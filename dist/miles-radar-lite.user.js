@@ -1,0 +1,6453 @@
+// ==UserScript==
+// @name         里程票雷达 手机版
+// @namespace    https://github.com/liangju1/miles-radar
+// @version      1.0.0
+// @description  在 aa.com 上批量查 AAdvantage 里程票空位，按“里程+税费”分档，小红书式卡片浏览，下单前一键核实。
+// @author       里程票雷达
+// @homepageURL  https://github.com/liangju1/miles-radar
+// @supportURL   https://github.com/liangju1/miles-radar/issues
+// @downloadURL  https://cdn.jsdelivr.net/gh/liangju1/miles-radar@latest/dist/miles-radar-lite.user.js
+// @updateURL    https://cdn.jsdelivr.net/gh/liangju1/miles-radar@latest/dist/miles-radar-lite.user.js
+// @icon         data:image/png;base64,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
+// @match        https://www.aa.com/*
+// @include      https://www.aa.com/*
+// @run-at       document-end
+// @grant        none
+// ==/UserScript==
+
+/*
+ * 里程票雷达 v1.0.0（手机版）
+ * 在 aa.com 上批量查 AAdvantage 里程票空位，按“里程+税费”分档，下单前一键核实。
+ * 看板娘：Miku（初音未来，占位）
+ * 占位形象：初音未来 © Crypton Future Media, INC. 2007 · Art by KEI · CC BY-NC 3.0
+ * Live2D 模型：Live2D 官方示例数据，受示例数据使用条款与 Crypton 角色使用准则约束
+ * 以上仅限非商业使用，商用或加广告前必须替换。
+ * 机场数据：OurAirports（公共领域）、Wikidata（CC0）
+ * 代码按模块排列：核心 → 数据访问 → 看板娘与插画 → 界面 → 启动；内嵌数据都在文件末尾。
+ */
+
+(function () {
+'use strict';
+
+// ===== 核心：工具函数、aa.com 接口、核实判定、分档分析、扫描 =====
+
+const PAGE = typeof unsafeWindow !== 'undefined' && unsafeWindow ? unsafeWindow : window;
+const DAY_MS = 864e5;
+const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
+
+const esc = value => String(value == null ? '' : value).replace(/[&<>"']/g, ch => ESCAPES[ch]);
+const ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+const fmtInt = n => Number(n || 0).toLocaleString('en-US');
+const money = n => (n == null ? '—' : '$' + Number(n).toFixed(2));
+const pad = n => String(n).padStart(2, '0');
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+function nowIso() {
+  const t = new Date();
+  const date = `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}`;
+  return `${date}T${pad(t.getHours())}:${pad(t.getMinutes())}:${pad(t.getSeconds())}`;
+}
+const todayIso = () => nowIso().slice(0, 10);
+
+function parseDate(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+const fmtDate = iso => `${iso.slice(5)} 周${WEEKDAYS[parseDate(iso).getDay()]}`;
+
+function ago(iso) {
+  if (!iso) return '—';
+  const seconds = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (seconds < 90) return '刚刚';
+  if (seconds < 3600) return `${Math.round(seconds / 60)} 分钟前`;
+  if (seconds < 86400 * 2) return `${Math.round(seconds / 3600)} 小时前`;
+  return `${Math.round(seconds / 86400)} 天前`;
+}
+
+function duration(seconds) {
+  if (seconds == null) return '';
+  if (seconds < 90) return `${Math.max(1, Math.round(seconds))} 秒`;
+  if (seconds < 5400) return `${Math.round(seconds / 60)} 分钟`;
+  return `${(seconds / 3600).toFixed(1)} 小时`;
+}
+
+// ----- aa.com -----
+
+const CABINS = {
+  J: {
+    query: 'BUSINESS,FIRST',
+    label: '商务/头等',
+    word: '商务舱',
+    products: ['BUSINESS', 'FIRST'],
+  },
+  Y: {
+    query: 'COACH',
+    label: '经济',
+    word: '经济舱',
+    products: ['COACH', 'MAIN', 'MAIN_CABIN', 'ECONOMY'],
+  },
+};
+
+// 随机间隔比固定间隔更像人在浏览
+const SPEEDS = {
+  normal: { workers: 2, minGap: 0.4, maxGap: 1.2, perRequest: 0.75, label: '标准' },
+  gentle: { workers: 1, minGap: 3.0, maxGap: 8.0, perRequest: 6.2, label: '稳妥' },
+};
+
+// aa.com 不收当天及以前的日期，所以第一个月从明天开始
+function monthStarts(count) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const earliest = new Date(today.getTime() + DAY_MS);
+  const starts = [];
+  let year = today.getFullYear();
+  let month = today.getMonth();
+  for (let i = 0; i < count; i++) {
+    const first = new Date(year, month, 1);
+    const start = first < earliest ? earliest : first;
+    starts.push(`${start.getFullYear()}-${pad(start.getMonth() + 1)}-${pad(start.getDate())}`);
+    if (++month > 11) {
+      month = 0;
+      year++;
+    }
+  }
+  return starts;
+}
+
+function monthBounds(start) {
+  const lastDay = new Date(+start.slice(0, 4), +start.slice(5, 7), 0).getDate();
+  return [`${start.slice(0, 7)}-01`, `${start.slice(0, 7)}-${pad(lastDay)}`];
+}
+
+function bookingUrl(o, d, date, cabin, pax) {
+  const query = new URLSearchParams({
+    type: 'OneWay',
+    searchType: 'Award',
+    from: o,
+    to: d,
+    pax: String(pax),
+    cabin: CABINS[cabin].query,
+    locale: 'en_US',
+    nearbyAirports: 'false',
+    depart: date,
+    carriers: 'ALL',
+    pos: 'US',
+    adult: String(pax),
+  });
+  return 'https://www.aa.com/booking/search?' + query.toString();
+}
+
+function calendarRequest(job) {
+  return {
+    metadata: { selectedProducts: [], tripType: 'OneWay', udo: {} },
+    passengers: [{ type: 'adult', count: job.pax }],
+    requestHeader: { clientId: 'AAcom' },
+    slices: [
+      {
+        allCarriers: true,
+        cabin: CABINS[job.cabin].query,
+        connectionCity: null,
+        departureDate: job.date,
+        destination: job.d,
+        destinationNearbyAirports: false,
+        maxStops: '2',
+        origin: job.o,
+        originNearbyAirports: false,
+      },
+    ],
+    tripOptions: {
+      corporateBooking: false,
+      fareType: 'Lowest',
+      locale: 'en_US',
+      pointOfSale: null,
+      searchType: 'Award',
+    },
+    loyaltyInfo: null,
+    version: '',
+    queryParams: { sliceIndex: 0, sessionId: '', solutionSet: '', solutionId: '' },
+  };
+}
+
+function calendarDays(data) {
+  const days = [];
+  for (const month of data.calendarMonths || []) {
+    for (const week of month.weeks || []) {
+      for (const day of week.days || []) {
+        const solution = day.solution;
+        if (!day.validDay || !solution || typeof solution.perPassengerAwardPoints !== 'number')
+          continue;
+        const cash = (solution.perPassengerSaleTotal || {}).amount || 0;
+        days.push([day.date, solution.perPassengerAwardPoints, cash]);
+      }
+    }
+  }
+  return days;
+}
+
+// 把一段代码放进页面环境执行。document-start 时 <html> 可能还没建好，就等它出现再注入
+function injectPageScript(code, after) {
+  const run = () => {
+    const script = document.createElement('script');
+    script.textContent = code;
+    (document.head || document.documentElement).appendChild(script);
+    script.remove();
+    if (after) after();
+  };
+  if (document.documentElement) {
+    run();
+    return;
+  }
+  const observer = new MutationObserver(() => {
+    if (!document.documentElement) return;
+    observer.disconnect();
+    run();
+  });
+  observer.observe(document, { childList: true });
+}
+
+// 请求要从页面环境发出，才带着页面的 Cookie 和风控状态。脚本管理器把我们放在隔离环境时
+// （iOS Userscripts 默认如此），就往页面里注入一个小桥，由它代发请求。
+const PageBridge = {
+  inPageWorld: false,
+  pending: new Map(),
+  nextId: 1,
+
+  install() {
+    const bridge = `(() => {
+      if (window.__arBridge) return;
+      window.__arBridge = true;
+      window.addEventListener('message', event => {
+        const call = event.data && event.data.__arCall;
+        if (event.source !== window || !call) return;
+        const reply = data => window.postMessage({ __arReply: Object.assign({ id: call.id }, data) }, location.origin);
+        fetch(call.url, call.init).then(
+          response => response.text().then(text => reply({ status: response.status, text })),
+          error => reply({ status: 0, error: String(error) }),
+        );
+      });
+    })();`;
+    injectPageScript(bridge, () => {
+      // 注入的脚本和我们在同一个环境里，说明我们本来就在页面环境
+      this.inPageWorld = PAGE !== window || window.__arBridge === true;
+    });
+    window.addEventListener('message', event => {
+      const reply = event.data && event.data.__arReply;
+      if (event.source !== window || !reply || !this.pending.has(reply.id)) return;
+      this.pending.get(reply.id)(reply);
+      this.pending.delete(reply.id);
+    });
+  },
+
+  async request(url, init) {
+    if (this.inPageWorld) {
+      const response = await PAGE.fetch(url, init);
+      return { status: response.status, text: await response.text() };
+    }
+    const id = this.nextId++;
+    const reply = await new Promise(resolve => {
+      this.pending.set(id, resolve);
+      window.postMessage({ __arCall: { id, url, init } }, location.origin);
+    });
+    if (reply.error) throw new Error(reply.error);
+    return reply;
+  },
+};
+
+async function fetchCalendar(job) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const response = await PageBridge.request('https://www.aa.com/booking/api/search/calendar', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'content-type': 'application/json',
+          accept: 'application/json, text/plain, */*',
+        },
+        body: JSON.stringify(calendarRequest(job)),
+      });
+      if (response.status === 403 || response.status === 429) {
+        return { error: 'HTTP ' + response.status, blocked: true };
+      }
+      if (response.status !== 200) throw new Error('HTTP ' + response.status);
+      return { days: calendarDays(JSON.parse(response.text)) };
+    } catch (error) {
+      if (attempt === 1) return { error: String((error && error.message) || error) };
+      await sleep(1500);
+    }
+  }
+  return { error: 'unreachable' };
+}
+
+// ----- 核实判定 -----
+
+// 不管页面把行程数据包在哪一层，找到带 segments 的 slices 数组即可
+function findSlices(node, depth = 0) {
+  if (depth > 8 || !node || typeof node !== 'object') return null;
+  const children = Array.isArray(node) ? node.slice(0, 50) : Object.values(node);
+  if (!Array.isArray(node)) {
+    const slices = node.slices;
+    if (
+      Array.isArray(slices) &&
+      slices[0] &&
+      typeof slices[0] === 'object' &&
+      'segments' in slices[0]
+    )
+      return slices;
+  }
+  for (const child of children) {
+    const found = findSlices(child, depth + 1);
+    if (found) return found;
+  }
+  return null;
+}
+
+const airportCode = value => (value && typeof value === 'object' ? value.code : value);
+
+// 混舱时整程按高舱位计价，所以要逐段看舱位
+function segmentCabins(slice, product) {
+  const cabins = [];
+  for (const segment of slice.segments || []) {
+    let cabin = null;
+    for (const leg of segment.legs || []) {
+      for (const detail of leg.productDetails || []) {
+        if (detail.productType === product) cabin = detail.cabinType || cabin;
+      }
+    }
+    if (cabin == null) return null;
+    cabins.push(String(cabin).toUpperCase());
+  }
+  return cabins.length ? cabins : null;
+}
+
+function judge(slices, o, d, cabin, pax) {
+  const wanted = new Set(CABINS[cabin].products);
+  const offers = [];
+  let substituted = 0;
+  for (const slice of slices || []) {
+    const segments = slice.segments || [];
+    if (!segments.length) continue;
+    const from = airportCode(slice.origin) || airportCode(segments[0].origin);
+    const to = airportCode(segments[segments.length - 1].destination);
+    // 结果页会悄悄换成附近机场（搜深圳给广州），只认完全一致的
+    if (from !== o || to !== d) {
+      substituted++;
+      continue;
+    }
+    for (const price of slice.pricingDetail || []) {
+      const usable =
+        wanted.has(price.productType) &&
+        typeof price.perPassengerAwardPoints === 'number' &&
+        price.productAvailable !== false;
+      if (usable) offers.push({ slice, price });
+    }
+  }
+  if (!offers.length) {
+    return substituted
+      ? { status: 'airport', note: '页面只给出了其他机场出发/到达的航班' }
+      : { status: 'none', note: '这一天实际已经没有该舱位' };
+  }
+  return describeOffer(bestOffer(offers, wanted, pax), wanted);
+}
+
+// 优先：每段都是所选舱位 → 座位够 → 里程少 → 段数少
+function bestOffer(offers, wanted, pax) {
+  let best = null;
+  for (const { slice, price } of offers) {
+    const cabins = segmentCabins(slice, price.productType);
+    const fullCabin = cabins == null ? null : cabins.every(c => wanted.has(c));
+    const remaining = price.seatsRemaining;
+    const seats = Number.isInteger(remaining) && remaining > 0 ? remaining : null;
+    const enough = seats == null ? null : seats >= pax;
+    const rank = [
+      fullCabin !== false ? 1 : 0,
+      enough !== false ? 1 : 0,
+      -price.perPassengerAwardPoints,
+      -slice.segments.length,
+    ];
+    if (!best || ranksHigher(rank, best.rank)) {
+      best = { rank, slice, price, fullCabin, seats, enough, cabins };
+    }
+  }
+  return best;
+}
+
+function ranksHigher(a, b) {
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] > b[i];
+  return false;
+}
+
+function describeOffer(offer, wanted) {
+  const { slice, price, fullCabin, seats, enough, cabins } = offer;
+  const segments = slice.segments;
+  const notes = [];
+  let status = 'ok';
+  if (fullCabin === false) {
+    status = 'mixed';
+    const index = cabins.findIndex(c => !wanted.has(c));
+    const cabinName = cabins[index] === 'COACH' ? '经济舱' : cabins[index];
+    notes.push(`第${['一', '二', '三', '四'][index] || index + 1}段是${cabinName}（混舱）`);
+  } else if (fullCabin == null) {
+    notes.push('页面没有给出每段舱位，混舱没法排除');
+  }
+  if (enough === false) {
+    if (status === 'ok') status = 'seats';
+    notes.push(`只剩 ${seats} 个座位`);
+  }
+  const unique = list => Array.from(new Set(list.filter(Boolean)));
+  return {
+    status,
+    miles: Math.round(price.perPassengerAwardPoints),
+    cash: Math.round(Number((price.perPassengerSaleTotal || {}).amount || 0) * 100) / 100,
+    carriers: unique(segments.map(s => s.flight && s.flight.carrierCode)).join('/'),
+    flights: segments
+      .map(s => (s.flight ? s.flight.carrierCode + s.flight.flightNumber : ''))
+      .join(' '),
+    path: [airportCode(slice.origin) || airportCode(segments[0].origin)]
+      .concat(segments.map(s => airportCode(s.destination)))
+      .join('-'),
+    aircraft: unique(segments.flatMap(s => (s.legs || []).map(leg => leg.aircraftCode))).join('/'),
+    minutes: slice.durationInMinutes || null,
+    seats,
+    full: fullCabin,
+    cabs: cabins,
+    note: notes.join('；'),
+  };
+}
+
+function verdictLine(result, pax) {
+  switch (result.status) {
+    case 'ok': {
+      if (!result.full) return '✓ 有位！不过页面没写每段舱位，留意一下哦';
+      const cabin = result.cabs && result.cabs[0] === 'FIRST' ? '头等' : '商务';
+      return `✓ 全程${cabin}，${result.seats ? result.seats + ' 个座位，' : ''}${pax} 人够！`;
+    }
+    case 'mixed':
+      return '✕ ' + (result.note || '有一段是经济舱哦');
+    case 'seats':
+      return `✕ 只剩 ${result.seats} 个座位，${pax} 人不够`;
+    case 'airport':
+      return '✕ 机场被换了，不是你要的那个';
+    case 'none':
+      return '✕ 这天其实已经没位了';
+    default:
+      return '没读到航班数据……';
+  }
+}
+
+// ----- 分档分析 -----
+
+const RANK = {
+  verified: 0,
+  trusted: 1,
+  lead: 2,
+  seats: 3,
+  mixed: 4,
+  gone: 5,
+  airport: 6,
+  excluded: 7,
+};
+// 机场不符、混舱是整组航班的问题；没位、座位不够只是那一天的问题
+const ROUTING_PROBLEMS = new Set(['airport', 'mixed']);
+
+const tierId = row => `${row.miles}|${row.cash.toFixed(2)}`;
+
+// 核实结果只适用于当时同一里程同一税费的日历数据
+const sameTier = (check, row) =>
+  check &&
+  check.cal_miles === row.miles &&
+  check.cal_cash != null &&
+  Math.abs(check.cal_cash - row.cash) < 0.005;
+
+function analyze(pax, cabin) {
+  const checks = DB.checks();
+  const routes = loadRoutes(pax, cabin);
+  const twins = findTwinRoutes(routes);
+  const result = new Map();
+  for (const [key, route] of routes) {
+    const checkOf = date => checks[`${route.o}|${route.d}|${cabin}|${pax}|${date}`];
+    const tiers = buildTiers(route.rows, checkOf);
+    const dates = route.rows.map(row => dateView(row, tiers.get(tierId(row)), checkOf(row.date)));
+    for (const tier of tiers.values()) {
+      tier.verified = dates.filter(x => x.tier === tier.id && x.status === 'verified').length;
+    }
+    result.set(key, routeSummary(route, tiers, dates, twins[key] || null));
+  }
+  return result;
+}
+
+function loadRoutes(pax, cabin) {
+  const routes = new Map();
+  for (const key of DB.keys()) {
+    const [routePax, routeCabin, o, d] = key.split('|');
+    if (+routePax !== pax || routeCabin !== cabin) continue;
+    const record = DB.route(key);
+    const rows = Object.entries(record.dates)
+      .map(([date, v]) => ({
+        date,
+        miles: v[0],
+        cash: v[1],
+        first: v[2],
+        scanned: v[3],
+        new: v[4],
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+    const lastScan = Object.values(record.months).sort().pop() || '';
+    routes.set(o + '|' + d, { o, d, rows, lastScan, months: record.months });
+  }
+  return routes;
+}
+
+// 同城两个机场的日历每天都一样（例如成都双流和天府）：说明日历把它们合并了
+function findTwinRoutes(routes) {
+  const metroGroups = {};
+  for (const [code, metro] of Object.entries(metroIndex())) {
+    (metroGroups[metro] = metroGroups[metro] || []).push(code);
+  }
+  const twins = {};
+  for (const [key, route] of routes) {
+    const mine = new Map(route.rows.map(x => [x.date, x.miles + '|' + x.cash]));
+    for (const [side, code] of [
+      ['o', route.o],
+      ['d', route.d],
+    ]) {
+      for (const other of metroGroups[metroIndex()[code]] || []) {
+        if (other === code) continue;
+        const twin = routes.get(side === 'o' ? other + '|' + route.d : route.o + '|' + other);
+        if (!twin) continue;
+        let overlap = 0;
+        let identical = 0;
+        for (const row of twin.rows) {
+          if (!mine.has(row.date)) continue;
+          overlap++;
+          if (mine.get(row.date) === row.miles + '|' + row.cash) identical++;
+        }
+        if (overlap >= 5 && identical >= 0.9 * overlap) twins[key] = other;
+      }
+    }
+  }
+  return twins;
+}
+
+function buildTiers(rows, checkOf) {
+  const soon = new Date(Date.now() + 2 * DAY_MS).toISOString().slice(0, 10);
+  const groups = new Map();
+  for (const row of rows) {
+    const id = tierId(row);
+    if (!groups.has(id)) groups.set(id, []);
+    groups.get(id).push(row);
+  }
+  const tiers = new Map();
+  for (const [id, members] of groups) {
+    const checks = members.map(row => checkOf(row.date)).filter((c, i) => sameTier(c, members[i]));
+    const newest = list => list.slice().sort((a, b) => b.checked_at.localeCompare(a.checked_at))[0];
+    const passed = checks.filter(c => c.status === 'ok');
+    const failed = checks.filter(c => ROUTING_PROBLEMS.has(c.status));
+    let status = 'lead';
+    let reference = null;
+    if (passed.length) {
+      status = 'trusted';
+      reference = newest(passed);
+    } else if (failed.length) {
+      status = 'excluded';
+      reference = newest(failed);
+    }
+    const tried = new Set(checks.map(c => c.date));
+    const dates = members.map(row => row.date);
+    // 代表日：优先两天以后、还没核实过的日期
+    const representative =
+      dates.find(x => x >= soon && !tried.has(x)) || dates.find(x => !tried.has(x)) || null;
+    tiers.set(id, {
+      id,
+      miles: members[0].miles,
+      cash: members[0].cash,
+      days: members.length,
+      first: dates[0],
+      last: dates[dates.length - 1],
+      status,
+      ref: reference,
+      rep: representative,
+      new: members.reduce((sum, row) => sum + row.new, 0),
+      peak: busiestMonth(dates),
+    });
+  }
+  return tiers;
+}
+
+function busiestMonth(dates) {
+  const counts = {};
+  for (const date of dates) counts[date.slice(0, 7)] = (counts[date.slice(0, 7)] || 0) + 1;
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  return top ? +top[0].slice(5) : null;
+}
+
+function dateView(row, tier, ownCheck) {
+  const check = ownCheck && sameTier(ownCheck, row) ? ownCheck : null;
+  let status = tier.status;
+  if (check) {
+    if (check.status === 'ok') {
+      const hours = (Date.now() - new Date(check.checked_at).getTime()) / 36e5;
+      status = hours < 24 ? 'verified' : 'trusted';
+    } else if (check.status === 'none') {
+      status = 'gone';
+    } else if (['mixed', 'airport', 'seats'].includes(check.status)) {
+      status = check.status;
+    }
+  }
+  return {
+    date: row.date,
+    miles: row.miles,
+    cash: row.cash,
+    status,
+    tier: tier.id,
+    new: !!row.new,
+    scanned: row.scanned,
+    check,
+  };
+}
+
+function routeSummary(route, tiers, dates, twin) {
+  const countOf = test => dates.filter(test).length;
+  const usable = dates.filter(x => ['verified', 'trusted', 'lead'].includes(x.status));
+  return {
+    o: route.o,
+    d: route.d,
+    days: route.rows.length,
+    usable: countOf(x => x.status === 'verified' || x.status === 'trusted'),
+    leads: countOf(x => x.status === 'lead'),
+    bad: countOf(x => RANK[x.status] > RANK.lead),
+    new: countOf(x => x.new),
+    minCash: usable.length ? Math.min(...usable.map(x => x.cash)) : null,
+    scanned: route.lastScan,
+    twin,
+    tiers: Array.from(tiers.values()).sort(
+      (a, b) => RANK[a.status] - RANK[b.status] || b.days - a.days || a.cash - b.cash,
+    ),
+    dates,
+  };
+}
+
+// ----- 扫描 -----
+
+function planJobs(params) {
+  const jobs = [];
+  // 近的月份排在前面，先出结果
+  for (const date of monthStarts(+params.months)) {
+    for (const a of params.A) {
+      for (const b of params.B) {
+        if (a === b) continue;
+        for (const cabin of params.cabins) {
+          if (params.dir !== 'back') jobs.push({ o: a, d: b, cabin, date, pax: +params.pax });
+          if (params.dir !== 'out') jobs.push({ o: b, d: a, cabin, date, pax: +params.pax });
+        }
+      }
+    }
+  }
+  return jobs;
+}
+
+function estimate(params) {
+  const requests = planJobs(params).length;
+  return {
+    requests,
+    seconds: Math.round(requests * SPEEDS[params.speed || 'normal'].perRequest) + 5,
+  };
+}
+
+const Scan = {
+  state: { job: null },
+  listeners: new Set(),
+  cancelled: false,
+
+  emit() {
+    for (const listener of this.listeners) listener(this.state);
+  },
+  running() {
+    return this.state.job === 'scan';
+  },
+  cancel() {
+    if (!this.running()) return;
+    this.cancelled = true;
+    this.state.msg = '正在停止……';
+    this.emit();
+  },
+
+  async start(params) {
+    if (this.running()) throw new Error(`${persona().name}已经在扫描啦`);
+    const jobs = planJobs(params);
+    if (!jobs.length) throw new Error('请至少选一个出发地和一个目的地');
+    const speed = SPEEDS[params.speed] || SPEEDS.normal;
+    const startedAt = Date.now();
+    const progress = {
+      job: 'scan',
+      done: 0,
+      total: jobs.length,
+      found: 0,
+      new: 0,
+      errors: 0,
+      msg: '',
+    };
+    const newTiers = new Set();
+    let next = 0;
+    let blockedInARow = 0;
+    let blocked = false;
+    this.cancelled = false;
+    this.state = progress;
+    this.emit();
+
+    const worker = async () => {
+      while (!this.cancelled && !blocked && next < jobs.length) {
+        const job = jobs[next++];
+        await sleep((speed.minGap + Math.random() * (speed.maxGap - speed.minGap)) * 1000);
+        if (this.cancelled) return;
+        const result = await fetchCalendar(job);
+        if (result.error) {
+          progress.errors++;
+          // 连续三次 403/429 就停：再查只会被封得更久
+          blockedInARow = result.blocked ? blockedInARow + 1 : 0;
+          blocked = blockedInARow >= 3;
+        } else {
+          blockedInARow = 0;
+          const [kept, fresh] = DB.applyMonth(job, result.days, nowIso());
+          progress.found += kept;
+          progress.new += fresh;
+          if (fresh) {
+            for (const [, miles, cash] of result.days) {
+              newTiers.add(`${job.o}|${job.d}|${miles}|${Number(cash).toFixed(2)}`);
+            }
+          }
+        }
+        progress.done++;
+        const perJob = (Date.now() - startedAt) / 1000 / progress.done;
+        progress.eta = Math.round(perJob * (progress.total - progress.done));
+        this.emit();
+      }
+    };
+    await Promise.all(Array.from({ length: speed.workers }, worker));
+
+    const last = {
+      at: nowIso(),
+      outcome: blocked ? 'blocked' : this.cancelled ? 'cancelled' : 'done',
+      done: progress.done,
+      total: progress.total,
+      found: progress.found,
+      new: progress.new,
+      errors: progress.errors,
+      newTiers: newTiers.size,
+      params,
+      msg: blocked
+        ? 'aa.com 暂时拒绝了查询（403/429）。扫到的都已保存，过一小时用「稳妥」速度再试吧。'
+        : '',
+    };
+    Store.set('lastScan', last);
+    this.state = { job: null, last };
+    this.emit();
+    return last;
+  },
+};
+
+// ===== 数据访问：存储、航线库、机场字典、台词 =====
+
+// 三种存储后端，按可用性依次选：同步 GM_*（Tampermonkey/脚本猫）、异步 GM.*（iOS Userscripts）、
+// 页面 localStorage（什么都没有时）。界面代码只用同步的 get/set，异步后端靠启动时预读的缓存。
+const Store = {
+  mode: 'local',
+  cache: new Map(),
+  listeners: new Map(),
+
+  async init() {
+    if (typeof GM_getValue === 'function' && typeof GM_setValue === 'function') {
+      this.mode = 'gm';
+    } else if (typeof GM !== 'undefined' && GM && typeof GM.getValue === 'function') {
+      this.mode = 'gm4';
+      await this.preload();
+      // GM4 没有变更监听，靠轮询把别的标签页写入的核实结果同步过来
+      setInterval(() => this.pollChanges(), 4000);
+    } else {
+      window.addEventListener('storage', event => this.onStorageEvent(event));
+    }
+  },
+
+  async preload() {
+    const keys = ['idx', 'checks', 'prefs', 'fav', 'lastScan', 'lastVisit', 'pending'];
+    for (const key of keys) this.cache.set(key, await GM.getValue(key));
+    for (const route of this.cache.get('idx') || []) {
+      this.cache.set('rt:' + route, await GM.getValue('rt:' + route));
+    }
+  },
+
+  get(key, fallback) {
+    let value;
+    if (this.mode === 'gm') {
+      value = GM_getValue(key);
+    } else if (this.mode === 'gm4') {
+      value = this.cache.get(key);
+    } else {
+      try {
+        const raw = localStorage.getItem('ar:' + key);
+        value = raw == null ? undefined : JSON.parse(raw);
+      } catch (error) {
+        value = undefined;
+      }
+    }
+    return value === undefined || value === null ? fallback : value;
+  },
+
+  set(key, value) {
+    if (this.mode === 'gm') return GM_setValue(key, value);
+    if (this.mode === 'gm4') {
+      this.cache.set(key, value);
+      GM.setValue(key, value);
+      return;
+    }
+    try {
+      localStorage.setItem('ar:' + key, JSON.stringify(value));
+    } catch (error) {
+      Diagnostics.note('存储写入失败：' + error.message);
+    }
+  },
+
+  remove(key) {
+    if (this.mode === 'gm') {
+      if (typeof GM_deleteValue === 'function') GM_deleteValue(key);
+    } else if (this.mode === 'gm4') {
+      this.cache.delete(key);
+      if (typeof GM.deleteValue === 'function') GM.deleteValue(key);
+    } else {
+      localStorage.removeItem('ar:' + key);
+    }
+  },
+
+  // 只有核实结果需要跨标签页同步
+  listen(key, callback) {
+    this.listeners.set(key, callback);
+    if (this.mode === 'gm' && typeof GM_addValueChangeListener === 'function') {
+      GM_addValueChangeListener(key, (name, oldValue, newValue) => callback(newValue));
+    }
+  },
+
+  onStorageEvent(event) {
+    if (!event.key || !event.key.startsWith('ar:')) return;
+    const callback = this.listeners.get(event.key.slice(3));
+    if (callback) callback(this.get(event.key.slice(3)));
+  },
+
+  async pollChanges() {
+    for (const [key, callback] of this.listeners) {
+      const fresh = await GM.getValue(key);
+      if (JSON.stringify(fresh) !== JSON.stringify(this.cache.get(key))) {
+        this.cache.set(key, fresh);
+        callback(fresh);
+      }
+    }
+  },
+};
+
+// ----- 航线库 -----
+// 每条航线一条记录：rt:<人数>|<舱位>|<出发>|<到达> = {dates: {日期: [里程, 税费, 首次出现, 查询时间, 是否新出现]}, months: {月份: 查询时间}}
+
+const DB = {
+  index: null,
+  routes: new Map(),
+
+  keys() {
+    if (!this.index) this.index = Store.get('idx', []);
+    return this.index;
+  },
+  route(key) {
+    if (!this.routes.has(key))
+      this.routes.set(key, Store.get('rt:' + key, { dates: {}, months: {} }));
+    return this.routes.get(key);
+  },
+  save(key, record) {
+    this.routes.set(key, record);
+    Store.set('rt:' + key, record);
+    if (!this.keys().includes(key)) {
+      this.index.push(key);
+      Store.set('idx', this.index);
+    }
+  },
+  checks() {
+    return Store.get('checks', {});
+  },
+
+  purgePast() {
+    const today = todayIso();
+    for (const key of this.keys()) {
+      const record = this.route(key);
+      const past = Object.keys(record.dates).filter(date => date <= today);
+      past.forEach(date => delete record.dates[date]);
+      if (past.length) this.save(key, record);
+    }
+    const checks = this.checks();
+    const stale = Object.keys(checks).filter(key => key.slice(-10) <= today);
+    stale.forEach(key => delete checks[key]);
+    if (stale.length) Store.set('checks', checks);
+  },
+
+  // 一个月的日历整月替换：消失的日期直接删掉，不留"幽灵票"
+  applyMonth(job, days, now) {
+    const key = `${job.pax}|${job.cabin}|${job.o}|${job.d}`;
+    const record = JSON.parse(JSON.stringify(this.route(key)));
+    const [firstDay, lastDay] = monthBounds(job.date);
+    const month = firstDay.slice(0, 7);
+    const scannedBefore = !!record.months[month];
+    const previous = {};
+    for (const [date, value] of Object.entries(record.dates)) {
+      if (date < firstDay || date > lastDay) continue;
+      previous[date] = value;
+      delete record.dates[date];
+    }
+    let kept = 0;
+    let fresh = 0;
+    for (const [date, miles, cash] of days) {
+      if (date < job.date || date > lastDay || typeof miles !== 'number') continue;
+      const isNew = scannedBefore && !previous[date];
+      const firstSeen = previous[date] ? previous[date][2] : now;
+      record.dates[date] = [
+        Math.round(miles),
+        Math.round(Number(cash || 0) * 100) / 100,
+        firstSeen,
+        now,
+        isNew ? 1 : 0,
+      ];
+      kept++;
+      if (isNew) fresh++;
+    }
+    record.months[month] = now;
+    this.save(key, record);
+    return [kept, fresh];
+  },
+
+  // 有数据的"人数 × 舱位"组合，最近扫描的在前
+  combos() {
+    const latest = new Map();
+    for (const key of this.keys()) {
+      const [pax, cabin] = key.split('|');
+      const last = Object.values(this.route(key).months).sort().pop() || '';
+      const id = pax + '|' + cabin;
+      if (!latest.has(id) || latest.get(id).last < last) latest.set(id, { pax: +pax, cabin, last });
+    }
+    return Array.from(latest.values()).sort((a, b) => b.last.localeCompare(a.last));
+  },
+
+  saveCheck(item, result) {
+    const calendar = this.route(`${item.pax}|${item.cabin}|${item.o}|${item.d}`).dates[item.date];
+    const checks = this.checks();
+    checks[`${item.o}|${item.d}|${item.cabin}|${item.pax}|${item.date}`] = Object.assign(
+      {},
+      result,
+      {
+        date: item.date,
+        checked_at: nowIso(),
+        cal_miles: calendar ? calendar[0] : null,
+        cal_cash: calendar ? calendar[1] : null,
+      },
+    );
+    Store.set('checks', checks);
+  },
+};
+
+// ----- 机场字典 -----
+
+const AIRPORT_FIELDS = ['n', 'c', 'a', 'ce', 'co', 'r', 'm', 'big'];
+const HOME_REGIONS = new Set(['CN', 'HMT']);
+let airportTable = null;
+let metroTable = null;
+let searchTable = null;
+
+function airports() {
+  if (airportTable) return airportTable;
+  airportTable = {};
+  for (const [code, row] of Object.entries(DATA.airports)) {
+    const entry = {};
+    AIRPORT_FIELDS.forEach((field, i) => {
+      if (row[i] !== undefined && row[i] !== '' && row[i] !== 0) entry[field] = row[i];
+    });
+    airportTable[code] = entry;
+  }
+  // 常用分组里的叫法优先，比较口语
+  for (const group of DATA.groups) {
+    for (const [code, name] of Object.entries(group.codes)) {
+      airportTable[code] = airportTable[code] || { c: name };
+      airportTable[code].n = name;
+    }
+  }
+  return airportTable;
+}
+
+const airport = code => airports()[code] || {};
+const cityName = code => airport(code).n || code;
+
+function metroIndex() {
+  if (!metroTable) {
+    metroTable = {};
+    for (const [code, entry] of Object.entries(airports())) if (entry.m) metroTable[code] = entry.m;
+  }
+  return metroTable;
+}
+
+// 卡片按"远端"那一侧的地区归类：广州→多哈和多哈→广州都算中东
+function regionOf(o, d) {
+  const fromRegion = airport(o).r;
+  const key = !fromRegion || HOME_REGIONS.has(fromRegion) ? airport(d).r : fromRegion;
+  return { key: key || 'other', label: DATA.regions[key] || '其他' };
+}
+
+function searchIndex() {
+  if (searchTable) return searchTable;
+  searchTable = Object.entries(airports()).map(([code, entry]) => ({
+    code,
+    entry,
+    english: (entry.ce || '').toLowerCase(),
+  }));
+  // 同城机场共用英文城市名，搜 tokyo 也能找到成田
+  const metroNames = {};
+  for (const item of searchTable) {
+    if (item.entry.m && item.entry.ce) {
+      (metroNames[item.entry.m] = metroNames[item.entry.m] || new Set()).add(item.english);
+    }
+  }
+  for (const item of searchTable) {
+    if (item.entry.m && metroNames[item.entry.m])
+      item.english = Array.from(metroNames[item.entry.m]).join(' ');
+  }
+  return searchTable;
+}
+
+function searchAirports(query) {
+  const text = query.trim();
+  if (!text) return [];
+  const lower = text.toLowerCase();
+  const upper = text.toUpperCase();
+  const matches = [];
+  for (const item of searchIndex()) {
+    const entry = item.entry;
+    let score;
+    if (item.code === upper) score = 0;
+    else if (entry.n && entry.n.startsWith(text)) score = 1;
+    else if (entry.c && entry.c.startsWith(text)) score = 1.5;
+    else if (item.english.startsWith(lower) || item.english.includes(' ' + lower)) score = 2;
+    else if (entry.n && entry.n.includes(text)) score = 3;
+    else if (entry.a && entry.a.includes(text)) score = 3.5;
+    else if (lower.length >= 3 && item.english.includes(lower)) score = 4;
+    else if (entry.co && entry.co.startsWith(text)) score = 5;
+    else continue;
+    matches.push([score - (entry.big ? 0.4 : 0), item]);
+  }
+  matches.sort((a, b) => a[0] - b[0] || (a[1].entry.n || '').length - (b[1].entry.n || '').length);
+  return matches.slice(0, 60).map(match => match[1]);
+}
+
+// ----- 人设与台词 -----
+
+const persona = () => DATA.persona;
+
+function aboutText() {
+  const credit = DATA.mascot.normal
+    ? '占位形象：初音未来 © Crypton Future Media, INC. 2007 · Art by KEI · CC BY-NC 3.0'
+    : '';
+  return [DATA.persona.about, credit].filter(Boolean).join(' · ');
+}
+
+// 每组台词一个"洗牌袋"：整组轮完一遍才会重复
+const lineBags = {};
+function drawLine(key, lines) {
+  if (!lines || !lines.length) return '';
+  let bag = lineBags[key];
+  if (!bag || !bag.length) {
+    bag = lineBags[key] = lines.map((_, i) => i).sort(() => Math.random() - 0.5);
+    if (bag.length > 1 && bag[0] === lineBags[key + '#last']) bag.push(bag.shift());
+  }
+  const index = bag.shift();
+  lineBags[key + '#last'] = index;
+  return lines[index];
+}
+
+function pickLine(group, vars, pokeLevel) {
+  const source = DATA.lines || {};
+  const text = pokeLevel
+    ? drawLine('poke' + pokeLevel, (source.poke || [])[pokeLevel - 1])
+    : drawLine(group, (source.lines || {})[group]);
+  return text.replace(/[{](\w+)[}]/g, (match, name) =>
+    vars && vars[name] != null ? vars[name] : match,
+  );
+}
+
+// ===== 看板娘与插画：城市封面、SVG 形象、看板娘渲染器 =====
+
+// 全部是代码画的原创插画，没有照片，也不用第三方角色。
+
+function hashStr(text) {
+  let hash = 2166136261;
+  for (let i = 0; i < text.length; i++) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function seededRandom(seed) {
+  let state = seed >>> 0 || 1;
+  return () => (state = (Math.imul(state, 1664525) + 1013904223) >>> 0) / 4294967296;
+}
+
+const GROUND = 330; // 封面画布 300×400 里的地平线
+const fillAttr = color => `fill="${color}"`;
+
+const SKIES = [
+  {
+    top: '#9fd3ff',
+    bot: '#eaf6ff',
+    sun: '#fff4b8',
+    far: '#b3d4f0',
+    near: '#6f9fd2',
+    ground: '#628fc2',
+    win: '#eaf6ff',
+  },
+  {
+    top: '#ffc2d6',
+    bot: '#fff1e6',
+    sun: '#ffe2a8',
+    far: '#f2bccb',
+    near: '#d58aa8',
+    ground: '#c47a9a',
+    win: '#fff1e6',
+  },
+  {
+    top: '#ffb194',
+    bot: '#ffe8cc',
+    sun: '#fff4cf',
+    far: '#f3b49a',
+    near: '#d48272',
+    ground: '#c07065',
+    win: '#ffe8cc',
+  },
+  {
+    top: '#b8a6ec',
+    bot: '#ffd6e1',
+    sun: '#fff7de',
+    far: '#b2a4e0',
+    near: '#8270c6',
+    ground: '#705fb3',
+    win: '#ffd6e1',
+    moon: true,
+  },
+  {
+    top: '#a6e6d6',
+    bot: '#f1fbf8',
+    sun: '#fffbe2',
+    far: '#a8dccf',
+    near: '#5fb3a2',
+    ground: '#52a291',
+    win: '#f1fbf8',
+  },
+  {
+    top: '#34418a',
+    bot: '#9286cc',
+    sun: '#fff3c6',
+    far: '#625fa8',
+    near: '#41408a',
+    ground: '#36357c',
+    win: '#ffe9a8',
+    moon: true,
+    stars: true,
+  },
+];
+
+function bldg(x, w, h, color, win, rand) {
+  let s = `<rect x="${x.toFixed(1)}" y="${GROUND - h}" width="${w.toFixed(1)}" height="${h + 1}" rx="1.5" ${fillAttr(color)}/>`;
+  if (win)
+    for (let y = GROUND - h + 8; y < GROUND - 8; y += 11)
+      for (let xx = x + 4; xx < x + w - 5; xx += 8)
+        if (rand() < 0.42)
+          s += `<rect x="${xx.toFixed(1)}" y="${y}" width="3" height="4" rx=".5" fill="${win}" opacity=".75"/>`;
+  return s;
+}
+function skyline(x0, x1, lo, hi, color, win, rand) {
+  let s = '',
+    x = x0;
+  while (x < x1) {
+    const w = 14 + rand() * 20;
+    s += bldg(x, w, lo + rand() * (hi - lo), color, win, rand);
+    x += w + 1 + rand() * 3;
+  }
+  return s;
+}
+function hills(color, amp, rand, base = GROUND + 2) {
+  let d = `M0 ${base} L0 ${base - amp * (0.5 + rand() * 0.5)}`;
+  for (let x = 0; x < 300; x += 60)
+    d += ` Q${x + 30} ${base - amp * (0.8 + rand() * 0.6)} ${x + 60} ${base - amp * (0.3 + rand() * 0.6)}`;
+  return `<path d="${d} L300 ${base} Z" ${fillAttr(color)}/>`;
+}
+function dome(cx, radius, color, baseH = 30) {
+  const y = GROUND - baseH;
+  return (
+    `<rect x="${cx - radius}" y="${y}" width="${2 * radius}" height="${baseH + 1}" ${fillAttr(color)}/>` +
+    `<path d="M${cx - radius} ${y + 1} A${radius} ${radius} 0 0 1 ${cx + radius} ${y + 1} Z" ${fillAttr(color)}/>` +
+    `<rect x="${cx - 1}" y="${y - radius - 12}" width="2" height="13" ${fillAttr(color)}/><circle cx="${cx}" cy="${y - radius - 13}" r="2.4" ${fillAttr(color)}/>`
+  );
+}
+function minaret(x, h, color) {
+  return (
+    `<rect x="${x - 4}" y="${GROUND - h}" width="8" height="${h + 1}" ${fillAttr(color)}/>` +
+    `<rect x="${x - 6.5}" y="${GROUND - h * 0.72}" width="13" height="3" ${fillAttr(color)}/><rect x="${x - 6}" y="${GROUND - h * 0.42}" width="12" height="3" ${fillAttr(color)}/>` +
+    `<path d="M${x - 4.5} ${GROUND - h} L${x} ${GROUND - h - 16} L${x + 4.5} ${GROUND - h} Z" ${fillAttr(color)}/>`
+  );
+}
+function needle(x, h, color) {
+  return (
+    `<path d="M${x - 8} ${GROUND} L${x - 2.5} ${GROUND - h * 0.74} L${x + 2.5} ${GROUND - h * 0.74} L${x + 8} ${GROUND} Z" ${fillAttr(color)}/>` +
+    `<ellipse cx="${x}" cy="${GROUND - h * 0.74}" rx="13" ry="7" ${fillAttr(color)}/><ellipse cx="${x}" cy="${GROUND - h * 0.82}" rx="7" ry="4" ${fillAttr(color)}/>` +
+    `<rect x="${x - 1.4}" y="${GROUND - h}" width="2.8" height="${h * 0.2}" ${fillAttr(color)}/>`
+  );
+}
+function burj(x, h, color) {
+  const st = [
+    [15, 0],
+    [15, 0.25],
+    [11, 0.25],
+    [11, 0.48],
+    [7.5, 0.48],
+    [7.5, 0.68],
+    [4.5, 0.68],
+    [4.5, 0.84],
+    [1.6, 0.84],
+    [0, 1],
+  ];
+  const L = st.map(([w, t]) => `${x - w},${GROUND - h * t}`),
+    Rt = st
+      .slice()
+      .reverse()
+      .map(([w, t]) => `${x + w},${GROUND - h * t}`);
+  return `<polygon points="${L.join(' ')} ${Rt.join(' ')}" ${fillAttr(color)}/>`;
+}
+function sail(x, h, color) {
+  return (
+    `<path d="M${x} ${GROUND} L${x} ${GROUND - h} Q${x + h * 0.48} ${GROUND - h * 0.55} ${x + h * 0.34} ${GROUND} Z" ${fillAttr(color)}/>` +
+    `<rect x="${x - 3}" y="${GROUND - h - 12}" width="2" height="14" ${fillAttr(color)}/>`
+  );
+}
+function pyramid(cx, w, h, color, light) {
+  return (
+    `<path d="M${cx - w / 2} ${GROUND} L${cx} ${GROUND - h} L${cx + w / 2} ${GROUND} Z" ${fillAttr(color)}/>` +
+    `<path d="M${cx} ${GROUND - h} L${cx + w / 2} ${GROUND} L${cx + w * 0.1} ${GROUND} Z" fill="${light}" opacity=".3"/>`
+  );
+}
+function eiffel(cx, h, color) {
+  const a = h * 0.27;
+  return (
+    `<path d="M${cx - a} ${GROUND} Q${cx - h * 0.11} ${GROUND - h * 0.36} ${cx - h * 0.05} ${GROUND - h * 0.62} L${cx - 1.6} ${GROUND - h * 0.96} L${cx} ${GROUND - h} L${cx + 1.6} ${GROUND - h * 0.96} L${cx + h * 0.05} ${GROUND - h * 0.62} Q${cx + h * 0.11} ${GROUND - h * 0.36} ${cx + a} ${GROUND} L${cx + h * 0.15} ${GROUND} Q${cx} ${GROUND - h * 0.22} ${cx - h * 0.15} ${GROUND} Z" ${fillAttr(color)}/>` +
+    `<rect x="${cx - h * 0.16}" y="${GROUND - h * 0.31}" width="${h * 0.32}" height="5" rx="1" ${fillAttr(color)}/><rect x="${cx - h * 0.075}" y="${GROUND - h * 0.61}" width="${h * 0.15}" height="4" rx="1" ${fillAttr(color)}/>`
+  );
+}
+function mountain(cx, w, h, color, snow) {
+  let s = `<path d="M${cx - w / 2} ${GROUND} Q${cx - w * 0.2} ${GROUND - h * 0.55} ${cx - w * 0.06} ${GROUND - h * 0.94} L${cx} ${GROUND - h} L${cx + w * 0.06} ${GROUND - h * 0.94} Q${cx + w * 0.2} ${GROUND - h * 0.55} ${cx + w / 2} ${GROUND} Z" ${fillAttr(color)}/>`;
+  if (snow)
+    s += `<path d="M${cx - w * 0.13} ${GROUND - h * 0.74} L${cx - w * 0.06} ${GROUND - h * 0.94} L${cx} ${GROUND - h} L${cx + w * 0.06} ${GROUND - h * 0.94} L${cx + w * 0.13} ${GROUND - h * 0.74} L${cx + w * 0.06} ${GROUND - h * 0.8} L${cx} ${GROUND - h * 0.72} L${cx - w * 0.06} ${GROUND - h * 0.8} Z" fill="#fff" opacity=".92"/>`;
+  return s;
+}
+function pagoda(cx, h, color, tiers = 4) {
+  let s = '',
+    y = GROUND,
+    w = h * 0.55;
+  const th = h / (tiers + 0.8);
+  for (let i = 0; i < tiers; i++) {
+    s += `<rect x="${cx - w * 0.32}" y="${y - th * 0.55}" width="${w * 0.64}" height="${th * 0.56}" ${fillAttr(color)}/>`;
+    y -= th * 0.55;
+    s += `<path d="M${cx - w / 2 - 7} ${y + 3} Q${cx - w * 0.2} ${y - th * 0.15} ${cx} ${y - th * 0.4} Q${cx + w * 0.2} ${y - th * 0.15} ${cx + w / 2 + 7} ${y + 3} Z" ${fillAttr(color)}/>`;
+    y -= th * 0.38;
+    w *= 0.8;
+  }
+  return s + `<rect x="${cx - 1.2}" y="${y - 14}" width="2.4" height="16" ${fillAttr(color)}/>`;
+}
+function roundTemple(cx, h, color) {
+  let s = `<rect x="${cx - 40}" y="${GROUND - 10}" width="80" height="11" ${fillAttr(color)}/>`,
+    y = GROUND - 10,
+    w = 62;
+  for (let i = 0; i < 3; i++) {
+    s += `<rect x="${cx - w * 0.36}" y="${y - 14}" width="${w * 0.72}" height="15" ${fillAttr(color)}/>`;
+    y -= 14;
+    s += `<path d="M${cx - w / 2} ${y + 2} Q${cx} ${y - 22} ${cx + w / 2} ${y + 2} Z" ${fillAttr(color)}/>`;
+    y -= 12;
+    w *= 0.78;
+  }
+  return s + `<circle cx="${cx}" cy="${y - 4}" r="4" ${fillAttr(color)}/>`;
+}
+function stupa(cx, h, color) {
+  return (
+    `<rect x="${cx - h * 0.32}" y="${GROUND - h * 0.14}" width="${h * 0.64}" height="${h * 0.14 + 1}" ${fillAttr(color)}/>` +
+    `<path d="M${cx - h * 0.26} ${GROUND - h * 0.13} Q${cx - h * 0.26} ${GROUND - h * 0.5} ${cx} ${GROUND - h * 0.56} Q${cx + h * 0.26} ${GROUND - h * 0.5} ${cx + h * 0.26} ${GROUND - h * 0.13} Z" ${fillAttr(color)}/>` +
+    `<path d="M${cx - 6} ${GROUND - h * 0.54} L${cx} ${GROUND - h} L${cx + 6} ${GROUND - h * 0.54} Z" ${fillAttr(color)}/>`
+  );
+}
+function twinTowers(cx, h, color) {
+  const t = x =>
+    `<path d="M${x - 11} ${GROUND} L${x - 11} ${GROUND - h * 0.6} L${x - 8} ${GROUND - h * 0.6} L${x - 8} ${GROUND - h * 0.75} L${x - 5} ${GROUND - h * 0.75} L${x - 5} ${GROUND - h * 0.85} L${x - 1.5} ${GROUND - h * 0.87} L${x} ${GROUND - h} L${x + 1.5} ${GROUND - h * 0.87} L${x + 5} ${GROUND - h * 0.85} L${x + 5} ${GROUND - h * 0.75} L${x + 8} ${GROUND - h * 0.75} L${x + 8} ${GROUND - h * 0.6} L${x + 11} ${GROUND - h * 0.6} L${x + 11} ${GROUND} Z" ${fillAttr(color)}/>`;
+  return (
+    t(cx - 20) +
+    t(cx + 20) +
+    `<rect x="${cx - 10}" y="${GROUND - h * 0.48}" width="20" height="4" ${fillAttr(color)}/>`
+  );
+}
+function mbs(cx, color) {
+  let s = '';
+  for (const dx of [-34, 0, 34])
+    s += `<path d="M${cx + dx - 11} ${GROUND} L${cx + dx - 8} ${GROUND - 110} L${cx + dx + 8} ${GROUND - 110} L${cx + dx + 11} ${GROUND} Z" ${fillAttr(color)}/>`;
+  return (
+    s +
+    `<path d="M${cx - 58} ${GROUND - 112} Q${cx} ${GROUND - 124} ${cx + 66} ${GROUND - 114} L${cx + 64} ${GROUND - 107} L${cx - 56} ${GROUND - 106} Z" ${fillAttr(color)}/>`
+  );
+}
+function bigBen(cx, h, color, light) {
+  return (
+    `<rect x="${cx - 10}" y="${GROUND - h * 0.82}" width="20" height="${h * 0.82 + 1}" ${fillAttr(color)}/>` +
+    `<rect x="${cx - 12}" y="${GROUND - h * 0.82}" width="24" height="20" ${fillAttr(color)}/><circle cx="${cx}" cy="${GROUND - h * 0.82 + 10}" r="7" fill="${light}" opacity=".85"/>` +
+    `<path d="M${cx - 12} ${GROUND - h * 0.82} L${cx} ${GROUND - h} L${cx + 12} ${GROUND - h * 0.82} Z" ${fillAttr(color)}/>`
+  );
+}
+function wheel(cx, radius, color) {
+  let s = `<circle cx="${cx}" cy="${GROUND - radius - 8}" r="${radius}" fill="none" stroke="${color}" stroke-width="3"/>`;
+  for (let i = 0; i < 8; i++) {
+    const a = (i * Math.PI) / 4;
+    s += `<line x1="${cx}" y1="${GROUND - radius - 8}" x2="${(cx + radius * Math.cos(a)).toFixed(1)}" y2="${(GROUND - radius - 8 + radius * Math.sin(a)).toFixed(1)}" stroke="${color}" stroke-width="1.4"/>`;
+    s += `<circle cx="${(cx + radius * Math.cos(a)).toFixed(1)}" cy="${(GROUND - radius - 8 + radius * Math.sin(a)).toFixed(1)}" r="3.2" ${fillAttr(color)}/>`;
+  }
+  return (
+    s +
+    `<path d="M${cx - 16} ${GROUND} L${cx} ${GROUND - radius - 8} L${cx + 16} ${GROUND} Z" fill="none" stroke="${color}" stroke-width="3"/>`
+  );
+}
+function bridge(x0, x1, h, color) {
+  const t1 = x0 + (x1 - x0) * 0.25,
+    t2 = x0 + (x1 - x0) * 0.75,
+    deck = GROUND - 26;
+  return (
+    `<rect x="${x0}" y="${deck}" width="${x1 - x0}" height="5" ${fillAttr(color)}/>` +
+    `<rect x="${t1 - 4}" y="${GROUND - h}" width="8" height="${h}" ${fillAttr(color)}/><rect x="${t2 - 4}" y="${GROUND - h}" width="8" height="${h}" ${fillAttr(color)}/>` +
+    `<path d="M${x0} ${deck - 2} Q${(x0 + t1) / 2} ${deck - 8} ${t1} ${GROUND - h + 4} Q${(t1 + t2) / 2} ${deck - 6} ${t2} ${GROUND - h + 4} Q${(t2 + x1) / 2} ${deck - 8} ${x1} ${deck - 2}" fill="none" stroke="${color}" stroke-width="2.4"/>`
+  );
+}
+function opera(cx, color, light) {
+  let s = `<rect x="${cx - 70}" y="${GROUND - 12}" width="140" height="13" ${fillAttr(color)}/>`;
+  [
+    [-46, 40],
+    [-18, 62],
+    [14, 52],
+    [40, 36],
+  ].forEach(([dx, hh], i) => {
+    s += `<path d="M${cx + dx - 8} ${GROUND - 12} Q${cx + dx - 6} ${GROUND - 12 - hh} ${cx + dx + 22} ${GROUND - 12 - hh} Q${cx + dx + 12} ${GROUND - 30} ${cx + dx + 20} ${GROUND - 12} Z" fill="${i % 2 ? light : color}" opacity="${i % 2 ? 0.9 : 1}"/>`;
+  });
+  return s;
+}
+function colosseum(cx, w, h, color, light) {
+  let s = `<path d="M${cx - w / 2} ${GROUND} L${cx - w / 2} ${GROUND - h * 0.8} L${cx + w * 0.2} ${GROUND - h} L${cx + w / 2} ${GROUND - h * 0.7} L${cx + w / 2} ${GROUND} Z" ${fillAttr(color)}/>`;
+  for (let row = 0; row < 3; row++)
+    for (let x = cx - w / 2 + 8; x < cx + w / 2 - 8; x += 14)
+      s += `<rect x="${x}" y="${GROUND - h * 0.75 + row * h * 0.24}" width="7" height="${h * 0.14}" rx="3.5" fill="${light}" opacity=".55"/>`;
+  return s;
+}
+function windmill(cx, h, color) {
+  const top = GROUND - h;
+  let s = `<path d="M${cx - 12} ${GROUND} L${cx - 7} ${top + 10} L${cx + 7} ${top + 10} L${cx + 12} ${GROUND} Z" ${fillAttr(color)}/><path d="M${cx - 9} ${top + 11} Q${cx} ${top - 2} ${cx + 9} ${top + 11} Z" ${fillAttr(color)}/>`;
+  for (const a of [20, 110, 200, 290]) {
+    const rad = (a * Math.PI) / 180,
+      ex = cx + 38 * Math.cos(rad),
+      ey = top + 6 + 38 * Math.sin(rad);
+    s += `<line x1="${cx}" y1="${top + 6}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="${color}" stroke-width="5"/>`;
+  }
+  return s;
+}
+function canalHouses(x0, n, color, light, rand) {
+  let s = '',
+    x = x0;
+  for (let i = 0; i < n; i++) {
+    const w = 18 + rand() * 6,
+      h = 50 + rand() * 30;
+    s += `<path d="M${x} ${GROUND} L${x} ${GROUND - h} L${x + w / 2} ${GROUND - h - 12} L${x + w} ${GROUND - h} L${x + w} ${GROUND} Z" ${fillAttr(color)}/>`;
+    for (let y = GROUND - h + 8; y < GROUND - 8; y += 14)
+      s += `<rect x="${x + 4}" y="${y}" width="4" height="6" fill="${light}" opacity=".6"/><rect x="${x + w - 8}" y="${y}" width="4" height="6" fill="${light}" opacity=".6"/>`;
+    x += w + 1;
+  }
+  return s;
+}
+function onion(cx, h, color) {
+  return (
+    `<rect x="${cx - 9}" y="${GROUND - h * 0.6}" width="18" height="${h * 0.6 + 1}" ${fillAttr(color)}/>` +
+    `<path d="M${cx} ${GROUND - h} Q${cx - 2} ${GROUND - h * 0.86} ${cx - 13} ${GROUND - h * 0.72} Q${cx - 16} ${GROUND - h * 0.6} ${cx} ${GROUND - h * 0.58} Q${cx + 16} ${GROUND - h * 0.6} ${cx + 13} ${GROUND - h * 0.72} Q${cx + 2} ${GROUND - h * 0.86} ${cx} ${GROUND - h} Z" ${fillAttr(color)}/>`
+  );
+}
+function palm(x, h, color) {
+  const tx = x + h * 0.18,
+    ty = GROUND - h;
+  let s = `<path d="M${x - 3} ${GROUND} Q${x + h * 0.02} ${GROUND - h * 0.5} ${tx - 2} ${ty} L${tx + 2} ${ty} Q${x + h * 0.08} ${GROUND - h * 0.5} ${x + 3} ${GROUND} Z" ${fillAttr(color)}/>`;
+  for (const [dx, dy] of [
+    [-30, 10],
+    [-22, -10],
+    [0, -16],
+    [24, -8],
+    [32, 12],
+  ])
+    s += `<path d="M${tx} ${ty} Q${tx + dx * 0.5} ${ty + dy - 10} ${tx + dx} ${ty + dy} Q${tx + dx * 0.5} ${ty + dy - 3} ${tx} ${ty + 2} Z" ${fillAttr(color)}/>`;
+  return s;
+}
+function acacia(x, h, color) {
+  return (
+    `<path d="M${x - 2.5} ${GROUND} L${x - 1.5} ${GROUND - h * 0.7} L${x - 14} ${GROUND - h * 0.85} L${x - 1} ${GROUND - h * 0.78} L${x + 12} ${GROUND - h * 0.9} L${x + 1.5} ${GROUND - h * 0.72} L${x + 2.5} ${GROUND} Z" ${fillAttr(color)}/>` +
+    `<ellipse cx="${x}" cy="${GROUND - h * 0.92}" rx="${h * 0.62}" ry="${h * 0.12}" ${fillAttr(color)}/>`
+  );
+}
+function tableMountain(color) {
+  return `<path d="M0 ${GROUND} L20 ${GROUND - 70} Q40 ${GROUND - 108} 70 ${GROUND - 112} L230 ${GROUND - 112} Q262 ${GROUND - 106} 280 ${GROUND - 72} L300 ${GROUND - 50} L300 ${GROUND} Z" ${fillAttr(color)}/>`;
+}
+function waterVillas(color, light) {
+  let s = '';
+  for (const x of [40, 110, 180, 245]) {
+    s += `<rect x="${x - 2}" y="${GROUND - 30}" width="2" height="30" ${fillAttr(color)}/><rect x="${x + 22}" y="${GROUND - 30}" width="2" height="30" ${fillAttr(color)}/>`;
+    s += `<rect x="${x - 4}" y="${GROUND - 46}" width="30" height="18" ${fillAttr(color)}/><path d="M${x - 8} ${GROUND - 44} L${x + 11} ${GROUND - 62} L${x + 30} ${GROUND - 44} Z" ${fillAttr(color)}/>`;
+  }
+  return s + `<rect x="0" y="${GROUND - 16}" width="300" height="3" fill="${light}" opacity=".5"/>`;
+}
+function cantonTower(cx, h, color) {
+  return (
+    `<path d="M${cx - 16} ${GROUND} Q${cx - 2} ${GROUND - h * 0.5} ${cx - 10} ${GROUND - h * 0.8} L${cx + 10} ${GROUND - h * 0.8} Q${cx + 2} ${GROUND - h * 0.5} ${cx + 16} ${GROUND} Z" ${fillAttr(color)}/>` +
+    `<rect x="${cx - 1.4}" y="${GROUND - h}" width="2.8" height="${h * 0.22}" ${fillAttr(color)}/>`
+  );
+}
+function pearlTower(cx, h, color) {
+  return (
+    `<path d="M${cx - 20} ${GROUND} L${cx - 4} ${GROUND - h * 0.3} L${cx + 4} ${GROUND - h * 0.3} L${cx + 20} ${GROUND} Z" ${fillAttr(color)}/>` +
+    `<rect x="${cx - 3}" y="${GROUND - h * 0.86}" width="6" height="${h * 0.6}" ${fillAttr(color)}/><circle cx="${cx}" cy="${GROUND - h * 0.32}" r="15" ${fillAttr(color)}/>` +
+    `<circle cx="${cx}" cy="${GROUND - h * 0.7}" r="10" ${fillAttr(color)}/><rect x="${cx - 1}" y="${GROUND - h}" width="2" height="${h * 0.16}" ${fillAttr(color)}/>`
+  );
+}
+function splitGate(cx, h, color) {
+  const half = s =>
+    `<path d="M${cx + s * 4} ${GROUND} L${cx + s * 4} ${GROUND - h} L${cx + s * 10} ${GROUND - h * 0.86} L${cx + s * 14} ${GROUND - h * 0.7} L${cx + s * 22} ${GROUND - h * 0.56} L${cx + s * 26} ${GROUND - h * 0.36} L${cx + s * 34} ${GROUND - h * 0.22} L${cx + s * 36} ${GROUND} Z" ${fillAttr(color)}/>`;
+  return half(-1) + half(1);
+}
+function taj(cx, color) {
+  return (
+    `<rect x="${cx - 40}" y="${GROUND - 40}" width="80" height="41" ${fillAttr(color)}/>` +
+    `<path d="M${cx - 26} ${GROUND - 40} Q${cx - 30} ${GROUND - 74} ${cx} ${GROUND - 92} Q${cx + 30} ${GROUND - 74} ${cx + 26} ${GROUND - 40} Z" ${fillAttr(color)}/><rect x="${cx - 1}" y="${GROUND - 104}" width="2" height="13" ${fillAttr(color)}/>` +
+    minaret(cx - 58, 84, color) +
+    minaret(cx + 58, 84, color)
+  );
+}
+function sagrada(cx, h, color) {
+  let s = `<rect x="${cx - 36}" y="${GROUND - h * 0.35}" width="72" height="${h * 0.35 + 1}" ${fillAttr(color)}/>`;
+  for (const [dx, k] of [
+    [-26, 0.8],
+    [-9, 1],
+    [9, 0.96],
+    [26, 0.78],
+  ])
+    s += `<path d="M${cx + dx - 6} ${GROUND - h * 0.3} L${cx + dx - 4} ${GROUND - h * k + 8} Q${cx + dx} ${GROUND - h * k - 6} ${cx + dx + 4} ${GROUND - h * k + 8} L${cx + dx + 6} ${GROUND - h * 0.3} Z" ${fillAttr(color)}/>`;
+  return s;
+}
+function pines(color, rand) {
+  let s = '';
+  for (let x = 6; x < 300; x += 18 + rand() * 10) {
+    const h = 40 + rand() * 40;
+    s += `<path d="M${x} ${GROUND - h} L${x - h * 0.22} ${GROUND} L${x + h * 0.22} ${GROUND} Z" ${fillAttr(color)}/>`;
+  }
+  return s;
+}
+function aurora() {
+  return (
+    `<path d="M-10 120 Q60 60 140 110 T310 80 L310 130 Q220 170 140 140 T-10 170 Z" fill="#7ff5c6" opacity=".35"/>` +
+    `<path d="M-10 150 Q80 100 160 140 T310 120 L310 150 Q230 190 150 165 T-10 190 Z" fill="#c69bff" opacity=".28"/>`
+  );
+}
+
+const SCENES = {
+  doha: (pal, rand) =>
+    skyline(150, 300, 50, 150, pal.near, pal.win, rand) +
+    dome(78, 30, pal.near, 34) +
+    minaret(124, 92, pal.near) +
+    palm(22, 78, pal.near),
+  dubai: (pal, rand) =>
+    skyline(0, 120, 30, 100, pal.near, pal.win, rand) +
+    burj(160, 250, pal.near) +
+    sail(220, 130, pal.near) +
+    skyline(258, 300, 30, 70, pal.near, pal.win, rand),
+  abudhabi: pal =>
+    dome(150, 40, pal.near, 40) +
+    dome(88, 24, pal.near, 30) +
+    dome(212, 24, pal.near, 30) +
+    minaret(46, 110, pal.near) +
+    minaret(254, 110, pal.near),
+  cairo: pal =>
+    pyramid(110, 170, 120, pal.near, pal.win) +
+    pyramid(210, 120, 82, pal.near, pal.win) +
+    pyramid(260, 60, 40, pal.near, pal.win) +
+    palm(30, 90, pal.near),
+  istanbul: pal =>
+    dome(150, 44, pal.near, 36) +
+    dome(102, 20, pal.near, 26) +
+    dome(198, 20, pal.near, 26) +
+    minaret(72, 140, pal.near) +
+    minaret(228, 140, pal.near) +
+    minaret(40, 110, pal.near) +
+    minaret(260, 110, pal.near),
+  london: (pal, rand) =>
+    bigBen(90, 220, pal.near, pal.win) +
+    wheel(205, 62, pal.near) +
+    skyline(0, 70, 20, 60, pal.near, null, rand),
+  paris: (pal, rand) => skyline(0, 300, 20, 55, pal.far, null, rand) + eiffel(150, 240, pal.near),
+  tokyo: pal => mountain(210, 260, 150, pal.far, true) + eiffel(100, 200, pal.near),
+  osaka: pal => mountain(200, 260, 130, pal.far, true) + pagoda(110, 180, pal.near, 5),
+  seoul: (pal, rand) =>
+    hills(pal.far, 90, rand) +
+    needle(160, 200, pal.near) +
+    skyline(0, 110, 20, 70, pal.near, pal.win, rand),
+  bangkok: pal =>
+    stupa(150, 210, pal.near) +
+    stupa(85, 140, pal.near) +
+    stupa(215, 140, pal.near) +
+    palm(30, 90, pal.near) +
+    palm(270, 80, pal.near),
+  singapore: (pal, rand) => skyline(0, 90, 40, 120, pal.near, pal.win, rand) + mbs(185, pal.near),
+  kualalumpur: (pal, rand) =>
+    skyline(0, 300, 20, 70, pal.far, null, rand) + twinTowers(150, 240, pal.near),
+  hongkong: (pal, rand) =>
+    hills(pal.far, 140, rand) + skyline(0, 300, 50, 170, pal.near, pal.win, rand),
+  shanghai: (pal, rand) =>
+    skyline(0, 300, 30, 110, pal.near, pal.win, rand) +
+    pearlTower(110, 230, pal.near) +
+    burj(220, 200, pal.near),
+  beijing: (pal, rand) => hills(pal.far, 60, rand) + roundTemple(150, 200, pal.near),
+  guangzhou: (pal, rand) =>
+    skyline(0, 300, 30, 100, pal.near, pal.win, rand) + cantonTower(150, 260, pal.near),
+  chengdu: (pal, rand) => hills(pal.far, 110, rand) + pagoda(150, 170, pal.near, 4),
+  china: (pal, rand) =>
+    hills(pal.far, 80, rand) +
+    pagoda(80, 140, pal.near, 3) +
+    skyline(130, 300, 40, 130, pal.near, pal.win, rand),
+  newyork: (pal, rand) =>
+    skyline(0, 300, 60, 160, pal.near, pal.win, rand) + needle(150, 230, pal.near),
+  sanfrancisco: (pal, rand) => hills(pal.far, 70, rand) + bridge(0, 300, 170, pal.near),
+  losangeles: (pal, rand) =>
+    hills(pal.far, 80, rand) +
+    palm(50, 150, pal.near) +
+    palm(140, 120, pal.near) +
+    palm(230, 160, pal.near),
+  sydney: (pal, rand) => bridge(160, 300, 90, pal.far) + opera(110, pal.near, pal.win),
+  rome: (pal, rand) => colosseum(150, 190, 100, pal.near, pal.win) + palm(30, 70, pal.near),
+  amsterdam: (pal, rand) =>
+    canalHouses(0, 7, pal.near, pal.win, rand) + windmill(240, 120, pal.near),
+  barcelona: (pal, rand) =>
+    skyline(0, 300, 20, 50, pal.far, null, rand) + sagrada(150, 210, pal.near),
+  helsinki: (pal, rand) => aurora() + pines(pal.near, rand),
+  bali: pal => splitGate(150, 170, pal.near) + palm(40, 120, pal.near) + palm(262, 110, pal.near),
+  maldives: pal => waterVillas(pal.near, pal.win) + palm(270, 130, pal.near),
+  colombo: pal => stupa(150, 160, pal.near) + palm(50, 120, pal.near) + palm(250, 140, pal.near),
+  delhi: pal => taj(150, pal.near),
+  nairobi: pal => acacia(90, 110, pal.near) + acacia(220, 80, pal.near),
+  capetown: pal => tableMountain(pal.near),
+  auckland: (pal, rand) =>
+    skyline(0, 300, 20, 70, pal.far, null, rand) + needle(180, 230, pal.near),
+  moscow: pal => onion(150, 170, pal.near) + onion(100, 120, pal.near) + onion(200, 130, pal.near),
+  // 没有专属地标的城市按地区出图
+  ME: (pal, rand) =>
+    skyline(140, 300, 40, 130, pal.near, pal.win, rand) +
+    dome(80, 26, pal.near, 30) +
+    palm(20, 70, pal.near),
+  SEA: (pal, rand) =>
+    stupa(110, 150, pal.near) +
+    palm(40, 110, pal.near) +
+    palm(200, 130, pal.near) +
+    palm(260, 100, pal.near),
+  SA: pal => stupa(150, 150, pal.near) + palm(60, 110, pal.near) + palm(240, 120, pal.near),
+  EA: (pal, rand) => mountain(190, 240, 120, pal.far, true) + pagoda(90, 150, pal.near, 4),
+  EU: (pal, rand) =>
+    canalHouses(10, 5, pal.near, pal.win, rand) +
+    bigBen(200, 160, pal.near, pal.win) +
+    skyline(222, 300, 30, 70, pal.near, pal.win, rand),
+  NA: (pal, rand) => skyline(0, 300, 40, 170, pal.near, pal.win, rand),
+  LA: (pal, rand) => hills(pal.far, 110, rand) + palm(90, 110, pal.near) + palm(210, 130, pal.near),
+  AF: (pal, rand) => hills(pal.far, 40, rand) + acacia(120, 100, pal.near),
+  OC: (pal, rand) => hills(pal.far, 60, rand) + palm(70, 120, pal.near) + palm(230, 100, pal.near),
+  CA: (pal, rand) => mountain(150, 300, 160, pal.far, true) + dome(150, 26, pal.near, 26),
+  CN: (pal, rand) =>
+    hills(pal.far, 80, rand) +
+    pagoda(90, 140, pal.near, 3) +
+    skyline(140, 300, 40, 140, pal.near, pal.win, rand),
+  HMT: (pal, rand) => hills(pal.far, 120, rand) + skyline(0, 300, 50, 150, pal.near, pal.win, rand),
+};
+const SCENE_OF = {
+  DOH: 'doha',
+  DXB: 'dubai',
+  DWC: 'dubai',
+  AUH: 'abudhabi',
+  CAI: 'cairo',
+  IST: 'istanbul',
+  SAW: 'istanbul',
+  LHR: 'london',
+  LGW: 'london',
+  STN: 'london',
+  LCY: 'london',
+  LTN: 'london',
+  CDG: 'paris',
+  ORY: 'paris',
+  NRT: 'tokyo',
+  HND: 'tokyo',
+  KIX: 'osaka',
+  ITM: 'osaka',
+  ICN: 'seoul',
+  GMP: 'seoul',
+  BKK: 'bangkok',
+  DMK: 'bangkok',
+  SIN: 'singapore',
+  KUL: 'kualalumpur',
+  HKG: 'hongkong',
+  MFM: 'hongkong',
+  PVG: 'shanghai',
+  SHA: 'shanghai',
+  PEK: 'beijing',
+  PKX: 'beijing',
+  CAN: 'guangzhou',
+  SZX: 'guangzhou',
+  CTU: 'chengdu',
+  TFU: 'chengdu',
+  CKG: 'chengdu',
+  JFK: 'newyork',
+  EWR: 'newyork',
+  LGA: 'newyork',
+  SFO: 'sanfrancisco',
+  LAX: 'losangeles',
+  SYD: 'sydney',
+  FCO: 'rome',
+  AMS: 'amsterdam',
+  BCN: 'barcelona',
+  HEL: 'helsinki',
+  DPS: 'bali',
+  MLE: 'maldives',
+  CMB: 'colombo',
+  DEL: 'delhi',
+  AGR: 'delhi',
+  NBO: 'nairobi',
+  CPT: 'capetown',
+  AKL: 'auckland',
+  SVO: 'moscow',
+  DME: 'moscow',
+  VKO: 'moscow',
+};
+
+// 一张目的地明信片，分层输出方便做动画：天空/太阳、云、远景、近景地标、小飞机
+let coverCount = 0;
+function coverArt(code, region, seed) {
+  const rand = seededRandom(seed);
+  const pal = SKIES[seed % SKIES.length];
+  const scene = SCENES[SCENE_OF[code]] || SCENES[region] || SCENES.NA;
+  // 每次渲染用唯一 id：同一个 id 出现在隐藏元素里时，url(#id) 会失效
+  const id = 'g' + seed.toString(36) + '_' + ++coverCount;
+  return `<svg class="art" viewBox="0 0 300 400" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${pal.top}"/><stop offset="1" stop-color="${pal.bot}"/></linearGradient>
+    <radialGradient id="${id}s"><stop offset="0" stop-color="${pal.sun}" stop-opacity=".9"/><stop offset="1" stop-color="${pal.sun}" stop-opacity="0"/></radialGradient></defs>
+    <g class="l-sky">${skyLayer(pal, rand, id)}</g><g class="l-cloud">${cloudLayer(pal, rand)}</g><g class="l-plane">${planeLayer(rand)}</g>
+    ${landscapeLayers(scene, pal, rand)}</svg>`;
+}
+
+function skyLayer(pal, rand, id) {
+  let svg = `<rect x="-30" y="-10" width="360" height="420" fill="url(#${id})"/>`;
+  if (pal.stars) {
+    for (let i = 0; i < 26; i++) {
+      svg += `<circle cx="${(rand() * 300).toFixed(0)}" cy="${(rand() * 200).toFixed(0)}" r="${(0.6 + rand() * 1.2).toFixed(1)}" fill="#fff" opacity="${(0.4 + rand() * 0.6).toFixed(2)}"/>`;
+    }
+  }
+  const sunX = (50 + rand() * 200).toFixed(0);
+  const sunY = (70 + rand() * 80).toFixed(0);
+  svg += `<circle class="glow" cx="${sunX}" cy="${sunY}" r="62" fill="url(#${id}s)"/><circle cx="${sunX}" cy="${sunY}" r="24" fill="${pal.sun}"/>`;
+  if (pal.moon) svg += `<circle cx="${+sunX + 9}" cy="${sunY - 6}" r="20" fill="${pal.top}"/>`;
+  return svg;
+}
+
+function cloudLayer(pal, rand) {
+  let svg = '';
+  for (let i = 0; i < 3; i++) {
+    const x = rand() * 300;
+    const y = 40 + rand() * 150;
+    const w = 30 + rand() * 40;
+    svg +=
+      `<g class="cl c${i}" fill="#fff" opacity="${pal.stars ? 0.18 : 0.75}"><ellipse cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" rx="${w.toFixed(0)}" ry="${(w * 0.28).toFixed(0)}"/>` +
+      `<circle cx="${(x - w * 0.3).toFixed(0)}" cy="${(y - w * 0.12).toFixed(0)}" r="${(w * 0.32).toFixed(0)}"/><circle cx="${(x + w * 0.15).toFixed(0)}" cy="${(y - w * 0.2).toFixed(0)}" r="${(w * 0.4).toFixed(0)}"/></g>`;
+  }
+  return svg;
+}
+
+function planeLayer(rand) {
+  const x = 40 + rand() * 180;
+  const y = 50 + rand() * 90;
+  const flip = rand() < 0.5 ? 1 : -1;
+  const trail = `M${(x - flip * 90).toFixed(0)} ${(y + 40).toFixed(0)} Q${(x - flip * 40).toFixed(0)} ${(y + 30).toFixed(0)} ${x.toFixed(0)} ${y.toFixed(0)}`;
+  return (
+    `<path d="${trail}" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="5 6" stroke-linecap="round" opacity=".8"/>` +
+    `<g class="pl" style="--dx:${(flip * 46).toFixed(0)}px;--dy:-16px"><g transform="translate(${x.toFixed(0)} ${y.toFixed(0)}) scale(${flip} 1) rotate(-18)">` +
+    '<path d="M-12 0 Q-4 -3 12 -1 Q15 0 12 1 Q-4 3 -12 0 Z M-2 -1 L-7 -10 L-3 -10 L4 -1 Z M-2 1 L-7 10 L-3 10 L4 1 Z M-11 0 L-14 -5 L-11 -5 L-8 0 Z" fill="#fff"/></g></g>'
+  );
+}
+
+// 按颜色把场景拆成远景和近景，视差时两层移动幅度不同
+function landscapeLayers(scene, pal, rand) {
+  let far = '';
+  let near = '';
+  for (const shape of scene(pal, rand).match(
+    /<(path|rect|circle|ellipse|polygon|line)\b[^>]*\/>/g,
+  ) || []) {
+    const isFar =
+      shape.includes(`fill="${pal.far}"`) ||
+      shape.includes('fill="#7ff5c6"') ||
+      shape.includes('fill="#c69bff"');
+    if (isFar) far += shape;
+    else near += shape;
+  }
+  near += `<rect x="-30" y="${GROUND}" width="360" height="${400 - GROUND + 10}" fill="${pal.ground}"/><rect x="-30" y="${GROUND}" width="360" height="3" fill="#fff" opacity=".18"/>`;
+  return `<g class="l-far" opacity=".95">${far}</g><g class="l-near" opacity=".97">${near}</g>`;
+}
+
+// 原创 SVG 形象（没有嵌入图片时用）。心情：'' | happy | surprised | worry | sleep
+function chibi(size = 40, mood = '', full = false, cls = '') {
+  const hair = '#a99be8',
+    hairDark = '#8b7bd6',
+    hairLight = '#d9d1fb',
+    skin = '#ffece3',
+    ink = '#3a2f55';
+  const X = 48.5; // 左眼中心，右眼是镜像
+  const Y = 64;
+  const eyeOpen = `
+    <ellipse cx="${X}" cy="${Y}" rx="7.8" ry="9.4" fill="#fff"/>
+    <ellipse cx="${X}" cy="${Y + 0.9}" rx="6.8" ry="8.4" fill="url(#arIris)"/>
+    <ellipse cx="${X + 0.3}" cy="${Y + 2}" rx="3.1" ry="4.1" fill="#2c2152"/>
+    <circle cx="${X - 2.6}" cy="${Y - 3.2}" r="2.8" fill="#fff"/>
+    <circle cx="${X + 2.8}" cy="${Y + 4}" r="1.3" fill="#fff"/>
+    <circle cx="${X - 3.6}" cy="${Y + 3.4}" r=".7" fill="#fff" opacity=".9"/>
+    <path d="M${X - 8.7} ${Y - 0.6} Q${X - 8} ${Y - 10.7} ${X} ${Y - 10.5} Q${X + 8} ${Y - 10.7} ${X + 8.7} ${Y - 0.6}
+             Q${X + 6.8} ${Y - 8.4} ${X} ${Y - 8.5} Q${X - 6.8} ${Y - 8.4} ${X - 8.7} ${Y - 0.6} Z" fill="${ink}"/>
+    <path d="M${X - 3.5} ${Y + 9.6} Q${X} ${Y + 10.6} ${X + 3.5} ${Y + 9.6}" stroke="${ink}" stroke-width=".9" fill="none" opacity=".45" stroke-linecap="round"/>`;
+  const eyeHappy = `<path d="M${X - 7.5} ${Y + 1.5} Q${X} ${Y - 8} ${X + 7.5} ${Y + 1.5}" stroke="${ink}" stroke-width="2.8" fill="none" stroke-linecap="round"/>`;
+  const eyeSleep = `<path d="M${X - 7.5} ${Y} Q${X} ${Y + 5} ${X + 7.5} ${Y}" stroke="${ink}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
+  const star = (cx, cy, r) =>
+    `<path d="M${cx} ${cy - r} Q${cx + r * 0.18} ${cy - r * 0.18} ${cx + r} ${cy} Q${cx + r * 0.18} ${cy + r * 0.18} ${cx} ${cy + r} Q${cx - r * 0.18} ${cy + r * 0.18} ${cx - r} ${cy} Q${cx - r * 0.18} ${cy - r * 0.18} ${cx} ${cy - r} Z" fill="#fff"/>`;
+  const eyeStar = eyeOpen
+    .replace(/<circle[^>]*r="2\.8"[^>]*\/>/, star(X - 1.8, Y - 2.6, 4.2))
+    .replace(/<circle[^>]*r="1\.3"[^>]*\/>/, star(X + 2.8, Y + 4, 2));
+  const eye =
+    mood === 'happy'
+      ? eyeHappy
+      : mood === 'sleep'
+        ? eyeSleep
+        : mood === 'surprised'
+          ? eyeStar
+          : eyeOpen;
+  const eyes = `<g class="ar-eyes">${eye}<g transform="translate(120 0) scale(-1 1)">${eye}</g></g>`;
+  const mouth =
+    mood === 'happy'
+      ? `<path d="M55 76 Q60 84.5 65 76 Z" fill="#c4566f"/><path d="M57.4 80 Q60 82.6 62.6 80" fill="#ff9fb4"/>`
+      : mood === 'surprised'
+        ? `<ellipse cx="60" cy="79" rx="2.8" ry="3.4" fill="#c4566f"/>`
+        : mood === 'sleep'
+          ? `<path d="M57.5 78.5 Q60 80 62.5 78.5" stroke="#c4566f" stroke-width="1.6" fill="none" stroke-linecap="round"/>` +
+            `<text x="94" y="30" font-size="11" font-weight="700" fill="#a99be8" font-family="sans-serif">z</text><text x="102" y="20" font-size="8" font-weight="700" fill="#a99be8" font-family="sans-serif">z</text>`
+          : mood === 'worry'
+            ? `<path d="M55.5 79 Q57.8 77 60 79 Q62.2 81 64.5 79" stroke="#c4566f" stroke-width="1.7" fill="none" stroke-linecap="round"/>`
+            : `<path d="M55.8 77.4 Q58 80 60 77.7 Q62 80 64.2 77.4" stroke="#c4566f" stroke-width="1.7" fill="none" stroke-linecap="round"/>`;
+  // 眉毛半透明地叠在刘海上；担心时内侧眉头抬高
+  const brow =
+    mood === 'worry'
+      ? `<path d="M${X - 6.5} 52.6 Q${X - 1} 51.8 ${X + 6} 48.4" stroke="${hairDark}" stroke-width="1.7" fill="none" stroke-linecap="round" opacity=".9"/>`
+      : `<path d="M${X - 6.5} 52 Q${X} 49 ${X + 6.5} 51.4" stroke="${hairDark}" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".85"/>`;
+  const brows = `${brow}<g transform="translate(120 0) scale(-1 1)">${brow}</g>`;
+  const worry =
+    mood === 'worry'
+      ? `<path d="M88 42 Q93.5 50 88 53.5 Q82.5 50 88 42 Z" fill="#a8d8ff" stroke="#73b7ec" stroke-width=".8"/>`
+      : '';
+  const head = `
+    <path d="M20 62 C18 27 38 9 60 9 C82 9 102 27 100 62 L100 88 Q100 96 92 95.5 Q87.5 95 87 88 L86 66 L34 66 L33 88 Q32.5 95 28 95.5 Q20 96 20 88 Z" fill="${hair}"/>
+    <path d="M34 66 L86 66 L86 86 Q60 93 34 86 Z" fill="${hairDark}"/>
+    <path d="M33 59 C33 44 45 36 60 36 C75 36 87 44 87 59 C87 75 76 87 60 88 C44 87 33 75 33 59 Z" fill="${skin}"/>
+    ${eyes}
+    <ellipse cx="40.5" cy="75" rx="5.6" ry="3" fill="#ffa3c0" opacity=".55"/><ellipse cx="79.5" cy="75" rx="5.6" ry="3" fill="#ffa3c0" opacity=".55"/>
+    <path d="M38 75 L39.5 73 M41 75.5 L42.5 73.5 M78 75.5 L79.5 73.5 M81 75 L82.5 73" stroke="#ff8fb1" stroke-width=".9" stroke-linecap="round" opacity=".7"/>
+    ${mouth}
+    <path d="M30 63 C29 40 43 27 60 27 C77 27 91 40 90 63 Q87.5 55 84 59.5 Q82.5 50 77 48 Q76.5 55 72 57.5 Q70.5 49 64.5 46 Q63.5 53 59.5 56.5 Q56.5 48 51 47 Q49.5 54 45.5 57.5 Q44 50 39 49 Q37.5 55.5 34 59 Q32 56 30 63 Z" fill="${hair}"/>
+    <path d="M31 52 C26 64 27 80 32.5 93 Q34.5 86 36 80 C35 70 36 60 38.5 54 Z" fill="${hair}"/>
+    <path d="M89 52 C94 64 93 80 87.5 93 Q85.5 86 84 80 C85 70 84 60 81.5 54 Z" fill="${hair}"/>
+    ${mood === 'happy' || mood === 'sleep' ? '' : brows}
+    <path d="M41 21 Q51 15 61 16" stroke="${hairLight}" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+    <path d="M67 17.5 Q71 17.5 74 19.5" stroke="${hairLight}" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M58 11 C55 1 66 -2.5 70.5 3 C65.5 3 61.5 6 61 11 Z" fill="${hairDark}"/>
+    <path d="M23.5 60 C21 5 99 5 96.5 60" stroke="#ff8fb1" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+    <rect x="13.5" y="54" width="14" height="22" rx="7" fill="#ff8fb1"/><rect x="16.5" y="58" width="8" height="14" rx="4" fill="#ffd3e1"/>
+    <rect x="92.5" y="54" width="14" height="22" rx="7" fill="#ff8fb1"/><rect x="95.5" y="58" width="8" height="14" rx="4" fill="#ffd3e1"/>
+    <path d="M105 52 Q114 56 109 66" stroke="#fff" stroke-width="4.4" fill="none" stroke-linecap="round"/>
+    <path d="M105 52 Q114 56 109 66" stroke="#ff8fb1" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <ink x1="106" y1="57" x2="113.5" y2="44.5" stroke="#ff8fb1" stroke-width="1.7" stroke-linecap="round"/>
+    <circle class="ar-ball" cx="114" cy="43" r="3.3" fill="#ffd166" stroke="#ff8fb1" stroke-width="1.2"/>
+    ${worry}`;
+  const body = `
+    <rect x="55.5" y="85" width="9" height="9" fill="${skin}"/>
+    <path d="M44 94 Q60 89 76 94 L79.5 116 L40.5 116 Z" fill="#fff" stroke="#e2dcf3" stroke-width="1.2"/>
+    <path d="M45 97 Q37 106 36 117" stroke="#e2dcf3" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <path d="M45 97 Q37 106 36 117" stroke="#fff" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <circle cx="36" cy="120" r="4.4" fill="${skin}" stroke="#f2cfc3" stroke-width=".8"/>
+    <path d="M38.5 114 L81.5 114 L88.5 133 Q60 137.5 31.5 133 Z" fill="#3d4a7a"/>
+    <path d="M47 115 L44 134.5 M60 115 L60 136 M73 115 L76 134.5" stroke="#5a69a0" stroke-width="1.3"/>
+    <path d="M43 94 L60 107 L77 94 L73 90.5 L60 100 L47 90.5 Z" fill="#3d4a7a"/>
+    <path d="M45.6 93.4 L60 104 L74.4 93.4" stroke="#fff" stroke-width=".9" fill="none"/>
+    <path d="M60 104 L51 100 L52 109 Z M60 104 L69 100 L68 109 Z" fill="#e95a8c"/><circle cx="60" cy="104.4" r="2.5" fill="#d64479"/>
+    <rect x="50.5" y="134" width="7" height="11" fill="${skin}"/><rect x="62.5" y="134" width="7" height="11" fill="${skin}"/>
+    <rect x="50.5" y="139" width="7" height="7" fill="#fff" stroke="#e2dcf3" stroke-width=".7"/><rect x="62.5" y="139" width="7" height="7" fill="#fff" stroke="#e2dcf3" stroke-width=".7"/>
+    <path d="M47 148 Q47 143 53.5 143 Q59 143 59.5 148 Z" fill="#7a5145"/><path d="M60.5 148 Q61 143 66.5 143 Q73 143 73 148 Z" fill="#7a5145"/>`;
+  const wave = `
+    <path class="ar-arm" d="M75 97 Q88 104 95.5 98.5" stroke="#e2dcf3" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <path class="ar-arm" d="M75 97 Q88 104 95.5 98.5" stroke="#fff" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <circle class="ar-arm" cx="97.5" cy="96.5" r="4.4" fill="${skin}" stroke="#f2cfc3" stroke-width=".8"/>`;
+  const vb = full ? '6 -4 114 156' : '10 -4 108 104';
+  const h = full ? Math.round((size * 156) / 114) : Math.round((size * 104) / 108);
+  return `<svg class="ar-mascot ${cls}" width="${size}" height="${h}" viewBox="${vb}" aria-hidden="true">
+    <defs><linearGradient id="arIris" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5442b4"/><stop offset=".55" stop-color="#9a6fe2"/><stop offset="1" stop-color="#ff98c4"/></linearGradient></defs>
+    ${full ? body : ''}${head}${full ? wave : ''}</svg>`;
+}
+
+// ----- 看板娘图片：构建时嵌入，没有图片就用 SVG -----
+
+function mascotBody(height, mood = '', className = '') {
+  const src = DATA.mascot[mood || 'normal'] || DATA.mascot.normal;
+  if (!src) return chibi(Math.round((height * 114) / 156), mood, true, className);
+  return `<img class="ar-mascot ar-img ${className}" src="${src}" alt="" style="height:${height}px;width:auto" draggable="false">`;
+}
+
+function mascotHead(size, mood = '') {
+  if (!DATA.mascot.avatar) return chibi(size, mood, false);
+  return `<img class="ar-mascot ar-av" src="${DATA.mascot.avatar}" alt="" style="width:${size}px;height:${size}px" draggable="false">`;
+}
+
+// ----- 渲染器：{kind, mount(el), setMood(mood), tap(), destroy()} -----
+// 优先 Live2D；运行库缺失、没有 WebGL 或加载出错时退回静态图，没有图片再退回 SVG。
+
+function stillRenderer() {
+  const useSvg = !DATA.mascot.normal;
+  return {
+    kind: useSvg ? 'svg' : 'image',
+    mood: '',
+    mount(el) {
+      this.el = el;
+      this.draw();
+    },
+    draw() {
+      this.el.innerHTML = useSvg
+        ? chibi(dockWidth(), this.mood, true, 'fig')
+        : mascotBody(dockHeight(), '', 'fig');
+    },
+    // 静态图只有一个姿势，心情由外层的 CSS 小动作表现
+    setMood(mood) {
+      if (!useSvg || mood === this.mood) return;
+      this.mood = mood;
+      this.draw();
+    },
+    tap() {},
+    destroy() {
+      if (this.el) this.el.innerHTML = '';
+    },
+  };
+}
+
+const LIVE2D_BASE = 'https://ar-live2d.invalid/model/'; // 假地址：文件都从内存提供，不会真的请求
+
+// @require 的 PIXI 和 Cubism Core 可能只是脚本管理器包装函数里的局部变量，不在 window 上
+function live2dLibraries() {
+  const pixi = typeof PIXI !== 'undefined' ? PIXI : window.PIXI || PAGE.PIXI;
+  const core =
+    typeof Live2DCubismCore !== 'undefined'
+      ? Live2DCubismCore
+      : window.Live2DCubismCore || PAGE.Live2DCubismCore;
+  if (!pixi || !core) return null;
+  if (!pixi.live2d && typeof cubism4Plugin === 'function') {
+    // 插件加载时会检查 window.Live2DCubismCore
+    if (!window.Live2DCubismCore) window.Live2DCubismCore = core;
+    const module = { exports: {} };
+    cubism4Plugin(module, module.exports, name => (name === '@pixi/utils' ? pixi.utils : pixi));
+    pixi.live2d = module.exports;
+    // 不注册的话插件会去 window.PIXI 找 Ticker，找不到模型就不动
+    pixi.live2d.Live2DModel.registerTicker(pixi.Ticker);
+  }
+  return pixi.live2d ? pixi : null;
+}
+
+function webglAvailable() {
+  try {
+    const canvas = document.createElement('canvas');
+    return !!(canvas.getContext('webgl2') || canvas.getContext('webgl'));
+  } catch (error) {
+    return false;
+  }
+}
+
+function decodeBase64(text) {
+  const binary = atob(text);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes.buffer;
+}
+
+function requestBinary(url) {
+  const request =
+    typeof GM_xmlhttpRequest === 'function'
+      ? GM_xmlhttpRequest
+      : typeof GM !== 'undefined' && GM && GM.xmlHttpRequest;
+  if (!request) return Promise.reject(new Error('脚本管理器不支持跨域下载'));
+  return new Promise((resolve, reject) =>
+    request({
+      method: 'GET',
+      url,
+      responseType: 'arraybuffer',
+      onload: response =>
+        response.status === 200
+          ? resolve(response.response)
+          : reject(new Error('HTTP ' + response.status)),
+      onerror: reject,
+    }),
+  );
+}
+
+async function live2dFiles() {
+  const model = DATA.live2d;
+  if (model.files) {
+    return Object.fromEntries(
+      Object.entries(model.files).map(([name, text]) => [name, decodeBase64(text)]),
+    );
+  }
+  const files = {}; // 开发选项：模型放在本地服务上
+  for (const name of model.list) files[name] = await requestBinary(model.base + name);
+  return files;
+}
+
+// 模型文件从内存提供：不发请求、不用 blob:/data: 地址，页面的 CSP 管不到
+function serveFromMemory(pixi, files) {
+  const decoder = new TextDecoder();
+  const byUrl = {};
+  for (const [name, buffer] of Object.entries(files)) byUrl[LIVE2D_BASE + name] = buffer;
+  const loader = pixi.live2d.Live2DLoader;
+  const middleware = (context, next) => {
+    const url = context.settings ? context.settings.resolveURL(context.url) : context.url;
+    const buffer = byUrl[url];
+    if (!buffer) return next();
+    context.result = context.type === 'json' ? JSON.parse(decoder.decode(buffer)) : buffer.slice(0);
+    return Promise.resolve();
+  };
+  middleware.fromMemory = true;
+  loader.middlewares = [middleware].concat(loader.middlewares.filter(m => !m.fromMemory));
+}
+
+async function cacheTextures(pixi, settings, files) {
+  // 贴图从字节解码后放进缓存，模型按同一地址取用时直接命中
+  for (const texture of settings.FileReferences.Textures) {
+    const bitmap = await createImageBitmap(new Blob([files[texture]]), {
+      premultiplyAlpha: 'none',
+    });
+    pixi.Texture.addToCache(pixi.Texture.from(bitmap), LIVE2D_BASE + texture);
+  }
+}
+
+function live2dRenderer(fallback) {
+  return {
+    kind: 'live2d',
+    app: null,
+    model: null,
+    destroyed: false,
+
+    async mount(el) {
+      this.el = el;
+      fallback.mount(el); // 加载期间先显示静态图
+      try {
+        await this.load(el);
+      } catch (error) {
+        this.kind = 'live2d-failed';
+        Diagnostics.note('Live2D 没加载成功，改用静态图：' + error.message);
+        fallback.mount(el);
+      }
+    },
+
+    async load(el) {
+      const pixi = live2dLibraries();
+      if (!pixi) throw new Error('缺少 Live2D 运行库');
+      if (!webglAvailable()) throw new Error('浏览器不支持 WebGL');
+      const files = await live2dFiles();
+      serveFromMemory(pixi, files);
+      const settings = JSON.parse(new TextDecoder().decode(files[DATA.live2d.model]));
+      settings.url = LIVE2D_BASE + DATA.live2d.model;
+      await cacheTextures(pixi, settings, files);
+      if (this.destroyed) return;
+
+      const width = dockWidth();
+      const height = dockHeight();
+      const app = new pixi.Application({
+        width,
+        height,
+        backgroundAlpha: 0,
+        antialias: true,
+        resolution: Math.min(2, window.devicePixelRatio || 1),
+        autoDensity: true,
+      });
+      const model = await pixi.live2d.Live2DModel.from(settings, {
+        autoInteract: false,
+        motionPreload: 'IDLE',
+      });
+      if (this.destroyed) {
+        app.destroy(true);
+        return;
+      }
+      const scale = Math.min(
+        width / model.internalModel.width,
+        height / model.internalModel.height,
+      );
+      model.scale.set(scale);
+      model.x = (width - model.internalModel.width * scale) / 2;
+      model.y = height - model.internalModel.height * scale;
+      app.stage.addChild(model);
+      app.view.className = 'fig l2d';
+      app.view.style.width = width + 'px';
+      app.view.style.height = height + 'px';
+      el.innerHTML = '';
+      el.appendChild(app.view);
+      this.app = app;
+      this.model = model;
+
+      this.followPointer = event => {
+        const rect = app.view.getBoundingClientRect();
+        model.focus(event.clientX - rect.left, event.clientY - rect.top);
+      };
+      this.pauseWhenHidden = () => (document.hidden ? app.ticker.stop() : app.ticker.start());
+      window.addEventListener('pointermove', this.followPointer, { passive: true });
+      document.addEventListener('visibilitychange', this.pauseWhenHidden);
+    },
+
+    // 模型没有表情文件，用动作表现心情
+    setMood(mood) {
+      const group = { happy: 'Tap', surprised: 'Flick3', worry: 'Flick' }[mood];
+      if (this.model && group) this.model.motion(group);
+    },
+    tap() {
+      if (this.model) this.model.motion('Tap');
+    },
+    destroy() {
+      this.destroyed = true;
+      if (this.followPointer) window.removeEventListener('pointermove', this.followPointer);
+      if (this.pauseWhenHidden)
+        document.removeEventListener('visibilitychange', this.pauseWhenHidden);
+      if (this.app) this.app.destroy(true);
+      this.app = null;
+      this.model = null;
+    },
+  };
+}
+
+function makeRenderer() {
+  const still = stillRenderer();
+  return DATA.live2d && DATA.live2d.model ? live2dRenderer(still) : still;
+}
+
+// ===== 界面：看板娘（常驻 / 小窗 / 完整面板）、卡片瀑布流、详情抽屉 =====
+
+const STATUS = {
+  verified: { icon: '✓', label: '已核实', tone: 'good' },
+  trusted: { icon: '≈', label: '同档可信', tone: 'trust' },
+  lead: { icon: '?', label: '线索', tone: 'lead' },
+  seats: { icon: '!', label: '座位不足', tone: 'warn' },
+  mixed: { icon: '!', label: '混舱', tone: 'warn' },
+  gone: { icon: '✕', label: '已失效', tone: 'bad' },
+  airport: { icon: '✕', label: '机场不符', tone: 'bad' },
+  excluded: { icon: '✕', label: '已排除', tone: 'bad' },
+};
+const TIER_EXPLAIN = {
+  trusted:
+    '这一档里已经有一天在 aa.com 搜索页核实过：机场对、舱位对、座位够。同档其他日期通常是同一组航班，但不保证。不过同一组航班可能某天全程商务、某天有一段只剩经济，下单前把要订的那天再核实一次最稳。',
+  lead: '这一档还只有日历数据。日历是 aa.com 的每日最低价汇总，可能和实际搜索页对不上（比如没位、换了机场、混舱）。核实一天，就知道这一档靠不靠谱。',
+  excluded: '这一档核实时发现机场不符或混舱，先排除。个别日期可以单独再核实。',
+};
+const DATE_EXPLAIN = {
+  verified: '刚核实过这一天：机场一致、舱位一致、座位够。',
+  trusted: '和同档已核实的日期一样，但这一天本身还没核实。',
+  lead: '只有日历数据，还没核实。',
+  gone: '核实时这一天已经没位了。',
+  airport: '核实时只给出了其他机场的航班。',
+  mixed: '核实时最好的选项里有一段不是所选舱位。',
+  seats: '核实时座位不够你选的人数。',
+  excluded: '同档另一天核实有问题，这天跟着排除，可以单独再核实。',
+};
+const KAOMOJI = ['(｡･ω･｡)', '(´･ω･`)', '(・∀・)', '(*´▽`*)'];
+const COVER_RATIOS = ['3 / 4', '4 / 5', '1 / 1', '3 / 4', '4 / 5'];
+const MOOD_DECOS = {
+  happy: '<i class="deco spark">✦</i><i class="deco spark s2">✦</i>',
+  surprised: '<i class="deco bang">!</i><i class="deco spark">✦</i>',
+  worry: '<i class="deco drop"></i>',
+  sleep: '<i class="deco zz">z<small>z</small></i>',
+};
+
+let state = null;
+let prefs = null;
+
+function initState() {
+  prefs = Object.assign(
+    { mode: 'auto', view: 'feed', sort: 'rec', quickOpen: { A: false, B: false } },
+    Store.get('prefs', {}),
+  );
+  if (!prefs.sel) {
+    const preset = DATA.presets[0];
+    prefs.sel = {
+      A: preset.A.slice(),
+      B: preset.B.slice(),
+      dir: 'both',
+      cabins: ['J'],
+      pax: 1,
+      months: 6,
+      speed: 'normal',
+    };
+  }
+  state = {
+    root: null,
+    favorites: new Set(Store.get('fav', [])),
+    channel: 'all',
+    routeFilter: null,
+    showExcluded: false,
+    routes: new Map(),
+    cards: [],
+    filtered: [],
+    shown: 0,
+    columns: 0,
+    fullOpen: false,
+    miniOpen: false,
+    card: null,
+    day: null,
+    setupOpen: false,
+    mood: '',
+    moodUntil: 0,
+    sleeping: false,
+    lastActive: Date.now(),
+    suggestions: { A: [], B: [] },
+    suggestionAt: { A: 0, B: 0 },
+  };
+}
+
+const savePrefs = () => Store.set('prefs', prefs);
+const combo = () => prefs.combo || { pax: prefs.sel.pax, cabin: prefs.sel.cabins[0] || 'J' };
+const cardId = card => `${card.o}-${card.d}-${card.id}`;
+const favoriteKey = card => `${combo().pax}|${combo().cabin}|${cardId(card)}`;
+const $ = (selector, scope) => (scope || state.root).querySelector(selector);
+const $$ = (selector, scope) => Array.from((scope || state.root).querySelectorAll(selector));
+const isPhone = () => window.innerWidth <= 720;
+const reducedMotion = () =>
+  !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+// 老的 WebView 没有 getAnimations
+const cancelAnimations = (el, subtree) => {
+  if (el.getAnimations) el.getAnimations({ subtree }).forEach(animation => animation.cancel());
+};
+const badge = status =>
+  `<span class="badge ${STATUS[status].tone}"><i>${STATUS[status].icon}</i>${STATUS[status].label}</span>`;
+
+function mount() {
+  if (document.getElementById('award-radar-host')) return;
+  const host = document.createElement('div');
+  host.id = 'award-radar-host';
+  (document.body || document.documentElement).appendChild(host);
+  state.root = host.attachShadow({ mode: 'open' });
+  state.root.innerHTML = `<style>${STYLES}</style><div class="ar">
+    <div class="dock" data-act="dock" title="${esc(persona().name)}"></div><div class="bubble" hidden></div>
+    <div class="mini" hidden></div><div class="full" hidden></div>
+    <div class="scrim-all" hidden></div><aside class="drawer" hidden></aside>
+    <div class="toast" hidden></div><div class="tip" hidden></div><div class="safe-probe"></div></div>`;
+  bindDock();
+  bindRoot();
+  placeDock();
+  window.addEventListener('resize', () => {
+    placeDock();
+    if (state.fullOpen) renderFeed(false);
+  });
+  Scan.listeners.add(onScan);
+  Store.listen('checks', refreshData);
+  refreshData();
+  renderDock();
+  initTalk();
+}
+
+function toast(message, ms = 2600, mood = 'happy') {
+  const el = $('.toast');
+  el.innerHTML = mascotHead(24, mood) + `<span>${esc(message)}</span>`;
+  el.hidden = false;
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => (el.hidden = true), ms);
+}
+
+// ----- 常驻看板娘 -----
+
+function rendererKind() {
+  if (state.rendererKind) return state.rendererKind;
+  if (DATA.live2d && DATA.live2d.model) return 'live2d';
+  return DATA.mascot.normal ? 'image' : 'svg';
+}
+
+function dockHeight() {
+  if (rendererKind() === 'live2d') return isPhone() ? 96 : 140;
+  if (DATA.mascot.normal) return isPhone() ? 80 : 120;
+  return isPhone() ? 66 : 92;
+}
+
+function dockWidth() {
+  if (rendererKind() === 'live2d') return Math.round(dockHeight() * 0.74);
+  const ratio = DATA.mascot.normal ? DATA.mascot.ratio || 0.66 : 114 / 156;
+  return Math.round(dockHeight() * ratio);
+}
+
+function placeDock() {
+  const dock = $('.dock');
+  const width = dockWidth();
+  const height = dockHeight();
+  dock.style.width = width + 'px';
+  dock.style.height = height + 'px';
+  const saved = prefs.dock || {};
+  // iPhone 底部有 Home 指示条，默认位置往上让出安全区
+  const safeBottom = $('.safe-probe').offsetHeight;
+  const x = Math.max(
+    4,
+    Math.min(
+      window.innerWidth - width - 4,
+      saved.x == null ? window.innerWidth - width - 22 : saved.x,
+    ),
+  );
+  const y = Math.max(
+    4,
+    Math.min(
+      window.innerHeight - height - 4,
+      saved.y == null ? window.innerHeight - height - 22 - safeBottom : saved.y,
+    ),
+  );
+  dock.style.left = x + 'px';
+  dock.style.top = y + 'px';
+  state.dockRect = { x, y, width, height };
+  // Live2D 画布大小跟着手机/桌面断点走，跨断点时重建
+  const phone = isPhone();
+  if (
+    state.renderer &&
+    state.phoneLayout !== undefined &&
+    state.phoneLayout !== phone &&
+    state.renderer.kind === 'live2d'
+  ) {
+    state.renderer.destroy();
+    mountRenderer();
+  }
+  state.phoneLayout = phone;
+  positionFloating();
+}
+
+function mountRenderer() {
+  state.renderer = makeRenderer();
+  state.rendererKind = state.renderer.kind;
+  Promise.resolve(state.renderer.mount($('.dock .holder'))).then(() => {
+    if (state.renderer.kind !== 'live2d-failed') return;
+    state.rendererKind = DATA.mascot.normal ? 'image' : 'svg';
+    placeDock();
+  });
+}
+
+function currentMood() {
+  if (Date.now() < state.moodUntil) return state.mood;
+  return state.sleeping ? 'sleep' : '';
+}
+
+function renderDock() {
+  const dock = $('.dock');
+  const mood = currentMood();
+  const busy = Scan.running();
+  const newCount = state.cards.filter(card => card.new).length;
+  dock.className =
+    `dock m-${mood || 'idle'}` +
+    (busy ? ' busy' : '') +
+    (state.sleeping ? ' sleeping' : '') +
+    (dock.classList.contains('settle') ? ' settle' : '');
+  if (!$('.holder', dock)) {
+    dock.innerHTML =
+      '<div class="shadow"></div><div class="holder"></div><div class="decos"></div><span class="badge-n" hidden></span>';
+    mountRenderer();
+  }
+  if (state.renderer && state.lastMood !== mood) {
+    state.lastMood = mood;
+    state.renderer.setMood(mood);
+  }
+  $('.decos', dock).innerHTML = MOOD_DECOS[mood] || '';
+  const counter = $('.badge-n', dock);
+  counter.hidden = !(newCount && !busy);
+  counter.textContent = newCount;
+}
+
+function setMood(mood, ms = 8000) {
+  state.mood = mood;
+  state.moodUntil = Date.now() + ms;
+  renderDock();
+}
+
+function wake() {
+  state.lastActive = Date.now();
+  if (!state.sleeping) return;
+  state.sleeping = false;
+  renderDock();
+  talk('wake');
+}
+
+function dockCenter() {
+  const rect = state.dockRect;
+  return { x: rect.x + rect.width / 2, y: rect.y + rect.height * 0.35 };
+}
+
+function positionFloating() {
+  const rect = state.dockRect;
+  if (!rect) return;
+  const onRight = rect.x + rect.width / 2 > window.innerWidth / 2;
+  const bubble = $('.bubble');
+  if (!bubble.hidden) {
+    const width = Math.min(240, bubble.offsetWidth || 220);
+    const height = bubble.offsetHeight || 60;
+    const left = onRight ? rect.x + rect.width - width + 10 : rect.x - 10;
+    let top = rect.y - height - 10;
+    if (top < 6) top = rect.y + rect.height + 10;
+    bubble.style.left = Math.max(6, Math.min(window.innerWidth - width - 6, left)) + 'px';
+    bubble.style.top = top + 'px';
+    bubble.classList.toggle('left', !onRight);
+  }
+  const mini = $('.mini');
+  if (!mini.hidden && !isPhone()) {
+    const width = 360;
+    const height = Math.min(520, window.innerHeight - 24);
+    let left = onRight ? rect.x - width - 10 : rect.x + rect.width + 10;
+    if (left < 6) left = Math.max(6, Math.min(window.innerWidth - width - 6, rect.x - width / 2));
+    mini.style.left = left + 'px';
+    mini.style.top =
+      Math.max(12, Math.min(window.innerHeight - height - 12, rect.y + rect.height - height)) +
+      'px';
+    mini.style.height = height + 'px';
+  }
+}
+
+function bindDock() {
+  const dock = $('.dock');
+  let start = null;
+  let moved = false;
+  dock.addEventListener('pointerdown', event => {
+    start = { px: event.clientX, py: event.clientY, x: state.dockRect.x, y: state.dockRect.y };
+    moved = false;
+    try {
+      dock.setPointerCapture(event.pointerId);
+    } catch (error) {
+      // 合成事件没有真实指针，捕获失败不影响拖动
+    }
+  });
+  dock.addEventListener('pointercancel', () => (start = null));
+  dock.addEventListener('lostpointercapture', () => {
+    if (moved) start = null;
+  });
+  dock.addEventListener('pointermove', event => {
+    if (!start) return;
+    // 鼠标没按住就不算拖动，避免丢了 pointerup 之后跟着光标跑
+    if (event.pointerType === 'mouse' && !(event.buttons & 1)) {
+      start = null;
+      return;
+    }
+    const dx = event.clientX - start.px;
+    const dy = event.clientY - start.py;
+    if (!moved && Math.hypot(dx, dy) < 5) return;
+    if (!moved) talk('drag');
+    moved = true;
+    prefs.dock = { x: start.x + dx, y: start.y + dy };
+    placeDock();
+  });
+  dock.addEventListener('pointerup', () => {
+    if (!start) return;
+    start = null;
+    if (moved) {
+      savePrefs();
+      dock.classList.add('settle');
+      setTimeout(() => dock.classList.remove('settle'), 720);
+      talk('drop');
+      return;
+    }
+    wake();
+    if (state.renderer) state.renderer.tap();
+    onDockClick();
+  });
+  dock.addEventListener('pointerenter', wake);
+}
+
+// 单击开关小窗；1.5 秒内连点算"戳"，按 20 秒内的点击数升级反应，不反复开关窗口
+function onDockClick() {
+  const now = Date.now();
+  const rapid = state.lastClick && now - state.lastClick < 1500;
+  state.lastClick = now;
+  state.pokes = (state.pokes || []).filter(t => now - t < 20000).concat(now);
+  if (!rapid) {
+    if (state.miniOpen) closeMini();
+    else openMini();
+  }
+  const count = state.pokes.length;
+  const level = count >= 10 ? 4 : count >= 6 ? 3 : count >= 3 ? 2 : 1;
+  talk(
+    'poke',
+    { count },
+    { level, mood: level >= 3 ? 'worry' : level === 2 ? 'surprised' : 'happy' },
+  );
+}
+
+// ----- 气泡与台词 -----
+
+// 同一时间只有一个气泡；显示时长约 2.5 秒 + 每字 0.12 秒
+function say(html, options = {}) {
+  const bubble = $('.bubble');
+  if (state.fullOpen && !options.sticky) return;
+  bubble.className = 'bubble' + (options.kind ? ' ' + options.kind : '');
+  bubble.innerHTML = `<button class="bx" data-act="mute" title="今天先别说话">×</button>${html}`;
+  bubble.hidden = false;
+  const length = options.length || String(html).replace(/<[^>]+>/g, '').length;
+  if (options.mood) setMood(options.mood, options.sticky ? 3600e3 : 2500 + 120 * length);
+  positionFloating();
+  clearTimeout(state.bubbleTimer);
+  if (!options.sticky)
+    state.bubbleTimer = setTimeout(() => (bubble.hidden = true), options.ms || 2500 + 120 * length);
+}
+
+const LINE_MOODS = {
+  greet_morning: 'happy',
+  greet_noon: 'happy',
+  greet_evening: 'happy',
+  greet_back: 'happy',
+  midnight: 'surprised',
+  drag: 'surprised',
+  drop: 'happy',
+  wake: 'surprised',
+  sleep: 'sleep',
+  scan_start: 'happy',
+  scan_half: 'happy',
+  scan_done_found: 'happy',
+  scan_done_new: 'surprised',
+  scan_done_none: 'worry',
+  blocked: 'worry',
+  human_check: 'worry',
+  fav: 'happy',
+  verify_ok: 'happy',
+  verify_mixed: 'worry',
+  verify_gone: 'worry',
+  verify_airport: 'worry',
+  verify_seats: 'worry',
+  verify_failed: 'worry',
+};
+// 静音或被完整面板挡住时，这些仍以 toast 显示
+const ALWAYS_SHOWN = new Set([
+  'human_check',
+  'verify_ok',
+  'verify_mixed',
+  'verify_gone',
+  'verify_airport',
+  'verify_seats',
+  'verify_failed',
+]);
+
+// 事件台词会打断闲聊；闲聊从不打断别的
+function talk(group, vars, options = {}) {
+  const text = pickLine(group, vars, options.level);
+  if (!text) return;
+  const mood = options.mood != null ? options.mood : LINE_MOODS[group] || '';
+  const muted = sessionStorage.getItem('ar-mute') === '1';
+  if (options.idle && (muted || state.miniOpen || state.fullOpen || !$('.bubble').hidden)) return;
+  if (muted || state.fullOpen) {
+    if (ALWAYS_SHOWN.has(group) || (options.toast && !muted)) {
+      toast(
+        text + (options.subText ? ' · ' + options.subText : ''),
+        2500 + 120 * text.length,
+        mood || 'happy',
+      );
+    }
+    return;
+  }
+  say(esc(text) + (options.sub ? `<span class="bsub">${options.sub}</span>` : ''), {
+    mood,
+    sticky: options.sticky,
+    kind: options.kind,
+    length: text.length,
+  });
+}
+
+const VERDICT_LINES = {
+  ok: 'verify_ok',
+  mixed: 'verify_mixed',
+  none: 'verify_gone',
+  airport: 'verify_airport',
+  seats: 'verify_seats',
+  failed: 'verify_failed',
+};
+
+// 台词下面附上如实的判定细节；verify_ok 只在判定通过时出现
+function sayVerdict(item, result, extra) {
+  const detail = [
+    esc(verdictLine(result, item.pax)),
+    result.flights ? esc(result.flights + ' · ' + (result.path || '')) : '',
+    extra || '',
+  ]
+    .filter(Boolean)
+    .join('<br>');
+  talk(
+    VERDICT_LINES[result.status] || 'verify_failed',
+    { seats: result.seats, from: cityName(item.o), to: cityName(item.d) },
+    {
+      sticky: true,
+      kind: result.status === 'ok' ? 'good' : 'bad',
+      sub: detail,
+      subText: verdictLine(result, item.pax),
+    },
+  );
+}
+
+function greetingGroup() {
+  const lastVisit = Store.get('lastVisit', 0);
+  if (lastVisit && Date.now() - lastVisit > DAY_MS) return 'greet_back';
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 11) return 'greet_morning';
+  if (hour >= 11 && hour < 16) return 'greet_noon';
+  if (hour >= 16 && hour < 23) return 'greet_evening';
+  return 'greet_night';
+}
+
+function initTalk() {
+  if (!IS_RESULTS_PAGE && !sessionStorage.getItem('ar-greeted')) {
+    sessionStorage.setItem('ar-greeted', '1');
+    const group = greetingGroup();
+    setTimeout(() => talk(group), 1400);
+  }
+  Store.set('lastVisit', Date.now());
+  const scheduleIdle = () =>
+    setTimeout(
+      () => {
+        if (!document.hidden && !state.sleeping && !Scan.running())
+          talk('idle', null, { idle: true });
+        scheduleIdle();
+      },
+      60000 + Math.random() * 60000,
+    );
+  scheduleIdle();
+  state.today = todayIso();
+  setInterval(() => {
+    if (todayIso() !== state.today) {
+      state.today = todayIso();
+      talk('midnight');
+    }
+    const idleFor = Date.now() - state.lastActive;
+    if (
+      !state.sleeping &&
+      !Scan.running() &&
+      !state.miniOpen &&
+      !state.fullOpen &&
+      idleFor > 300000
+    ) {
+      state.sleeping = true;
+      renderDock();
+      talk('sleep', null, { idle: true });
+    }
+  }, 15000);
+  for (const type of ['pointerdown', 'keydown', 'wheel', 'touchstart']) {
+    window.addEventListener(type, wake, { passive: true, capture: true });
+  }
+}
+
+// ----- 动画 -----
+
+// 从一个点（看板娘）弹开，略微过冲；只动 transform/opacity
+function springFrom(el, point, ms = 460) {
+  if (reducedMotion() || !el.animate) return;
+  const rect = el.getBoundingClientRect();
+  el.style.transformOrigin = `${point.x - rect.left}px ${point.y - rect.top}px`;
+  el.animate(
+    [
+      { transform: 'scale(.18)', opacity: 0 },
+      { transform: 'scale(1.035)', opacity: 1, offset: 0.62 },
+      { transform: 'scale(.995)', offset: 0.82 },
+      { transform: 'scale(1)', opacity: 1 },
+    ],
+    { duration: ms, easing: 'cubic-bezier(.2,.8,.3,1)' },
+  );
+}
+
+function shrinkTo(el, point, ms = 220) {
+  if (reducedMotion() || !el.animate) return Promise.resolve();
+  const rect = el.getBoundingClientRect();
+  el.style.transformOrigin = `${point.x - rect.left}px ${point.y - rect.top}px`;
+  const keyframes = [
+    { transform: 'scale(1)', opacity: 1 },
+    { transform: 'scale(.2)', opacity: 0 },
+  ];
+  return el
+    .animate(keyframes, { duration: ms, easing: 'cubic-bezier(.5,0,.8,.4)' })
+    .finished.catch(() => {});
+}
+
+// FLIP：从 from 的位置和大小过渡到元素现在的位置
+function flip(el, from, ms = 500, easing = 'cubic-bezier(.2,.9,.25,1.08)') {
+  if (reducedMotion() || !el.animate || !from) return Promise.resolve();
+  const to = el.getBoundingClientRect();
+  el.style.transformOrigin = '0 0';
+  const start = `translate(${from.left - to.left}px, ${from.top - to.top}px) scale(${from.width / to.width}, ${from.height / to.height})`;
+  return el
+    .animate([{ transform: start }, { transform: 'none' }], { duration: ms, easing })
+    .finished.catch(() => {});
+}
+
+function heartBurst(button) {
+  if (reducedMotion()) return;
+  const rect = button.getBoundingClientRect();
+  const x = rect.left + rect.width / 2;
+  const y = rect.top + rect.height / 2;
+  for (let i = 0; i < 9; i++) {
+    const particle = document.createElement('i');
+    particle.className = 'heartp';
+    particle.textContent = i % 3 ? '♥' : '✦';
+    particle.style.left = x + 'px';
+    particle.style.top = y + 'px';
+    $('.ar').appendChild(particle);
+    const angle = (i / 9) * Math.PI * 2 + Math.random() * 0.5;
+    const distance = 22 + Math.random() * 18;
+    const end = `translate(calc(-50% + ${Math.cos(angle) * distance}px), calc(-50% + ${Math.sin(angle) * distance - 10}px)) scale(1)`;
+    particle
+      .animate(
+        [
+          { transform: 'translate(-50%,-50%) scale(.4)', opacity: 1 },
+          { transform: end, opacity: 0 },
+        ],
+        {
+          duration: 620 + Math.random() * 200,
+          easing: 'cubic-bezier(.2,.7,.3,1)',
+        },
+      )
+      .finished.then(
+        () => particle.remove(),
+        () => particle.remove(),
+      );
+  }
+}
+
+// ----- 数据刷新与扫描事件 -----
+
+function refreshData() {
+  const current = combo();
+  state.routes = analyze(current.pax, current.cabin);
+  state.cards = [];
+  for (const route of state.routes.values()) {
+    for (const tier of route.tiers) {
+      state.cards.push(
+        Object.assign({}, tier, {
+          o: route.o,
+          d: route.d,
+          twin: route.twin,
+          scanned: route.scanned,
+        }),
+      );
+    }
+  }
+  if (state.miniOpen) renderMini();
+  if (state.fullOpen) {
+    if (prefs.view === 'matrix') renderMatrix();
+    else renderFeed(true);
+    updateTabs();
+  }
+  if (state.card) renderDrawer();
+  renderDock();
+}
+
+let lastScanRefresh = 0;
+function onScan(scan) {
+  if (scan.job === 'scan') {
+    if (Date.now() - lastScanRefresh > 3000) {
+      lastScanRefresh = Date.now();
+      refreshData();
+    }
+    renderJob();
+    talkScanProgress(scan);
+  } else if (scan.last) {
+    state.scanTalked = false;
+    refreshData();
+    renderJob();
+    talkScanResult(scan.last);
+  }
+}
+
+function talkScanProgress(scan) {
+  const percent = scan.total ? Math.round((scan.done / scan.total) * 100) : 0;
+  if (scan.done === 0 && !state.scanTalked) {
+    state.scanTalked = true;
+    state.lastPercent = 0;
+    state.saidHalf = false;
+    talk('scan_start', null, { sub: '扫描时这个标签页别关哦', toast: true });
+  } else if (percent - (state.lastPercent || 0) >= 20 && percent < 100) {
+    state.lastPercent = percent - (percent % 20);
+    if (percent >= 50 && !state.saidHalf) {
+      state.saidHalf = true;
+      talk('scan_half', { pct: percent });
+    } else {
+      talk('scan_progress', { pct: percent });
+    }
+  }
+}
+
+function talkScanResult(last) {
+  state.lastPercent = 0;
+  if (last.outcome === 'blocked') {
+    talk('blocked', null, {
+      kind: 'bad',
+      toast: true,
+      sub: '扫到的都已保存，过一小时用「稳妥」速度再试',
+    });
+  } else if (last.outcome !== 'done') {
+    talk('scan_cancel', null, { toast: true });
+  } else if (last.new > 0) {
+    talk('scan_done_new', { new: last.new, n: last.found }, { toast: true });
+  } else if (last.found > 0) {
+    talk('scan_done_found', { n: last.found }, { toast: true });
+  } else {
+    talk('scan_done_none', null, { toast: true });
+  }
+}
+
+// ----- 小窗 -----
+
+function openMini() {
+  state.miniOpen = true;
+  const mini = $('.mini');
+  mini.hidden = false;
+  renderMini();
+  positionFloating();
+  $('.bubble').hidden = true;
+  springFrom(mini, dockCenter());
+}
+
+function closeMini(instant) {
+  if (!state.miniOpen) return;
+  state.miniOpen = false;
+  const mini = $('.mini');
+  if (instant || reducedMotion()) {
+    mini.hidden = true;
+    return;
+  }
+  shrinkTo(mini, dockCenter()).then(() => {
+    if (!state.miniOpen) mini.hidden = true;
+  });
+}
+
+const topCards = count =>
+  state.cards
+    .filter(card => card.status !== 'excluded')
+    .sort(recommendedOrder)
+    .slice(0, count);
+
+function miniGreeting(cards) {
+  if (Scan.running()) return '我在努力扫描中，这个标签页先别关哦～';
+  if (cards.some(card => card.status === 'trusted')) return '有已核实的同款票！先看这几张～';
+  if (cards.length) return '这几档最值得看，记得点开核实哦～';
+  return `还没有票的数据 ${KAOMOJI[0]} 点下面开始扫描吧！`;
+}
+
+function miniCardHtml(card) {
+  return `<button class="mcard" data-card="${esc(cardId(card))}">
+    <div class="thumb">${cardCoverArt(card)}</div>
+    <div class="mt"><span class="r">${esc(cityName(card.o))} → ${esc(cityName(card.d))}</span>
+      <span class="p"><b>${fmtInt(card.miles)}</b> 里程 + ${money(card.cash)}</span>
+      <span>${badge(card.status)} <span class="small muted">${card.days} 天有位</span></span></div></button>`;
+}
+
+function renderMini() {
+  const cards = topCards(5);
+  const about = aboutText();
+  const modeLabel = prefs.mode === 'semi' ? '半自动' : '全自动';
+  const scanButton = Scan.running()
+    ? '<button class="btn" data-act="stop">停止扫描</button>'
+    : '<button class="btn primary" data-act="quickScan">开始扫描</button>';
+  $('.mini').innerHTML = `<div class="mini-h">${mascotHead(30, '')}<b>${esc(persona().name)}</b>
+      <span class="small muted">${modeLabel} · ${combo().pax}人 ${CABINS[combo().cabin].label}</span>
+      <button class="x" data-act="closeMini" aria-label="关闭">×</button></div>
+    <div class="mini-b">
+      <div class="say">${mascotHead(26, cards.length ? 'happy' : '')}<div class="txt">${miniGreeting(cards)}</div></div>
+      ${progressHtml()}
+      ${cards.map(miniCardHtml).join('')}
+      ${about ? `<div class="credit">${esc(about)}</div>` : ''}
+    </div>
+    <div class="mini-f">${scanButton}
+      <button class="btn" data-act="openSetup">设置</button>
+      <button class="btn" data-act="openFull">展开完整面板</button></div>`;
+}
+
+function progressHtml() {
+  const scan = Scan.state;
+  if (scan.job !== 'scan') {
+    const last = scan.last || Store.get('lastScan', null);
+    if (!last) return '';
+    const fresh = last.newTiers ? `，新放出 ${last.newTiers} 档` : '';
+    const blocked = last.outcome === 'blocked' ? '（被 aa.com 拦了一下）' : '';
+    return `<div class="prog">上次扫描 ${ago(last.at)}：${fmtInt(last.found)} 个有位日期${fresh}${blocked}</div>`;
+  }
+  const percent = scan.total ? Math.round((scan.done / scan.total) * 100) : 0;
+  const fresh = scan.new ? `（新 ${scan.new}）` : '';
+  const eta = scan.eta != null && scan.done ? ` · 还要约 ${duration(scan.eta)}` : '';
+  return `<div class="prog busy">扫描中 <b class="num">${fmtInt(scan.done)}/${fmtInt(scan.total)}</b> · 找到 ${fmtInt(scan.found)} 天${fresh}${eta}
+    <div class="bar"><i style="width:${percent}%"></i></div><span class="muted">扫描只在这个标签页开着时进行</span></div>`;
+}
+
+// ----- 完整面板 -----
+
+function fullHeaderHtml() {
+  return `<header class="top">
+    <div class="brand">${mascotHead(34, 'happy')}<div><b>里程票雷达</b><span class="small">AAdvantage 兑换空位</span></div></div>
+    <nav class="tabs"><button data-view="feed">发现</button><button data-view="fav">收藏<span class="n fav-n"></span></button><button data-view="matrix">总览</button></nav>
+    <span class="spacer"></span>
+    <button class="btn small mobile-only" data-act="toggleSetup">扫描设置</button>
+    <div class="seg mode"><button data-mode="auto">全自动</button><button data-mode="semi">半自动</button></div>
+    <select class="combo" aria-label="显示哪种结果"></select>
+    <button class="x" data-act="closeFull" aria-label="关闭">×</button></header>`;
+}
+
+function segHtml(option, choices) {
+  return `<div class="seg" data-opt="${option}">${choices.map(([value, label]) => `<button data-v="${value}">${label}</button>`).join('')}</div>`;
+}
+
+function optionsHtml() {
+  const months = Array.from(
+    { length: 12 },
+    (_, i) => `<option value="${i + 1}">未来 ${i + 1} 个月</option>`,
+  ).join('');
+  return `<section class="opts">
+    <div class="opt"><span class="opt-l">方向</span>${segHtml('dir', [
+      ['out', '去程'],
+      ['back', '回程'],
+      ['both', '往返都查'],
+    ])}</div>
+    <div class="opt"><span class="opt-l">舱位</span>${segHtml('cabins', [
+      ['J', '商务/头等'],
+      ['Y', '经济'],
+    ])}</div>
+    <div class="opt"><span class="opt-l">人数</span><div class="stepper"><button data-act="pax-">−</button><output class="pax"></output><button data-act="pax+">＋</button></div><span class="hint">座位不够的日期不会出现</span></div>
+    <div class="opt"><span class="opt-l">范围</span><select class="months">${months}</select></div>
+    <div class="opt"><span class="opt-l">速度</span>${segHtml('speed', [
+      ['normal', '标准'],
+      ['gentle', '稳妥'],
+    ])}</div>
+  </section>`;
+}
+
+function setupHtml(open) {
+  const about = aboutText();
+  return `<aside class="setup ${open ? 'open' : ''}">
+    <div class="setup-h">扫描设置<button class="x" data-act="toggleSetup">×</button></div>
+    <div class="setup-s">
+      <section><div class="sec-h"><h2>从哪里出发</h2><label class="preset">预设 <select class="presets"></select></label></div><div class="picker" data-side="A"></div></section>
+      <section><div class="sec-h"><h2>想去哪里</h2></div><div class="picker" data-side="B"></div></section>
+      ${optionsHtml()}
+    </div>
+    <div class="run"><div class="estimate"></div><div class="jobbtn"></div><div class="jobprog"></div>
+      ${about ? `<div class="credit">${esc(about)}</div>` : ''}
+      <details class="debug"><summary>调试信息</summary><pre class="debug-info"></pre></details></div>
+  </aside>`;
+}
+
+function openFull(withSetup) {
+  const miniRect = state.miniOpen ? $('.mini').getBoundingClientRect() : null;
+  closeMini(true);
+  state.fullOpen = true;
+  stopObservingCards();
+  const full = $('.full');
+  full.hidden = false;
+  full.innerHTML =
+    fullHeaderHtml() +
+    `<div class="body">${setupHtml(withSetup)}<section class="main"><div class="view"></div></section></div>`;
+  state.setupOpen = !!withSetup;
+  $('.presets').innerHTML =
+    '<option value="">选择…</option>' +
+    DATA.presets.map((p, i) => `<option value="${i}">${esc(p.label)}</option>`).join('');
+  buildPicker('A');
+  buildPicker('B');
+  renderOptions();
+  renderMode();
+  renderCombos();
+  renderJob();
+  updateTabs();
+  if (prefs.view === 'matrix') renderMatrix();
+  else renderFeed(true);
+  renderEstimate();
+  $('.view').addEventListener('scroll', onFeedScroll);
+  $('.debug').addEventListener('toggle', event => {
+    if (event.target.open) $('.debug-info').textContent = Diagnostics.text();
+  });
+  if (miniRect) flip(full, miniRect, 560, 'cubic-bezier(.2,.85,.25,1.06)');
+  else springFrom(full, dockCenter(), 520);
+}
+
+function closeFull() {
+  if (!state.fullOpen) return;
+  state.fullOpen = false;
+  stopObservingCards();
+  const full = $('.full');
+  shrinkTo(full, dockCenter(), 260).then(() => {
+    if (state.fullOpen) return;
+    full.hidden = true;
+    full.innerHTML = '';
+  });
+}
+
+function updateTabs() {
+  $$('.tabs button').forEach(button =>
+    button.classList.toggle('on', button.dataset.view === prefs.view),
+  );
+  const count = state.cards.filter(card => state.favorites.has(favoriteKey(card))).length;
+  const counter = $('.fav-n');
+  if (counter) counter.textContent = count || '';
+}
+
+function renderMode() {
+  $$('.seg.mode button').forEach(button =>
+    button.classList.toggle('on', button.dataset.mode === prefs.mode),
+  );
+}
+
+function renderCombos() {
+  const select = $('.combo');
+  if (!select) return;
+  const current = combo();
+  const combos = DB.combos();
+  if (!combos.some(x => x.pax === current.pax && x.cabin === current.cabin))
+    combos.unshift(current);
+  select.innerHTML = combos
+    .map(x => {
+      const selected = x.pax === current.pax && x.cabin === current.cabin ? 'selected' : '';
+      return `<option value="${x.pax}|${x.cabin}" ${selected}>${x.pax} 人 · ${CABINS[x.cabin].label}</option>`;
+    })
+    .join('');
+}
+
+function renderJob() {
+  if (state.miniOpen) renderMini();
+  renderDock();
+  if (!state.fullOpen) return;
+  $('.jobbtn').innerHTML = Scan.running()
+    ? '<button class="btn" data-act="stop" style="width:100%;justify-content:center">停止扫描</button>'
+    : '<button class="btn primary" data-act="scan" style="width:100%">开始扫描</button>';
+  $('.jobprog').innerHTML = progressHtml();
+}
+
+// ----- 机场选择 -----
+
+const pickerOf = side => $(`.picker[data-side="${side}"]`);
+
+function buildPicker(side) {
+  const picker = pickerOf(side);
+  const quickOpen = prefs.quickOpen && prefs.quickOpen[side] ? 'open' : '';
+  picker.innerHTML = `<div class="picked-h"><span class="cnt"></span><button class="link" data-act="clear" data-side="${side}">清空</button></div>
+    <div class="picked"></div>
+    <div class="search"><input type="text" autocomplete="off" spellcheck="false" placeholder="搜城市、机场或三字码" data-side="${side}">
+      <div class="suggest" hidden></div></div>
+    <details class="quick" ${quickOpen}><summary>常用城市</summary><div class="quick-b"></div></details>`;
+  $('.quick', picker).addEventListener('toggle', event => {
+    prefs.quickOpen = prefs.quickOpen || {};
+    prefs.quickOpen[side] = event.target.open;
+    savePrefs();
+  });
+  renderPicked(side);
+}
+
+function pickedChipHtml(code, side) {
+  return `<span class="pchip">${esc(cityName(code))}<small>${code}</small><button data-rm="${code}" data-side="${side}">×</button></span>`;
+}
+
+function quickGroupHtml(group, side, selected) {
+  const codes = Object.keys(group.codes);
+  const allSelected = codes.every(code => selected.has(code));
+  const chips = codes
+    .map(
+      code =>
+        `<button class="chip ${selected.has(code) ? 'on' : ''}" data-code="${code}" data-side="${side}">${esc(cityName(code))}<small>${code}</small></button>`,
+    )
+    .join('');
+  return `<div class="grp-h"><span>${esc(group.label)}</span><button class="link" data-grp="${group.key}" data-side="${side}">${allSelected ? '取消全选' : '全选'}</button></div>
+    <div class="chips">${chips}</div>`;
+}
+
+function renderPicked(side) {
+  const picker = pickerOf(side);
+  if (!picker) return;
+  const codes = prefs.sel[side];
+  const selected = new Set(codes);
+  $('.cnt', picker).textContent = codes.length ? `已选 ${codes.length} 个` : '';
+  $('.picked', picker).innerHTML = codes.length
+    ? codes.map(code => pickedChipHtml(code, side)).join('')
+    : '<span class="none">还没选，在下面搜一下吧～</span>';
+  $('.quick-b', picker).innerHTML = DATA.groups
+    .map(group => quickGroupHtml(group, side, selected))
+    .join('');
+}
+
+function setSelection(side, codes) {
+  prefs.sel[side] = Array.from(new Set(codes));
+  savePrefs();
+  renderPicked(side);
+  renderEstimate();
+  if (prefs.view === 'matrix' && state.fullOpen) renderMatrix();
+}
+
+function suggestionHtml(item, index, side, selected) {
+  const active = index === state.suggestionAt[side] ? ' on' : '';
+  if (item.kind === 'all') {
+    return `<div class="sug all${active}" data-i="${index}" data-side="${side}">＋ 全部添加（${item.codes.length} 个）</div>`;
+  }
+  if (item.kind === 'raw') {
+    return `<div class="sug${active}" data-i="${index}" data-side="${side}"><b>${item.code}</b><span class="sub">字典里没有，按三字码添加</span></div>`;
+  }
+  const entry = item.entry;
+  const detail = [entry.a && entry.a !== entry.n ? entry.a : '', entry.co]
+    .filter(Boolean)
+    .join(' · ');
+  const added = selected.has(item.code) ? ' added' : '';
+  return `<div class="sug${active}${added}" data-i="${index}" data-side="${side}"><b>${esc(entry.n || item.code)}</b><span class="code">${item.code}</span><span class="sub">${esc(detail)}</span></div>`;
+}
+
+function renderSuggestions(side) {
+  const picker = pickerOf(side);
+  const list = $('.suggest', picker);
+  const query = $('input', picker).value.trim();
+  if (!query) {
+    list.hidden = true;
+    state.suggestions[side] = [];
+    return;
+  }
+  const matches = searchAirports(query);
+  const items = matches
+    .slice(0, 8)
+    .map(match => ({ kind: 'one', code: match.code, entry: match.entry }));
+  if (matches.length > 1)
+    items.push({ kind: 'all', codes: matches.slice(0, 30).map(match => match.code) });
+  if (!matches.length && /^[a-z]{3}$/i.test(query))
+    items.push({ kind: 'raw', code: query.toUpperCase() });
+  state.suggestions[side] = items;
+  state.suggestionAt[side] = Math.min(state.suggestionAt[side], Math.max(0, items.length - 1));
+  const selected = new Set(prefs.sel[side]);
+  list.innerHTML = items.length
+    ? items.map((item, i) => suggestionHtml(item, i, side, selected)).join('')
+    : `<div class="sug">没找到「${esc(query)}」${KAOMOJI[1]}</div>`;
+  list.hidden = false;
+}
+
+function closeSuggestions(side, clearInput) {
+  const picker = pickerOf(side);
+  if (!picker) return;
+  if (clearInput) $('input', picker).value = '';
+  $('.suggest', picker).hidden = true;
+  state.suggestions[side] = [];
+  state.suggestionAt[side] = 0;
+}
+
+function pickSuggestion(side, index) {
+  const item = state.suggestions[side][index];
+  if (!item) return;
+  if (item.kind === 'all') {
+    setSelection(side, prefs.sel[side].concat(item.codes));
+    toast(`添加了 ${item.codes.length} 个机场`);
+  } else {
+    setSelection(side, prefs.sel[side].concat(item.code));
+    toast(`已添加 ${cityName(item.code)} ${item.code}`, 1500);
+  }
+  closeSuggestions(side, true);
+}
+
+function renderOptions() {
+  const sel = prefs.sel;
+  $$('[data-opt] button').forEach(button => {
+    const option = button.parentElement.dataset.opt;
+    const on =
+      option === 'cabins'
+        ? sel.cabins.includes(button.dataset.v)
+        : sel[option] === button.dataset.v;
+    button.classList.toggle('on', on);
+  });
+  $('.pax').textContent = sel.pax;
+  $('.months').value = sel.months;
+}
+
+function renderEstimate() {
+  const el = $('.estimate');
+  if (!el) return;
+  const { requests, seconds } = estimate(prefs.sel);
+  const tooMany =
+    requests > 3000
+      ? '<br><span style="color:var(--bad)">有点多哦，少选几个城市或缩短范围吧</span>'
+      : '';
+  el.innerHTML = `约 <b class="num">${fmtInt(requests)}</b> 次查询 · 预计 ${duration(seconds)}${tooMany}`;
+}
+
+function startScan(params) {
+  prefs.combo = { pax: +params.pax, cabin: params.cabins[0] };
+  savePrefs();
+  refreshData();
+  renderCombos();
+  toast('出发啦！扫描时这个标签页别关哦', 3500);
+  Scan.start(params).catch(error => toast(error.message, 3500, 'worry'));
+}
+
+// ----- 卡片瀑布流 -----
+
+const recommendedOrder = (a, b) =>
+  RANK[a.status] - RANK[b.status] ||
+  (b.new > 0) - (a.new > 0) ||
+  b.days - a.days ||
+  a.cash - b.cash;
+
+const SORTS = {
+  rec: recommendedOrder,
+  cash: (a, b) => a.cash - b.cash || a.miles - b.miles,
+  days: (a, b) => b.days - a.days || a.cash - b.cash,
+  soon: (a, b) => a.first.localeCompare(b.first) || a.cash - b.cash,
+};
+
+function filterCards() {
+  let cards = state.cards.slice();
+  if (prefs.view === 'fav') cards = cards.filter(card => state.favorites.has(favoriteKey(card)));
+  if (state.routeFilter) {
+    cards = cards.filter(card => card.o === state.routeFilter.o && card.d === state.routeFilter.d);
+  }
+  const base = cards;
+  if (!state.showExcluded && prefs.view !== 'fav')
+    cards = cards.filter(card => card.status !== 'excluded');
+  if (state.channel === 'good')
+    cards = cards.filter(card => card.status === 'trusted' || card.verified);
+  else if (state.channel === 'new') cards = cards.filter(card => card.new);
+  else if (state.channel !== 'all')
+    cards = cards.filter(card => regionOf(card.o, card.d).key === state.channel);
+  cards.sort(SORTS[prefs.sort] || recommendedOrder);
+  return { cards, base };
+}
+
+// 像帖子标题一样说人话，但不能把没核实的票说成真的
+function postTitle(card) {
+  const from = cityName(card.o);
+  const to = cityName(card.d);
+  const cabin = CABINS[combo().cabin].word;
+  const price = `${Math.round(card.miles / 1000)}k+$${Math.round(card.cash)}`;
+  if (card.status === 'excluded') {
+    return `${from}→${to} 这一档核实没通过（${(card.ref && card.ref.note) || '机场或舱位不对'}），先别冲 ${KAOMOJI[1]}`;
+  }
+  if (card.status === 'trusted') {
+    const carriers =
+      card.ref && card.ref.carriers ? '，' + card.ref.carriers.split('/').join('+') : '';
+    return `已核实同款✓ ${from}飞${to}${cabin} ${price}，这一档有 ${card.days} 天${carriers}`;
+  }
+  if (card.new)
+    return `新放出！${from}→${to}${cabin} ${price}，多了 ${card.new} 天｜日历显示，待核实`;
+  if (card.days <= 3)
+    return `${from}→${to}${cabin} ${price}｜只有 ${card.days} 天，日历显示，待核实`;
+  const peak = card.peak ? `，${card.peak}月最多` : '';
+  return `${from}飞${to}${cabin} ${price}｜日历显示 ${card.days} 天有位${peak}，待核实`;
+}
+
+function cardCoverArt(card) {
+  return coverArt(card.d, airport(card.d).r || regionOf(card.o, card.d).key, hashStr(cardId(card)));
+}
+
+function coverHtml(card, ratio, large) {
+  return `<div class="${large ? 'cover dcover' : 'cover'}" ${ratio ? `style="aspect-ratio:${ratio}"` : ''}>${cardCoverArt(card)}
+    <div class="scrim"></div>
+    <div class="cv-top">${badge(card.status)}<span class="price">${Math.round(card.miles / 1000)}k + ${money(card.cash)}</span></div>
+    <div class="cv-t"><small>从 ${esc(cityName(card.o))} 出发</small><b>${esc(cityName(card.d))}</b></div>
+    ${card.new ? '<span class="new">NEW</span>' : ''}</div>`;
+}
+
+function favoriteButton(id, on, withLabel) {
+  const label = withLabel ? (on ? ' 已收藏' : ' 收藏') : '';
+  return `<button class="fav ${on ? 'on' : ''}${withLabel ? ' btn' : ''}" data-fav="${esc(id)}" aria-pressed="${on}"><span class="h">${on ? '♥' : '♡'}</span>${label}</button>`;
+}
+
+function cardHtml(card) {
+  const id = cardId(card);
+  return `<article class="card" data-card="${esc(id)}" tabindex="0">
+    ${coverHtml(card, COVER_RATIOS[hashStr(id) % COVER_RATIOS.length])}
+    <div class="ctitle">${esc(postTitle(card))}</div>
+    <div class="cfoot">${mascotHead(18, '')}<span class="who">${esc(persona().name)} · ${ago(card.scanned)}</span>${favoriteButton(id, state.favorites.has(favoriteKey(card)))}</div></article>`;
+}
+
+function feedGreeting(cards) {
+  if (Scan.running()) return '我在扫描中，新票会自己冒出来～';
+  if (prefs.view === 'fav') return cards.length ? '你收藏的票都在这里～' : '';
+  const trusted = cards.filter(card => card.status === 'trusted').length;
+  const fresh = cards.filter(card => card.new).length;
+  if (trusted) return `有 ${trusted} 档已核实的同款票，先看它们！`;
+  if (fresh) return `新放出 ${fresh} 档，手快有手慢无～`;
+  if (!cards.length) return '';
+  return prefs.mode === 'semi'
+    ? '看中哪张就点开「核实」一下哦～'
+    : '这些都是日历线索，切到半自动就能核实～';
+}
+
+function channelList(base) {
+  const regions = new Map();
+  for (const card of base) {
+    const region = regionOf(card.o, card.d);
+    const entry = regions.get(region.key) || { label: region.label, count: 0 };
+    entry.count++;
+    regions.set(region.key, entry);
+  }
+  return [
+    ['all', prefs.view === 'fav' ? '全部收藏' : '推荐', base.length],
+    ['good', '可信', base.filter(card => card.status === 'trusted' || card.verified).length],
+    ['new', '新出现', base.filter(card => card.new).length],
+  ].concat(
+    Array.from(regions)
+      .sort((a, b) => b[1].count - a[1].count)
+      .map(([key, r]) => [key, r.label, r.count]),
+  );
+}
+
+function feedBarHtml(channels) {
+  const sortOptions = [
+    ['rec', '推荐'],
+    ['cash', '税费最低'],
+    ['days', '有位最多'],
+    ['soon', '最早出发'],
+  ]
+    .map(
+      ([key, label]) =>
+        `<option value="${key}" ${prefs.sort === key ? 'selected' : ''}>${label}</option>`,
+    )
+    .join('');
+  const routeChip = state.routeFilter
+    ? `<span class="filterchip">${esc(cityName(state.routeFilter.o))} → ${esc(cityName(state.routeFilter.d))}<button data-act="clearRoute">×</button></span>`
+    : '';
+  const excludedToggle =
+    prefs.view === 'fav'
+      ? ''
+      : `<label class="small"><input type="checkbox" class="showbad" ${state.showExcluded ? 'checked' : ''}> 显示已排除</label>`;
+  const tabs = channels
+    .map(
+      ([key, label, count]) =>
+        `<button data-ch="${key}" class="${state.channel === key ? 'on' : ''}">${esc(label)}<span class="n">${count}</span></button>`,
+    )
+    .join('');
+  return `<div class="feedbar"><div class="channels">${tabs}</div>
+    <div class="tools">${routeChip}<select class="sort">${sortOptions}</select>${excludedToggle}
+      <button class="btn small" data-act="csv">导出 CSV</button></div></div>`;
+}
+
+function emptyFeedHtml() {
+  const noData = !state.cards.length;
+  const title =
+    prefs.view === 'fav'
+      ? '还没有收藏哦'
+      : noData
+        ? `${persona().name}还没找到票～`
+        : '这里暂时空空的';
+  const hint =
+    prefs.view === 'fav'
+      ? '看到中意的卡片，点 ♡ 就会收进来'
+      : noData
+        ? '先在「扫描设置」里选好航线，点「开始扫描」吧'
+        : '换个频道看看？';
+  return `<div class="empty" style="flex:1">${mascotBody(110, noData ? '' : 'worry')}<b>${title}</b>${hint}<span>${KAOMOJI[noData ? 0 : 1]}</span></div>`;
+}
+
+function renderFeed(reset) {
+  if (!state.fullOpen || prefs.view === 'matrix') return;
+  const view = $('.view');
+  const { cards, base } = filterCards();
+  state.filtered = cards;
+  const channels = channelList(base);
+  if (!channels.some(channel => channel[0] === state.channel)) state.channel = 'all';
+  if (reset || !$('.feed', view)) {
+    const greeting = feedGreeting(cards);
+    view.innerHTML =
+      feedBarHtml(channels) +
+      (greeting
+        ? `<div class="saybar">${mascotHead(28, 'happy')}<span class="txt">${esc(greeting)}</span></div>`
+        : '') +
+      '<div class="feed"></div><div class="more"></div>';
+  }
+  const grid = $('.feed', view);
+  if (!cards.length && Scan.running() && prefs.view !== 'fav') {
+    grid.innerHTML = skeletonColumns(isPhone() ? 2 : 4);
+    $('.more', view).textContent = `${persona().name}扫描中，新票马上冒出来～`;
+    return;
+  }
+  if (!cards.length) {
+    grid.innerHTML = emptyFeedHtml();
+    $('.more', view).textContent = '';
+    return;
+  }
+  const columnWidth = isPhone() ? 160 : 236;
+  const gap = isPhone() ? 8 : 16;
+  const columns = Math.max(2, Math.floor((grid.clientWidth + gap) / (columnWidth + gap)));
+  if (reset || columns !== state.columns || !$('.col', grid)) {
+    const keep = reset ? 0 : state.shown;
+    state.columns = columns;
+    state.shown = 0;
+    grid.innerHTML = '<div class="col"></div>'.repeat(columns);
+    state.stagger = reset ? 0 : -1;
+    appendCards(Math.max(keep, 24));
+    if (reset && !reducedMotion() && grid.animate) {
+      grid.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220, easing: 'ease-out' });
+    }
+  }
+}
+
+function skeletonColumns(count) {
+  const skeleton = ratio =>
+    `<div class="skel-card"><div class="skel" style="aspect-ratio:${ratio}"></div><div class="skel line"></div><div class="skel line short"></div></div>`;
+  return Array.from(
+    { length: count },
+    (_, i) =>
+      `<div class="col">${skeleton(COVER_RATIOS[i % 5])}${skeleton(COVER_RATIOS[(i + 2) % 5])}</div>`,
+  ).join('');
+}
+
+// 只让屏幕上的封面动起来，省电
+function observeCards(elements) {
+  if (!('IntersectionObserver' in window)) {
+    elements.forEach(el => el.classList.add('in-view'));
+    return;
+  }
+  if (!state.observer) {
+    state.observer = new IntersectionObserver(
+      entries =>
+        entries.forEach(entry => entry.target.classList.toggle('in-view', entry.isIntersecting)),
+      { root: $('.view'), rootMargin: '120px' },
+    );
+  }
+  elements.forEach(el => state.observer.observe(el));
+}
+
+function stopObservingCards() {
+  if (!state.observer) return;
+  state.observer.disconnect();
+  state.observer = null;
+}
+
+// 瀑布流：每张卡片放进当前最矮的一列
+function appendCards(count) {
+  const columns = $$('.feed .col');
+  if (!columns.length) return;
+  const batch = state.filtered.slice(state.shown, state.shown + count);
+  const added = [];
+  for (const card of batch) {
+    const column = columns.reduce((a, b) => (a.offsetHeight <= b.offsetHeight ? a : b));
+    column.insertAdjacentHTML('beforeend', cardHtml(card));
+    const el = column.lastElementChild;
+    added.push(el);
+    if (state.stagger >= 0 && state.stagger < 16)
+      el.style.animationDelay = state.stagger++ * 38 + 'ms';
+  }
+  observeCards(added);
+  state.shown += batch.length;
+  const remaining = state.filtered.length - state.shown;
+  $('.more').textContent =
+    remaining > 0 ? '往下滑还有更多～' : state.filtered.length > 8 ? `到底啦 ${KAOMOJI[2]}` : '';
+}
+
+function onFeedScroll() {
+  const view = $('.view');
+  const nearBottom = view.scrollTop + view.clientHeight > view.scrollHeight - 800;
+  if (prefs.view !== 'matrix' && state.shown < state.filtered.length && nearBottom) appendCards(18);
+}
+
+function toggleFavorite(id, button) {
+  const card = state.cards.find(x => cardId(x) === id);
+  if (!card) return;
+  const key = favoriteKey(card);
+  if (state.favorites.has(key)) {
+    state.favorites.delete(key);
+    talk('unfav', null, { toast: true });
+  } else {
+    state.favorites.add(key);
+    talk('fav', null, { toast: true });
+    if (button) heartBurst(button);
+  }
+  Store.set('fav', Array.from(state.favorites));
+  const on = state.favorites.has(key);
+  $$(`[data-fav="${CSS.escape(id)}"]`).forEach(el => {
+    el.classList.toggle('on', on);
+    el.querySelector('.h').textContent = on ? '♥' : '♡';
+    if (el.classList.contains('btn')) el.lastChild.textContent = on ? ' 已收藏' : ' 收藏';
+  });
+  updateTabs();
+  if (prefs.view === 'fav' && !on) renderFeed(true);
+}
+
+function exportCsv() {
+  const rows = [
+    ['状态', '出发', '到达', '日期', '里程', '税费USD', '航班', '经停', '核实时间', '日历查询时间'],
+  ];
+  for (const route of state.routes.values()) {
+    for (const day of route.dates) {
+      const check = day.check || {};
+      rows.push([
+        STATUS[day.status].label,
+        route.o,
+        route.d,
+        day.date,
+        day.miles,
+        day.cash,
+        check.flights || '',
+        check.path || '',
+        check.checked_at || '',
+        day.scanned,
+      ]);
+    }
+  }
+  const quote = value =>
+    /[",\n]/.test(String(value)) ? `"${String(value).replace(/"/g, '""')}"` : value;
+  // 开头的 BOM 让 Excel 按 UTF-8 打开
+  const csv = '﻿' + rows.map(row => row.map(quote).join(',')).join('\n');
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  link.download = `里程票-${combo().pax}人-${CABINS[combo().cabin].label.replace('/', '')}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  setTimeout(() => {
+    URL.revokeObjectURL(link.href);
+    link.remove();
+  }, 1000);
+}
+
+// ----- 总览矩阵 -----
+
+function matrixCellHtml(route, o, d, maxDays) {
+  if (!route) return '<td class="cell none"></td>';
+  if (!route.days) return '<td class="cell zero">0</td>';
+  const level = 1 + Math.min(6, Math.floor((route.days / maxDays) * 7));
+  const cash = route.minCash != null ? '$' + Math.round(route.minCash) : '';
+  const usable = route.usable ? `<i class="mk">✓${route.usable}</i>` : '';
+  const twin = route.twin
+    ? '<i style="position:absolute;top:1px;left:4px;font-size:10px;font-style:normal">⚠</i>'
+    : '';
+  return `<td class="cell q${level}" data-o="${o}" data-d="${d}" title="${esc(cityName(o))}→${esc(cityName(d))} ${route.days} 天"><b>${route.days}</b><span>${cash}</span>${usable}${twin}</td>`;
+}
+
+function renderMatrix() {
+  if (!state.fullOpen) return;
+  const view = $('.view');
+  if (!state.routes.size) {
+    view.innerHTML = `<div class="empty">${mascotBody(110)}<b>还没有数据</b>先选好航线开始扫描吧</div>`;
+    return;
+  }
+  const origins = prefs.sel.A;
+  const destinations = prefs.sel.B;
+  const directions = prefs.sel.dir === 'both' ? ['out', 'back'] : [prefs.sel.dir];
+  const routeOf = (a, b, direction) =>
+    state.routes.get(direction === 'out' ? a + '|' + b : b + '|' + a);
+  const shown = [];
+  for (const a of origins)
+    for (const b of destinations)
+      for (const direction of directions) {
+        const route = routeOf(a, b, direction);
+        if (route) shown.push(route);
+      }
+  const maxDays = Math.max(1, ...shown.map(route => route.days));
+  const total = field => shown.reduce((sum, route) => sum + (route[field] || 0), 0);
+  const tile = (value, label) =>
+    `<div class="tile"><div class="v num">${fmtInt(value)}</div><div class="k">${label}</div></div>`;
+  let html = `<div class="tiles">${tile(total('days'), '日历上有位的天数')}${tile(total('usable'), '已核实 / 同档可信')}${tile(total('leads'), '线索，待核实')}</div>`;
+  if (shown.some(route => route.twin)) {
+    html +=
+      '<p class="note">标 ⚠ 的航线和同城另一个机场的日历一模一样，实际出发机场要核实一天才知道。</p>';
+  }
+  html += `<div class="mwrap"><table class="matrix"><thead><tr><th rowspan="${directions.length > 1 ? 2 : 1}">出发地</th>`;
+  html +=
+    destinations
+      .map(b => `<th colspan="${directions.length}">${esc(cityName(b))}<small>${b}</small></th>`)
+      .join('') + '</tr>';
+  if (directions.length > 1) {
+    html +=
+      '<tr>' +
+      destinations
+        .map(() => '<th class="small muted">去 →</th><th class="small muted">← 回</th>')
+        .join('') +
+      '</tr>';
+  }
+  html += '</thead><tbody>';
+  for (const a of origins) {
+    html += `<tr><th>${esc(cityName(a))}<small>${a}</small></th>`;
+    for (const b of destinations) {
+      for (const direction of directions) {
+        const [o, d] = direction === 'out' ? [a, b] : [b, a];
+        html += matrixCellHtml(routeOf(a, b, direction), o, d, maxDays);
+      }
+    }
+    html += '</tr>';
+  }
+  const ramp = [1, 2, 3, 4, 5, 6, 7].map(i => `<i style="background:var(--q${i})"></i>`).join('');
+  html += `</tbody></table></div><div class="legend"><span>数字 = 有位天数，越深越多<span class="ramp">${ramp}</span></span><span>点格子看这条航线的卡片</span></div>`;
+  view.innerHTML = html;
+}
+
+// ----- 详情抽屉 -----
+
+// 封面从卡片位置飞到抽屉顶部（共享元素过渡）
+function openCardDrawer(id, source) {
+  const card = state.cards.find(x => cardId(x) === id);
+  if (!card) return;
+  state.card = { o: card.o, d: card.d, id: card.id };
+  state.day = null;
+  const cover = source && source.querySelector ? source.querySelector('.cover, .thumb') : null;
+  state.drawerSource = cover;
+  const from = cover ? cover.getBoundingClientRect() : null;
+  renderDrawer(!!from);
+  if (!from || reducedMotion()) return;
+  const drawer = $('.drawer');
+  drawer.animate([{ backgroundColor: 'rgba(0,0,0,0)', boxShadow: 'none' }, {}], {
+    duration: 260,
+    easing: 'ease-out',
+  });
+  $('.scrim-all').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260 });
+  $('.drawer .dbody').animate(
+    [
+      { opacity: 0, transform: 'translateY(18px)' },
+      { opacity: 1, transform: 'none' },
+    ],
+    {
+      duration: 360,
+      delay: 140,
+      easing: 'cubic-bezier(.2,.8,.3,1)',
+      fill: 'backwards',
+    },
+  );
+  flip($('.drawer .dcover'), from, 520);
+}
+
+function closeDrawer() {
+  if (!state.card) return;
+  const drawer = $('.drawer');
+  const cover = $('.drawer .dcover');
+  const source = state.drawerSource;
+  state.card = null;
+  state.day = null;
+  state.drawerSource = null;
+  const finish = () => {
+    if (state.card) return;
+    drawer.hidden = true;
+    $('.scrim-all').hidden = true;
+    drawer.classList.remove('flip');
+    // 动画用了 fill: forwards，不取消的话下次打开会停在结束帧
+    cancelAnimations(drawer, true);
+    cancelAnimations($('.scrim-all'), false);
+  };
+  if (reducedMotion() || !cover || !drawer.animate) return finish();
+  const target = source && source.isConnected ? source.getBoundingClientRect() : null;
+  $('.scrim-all').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 240 });
+  $('.drawer .dbody').animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(12px)' }], {
+    duration: 160,
+    fill: 'forwards',
+  });
+  if (target && target.width) {
+    const rect = cover.getBoundingClientRect();
+    cover.style.transformOrigin = '0 0';
+    drawer.animate(
+      [
+        { backgroundColor: getComputedStyle(drawer).backgroundColor },
+        { backgroundColor: 'rgba(0,0,0,0)', boxShadow: 'none' },
+      ],
+      { duration: 280, fill: 'forwards' },
+    );
+    const end = `translate(${target.left - rect.left}px, ${target.top - rect.top}px) scale(${target.width / rect.width}, ${target.height / rect.height})`;
+    cover
+      .animate([{ transform: 'none' }, { transform: end }], {
+        duration: 300,
+        easing: 'cubic-bezier(.4,0,.2,1)',
+        fill: 'forwards',
+      })
+      .finished.then(finish, finish);
+  } else {
+    drawer
+      .animate(
+        [
+          { opacity: 1, transform: 'none' },
+          { opacity: 0, transform: 'translateX(30px)' },
+        ],
+        { duration: 220, fill: 'forwards' },
+      )
+      .finished.then(finish, finish);
+  }
+}
+
+function tierFactsHtml(reference) {
+  if (!reference) return '';
+  const when = `${esc(reference.date.slice(5))} 的核实，${ago(reference.checked_at)}`;
+  if (!reference.flights) {
+    return `<p class="note">${esc(reference.note || '')}（${esc(reference.date.slice(5))} 核实，${ago(reference.checked_at)}）</p>`;
+  }
+  return `<dl class="facts"><dt>航班</dt><dd>${esc(reference.flights)}</dd><dt>经停</dt><dd>${esc(reference.path || '')}</dd>
+    ${reference.aircraft ? `<dt>机型</dt><dd>${esc(reference.aircraft)}</dd>` : ''}${reference.minutes ? `<dt>全程</dt><dd>${(reference.minutes / 60).toFixed(1)} 小时</dd>` : ''}
+    <dt>依据</dt><dd>${when}</dd></dl>`;
+}
+
+function otherTiersHtml(tiers) {
+  if (!tiers.length) return '';
+  const rows = tiers
+    .map(
+      t =>
+        `<button class="tierrow" data-tier="${esc(t.id)}">${badge(t.status)}<b>${fmtInt(t.miles)} + ${money(t.cash)}</b><span class="sub">${t.days} 天 · ${t.first.slice(5)} ~ ${t.last.slice(5)}</span></button>`,
+    )
+    .join('');
+  return `<h3>同航线其他档位 <span class="sub">${tiers.length} 档</span></h3>${rows}`;
+}
+
+function drawerBodyHtml(route, tier, card) {
+  const semi = prefs.mode === 'semi';
+  const verifyButton =
+    semi && tier.rep
+      ? `<button class="btn primary" data-verify="${tier.rep}">${tier.status === 'lead' ? '核实这一档' : '再核实一天'}（${tier.rep.slice(5)}）</button>`
+      : '';
+  const about = aboutText();
+  const meta = `${route.o} → ${route.d} · ${combo().pax} 人 · ${CABINS[combo().cabin].label} · 这一档 ${tier.days} 天（${tier.first.slice(5)} ~ ${tier.last.slice(5)}）· 日历${ago(route.scanned)}查询`;
+  return `<div class="dbody">
+    <div class="dprice"><b>${fmtInt(tier.miles)}</b><span class="muted">里程/人</span><span style="color:var(--ink-2)">+ ${money(tier.cash)}</span></div>
+    <div class="dmeta">${meta}</div>
+    <p>${TIER_EXPLAIN[tier.status]}</p>
+    ${route.twin ? `<p class="note">⚠ 这条航线的日历和 ${esc(cityName(route.twin))} ${route.twin} 每天都一样，实际机场以核实为准。</p>` : ''}
+    ${tierFactsHtml(tier.ref)}
+    <div class="actions">${verifyButton}${favoriteButton(cardId(card), state.favorites.has(favoriteKey(card)), true)}</div>
+    ${semi ? '' : '<p class="small muted">切到「半自动」就可以核实这一档。</p>'}
+    <h3>这一档的日期 <span class="sub">点日期看详情</span></h3>
+    <div class="months">${monthsHtml(route.dates, tier.id)}</div>
+    <div class="daybox" hidden></div>
+    ${otherTiersHtml(route.tiers.filter(t => t.id !== tier.id))}
+    <div class="fine">${mascotHead(26, '')}<span>合作航司的票偶尔会在付款或出票时才被拒，这一点下单前没法检测。核实能确认的是：搜索页上真的有这一天、机场对、舱位对、座位够。${about ? '<br>' + esc(about) : ''}</span></div>
+  </div>`;
+}
+
+function renderDrawer(fromCard) {
+  const selected = state.card;
+  const route = selected && state.routes.get(selected.o + '|' + selected.d);
+  const tier = route && route.tiers.find(t => t.id === selected.id);
+  const drawer = $('.drawer');
+  if (!tier) {
+    state.card = null;
+    drawer.hidden = true;
+    $('.scrim-all').hidden = true;
+    return;
+  }
+  const card = Object.assign({}, tier, { o: route.o, d: route.d });
+  cancelAnimations(drawer, true);
+  drawer.innerHTML = `<button class="x" data-act="closeDrawer">×</button>${coverHtml(card, null, true)}${drawerBodyHtml(route, tier, card)}`;
+  drawer.classList.toggle('flip', !!fromCard);
+  drawer.hidden = false;
+  $('.scrim-all').hidden = false;
+  if (state.day) showDay(state.day);
+}
+
+function monthHtml(year, month, byDate, tierKey) {
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  const leadingBlanks = (new Date(year, month, 1).getDay() + 6) % 7; // 周一开头
+  let cells = '<span></span>'.repeat(leadingBlanks);
+  let count = 0;
+  for (let day = 1; day <= lastDay; day++) {
+    const iso = `${year}-${pad(month + 1)}-${pad(day)}`;
+    const entry = byDate.get(iso);
+    if (!entry) {
+      cells += `<span class="day">${day}</span>`;
+    } else if (entry.tier !== tierKey) {
+      cells += `<span class="day other">${day}</span>`;
+    } else {
+      count++;
+      const classes = `day has st-${entry.status}${entry.new ? ' new' : ''}${state.day === iso ? ' sel' : ''}`;
+      cells += `<button class="${classes}" data-day="${iso}">${day}</button>`;
+    }
+  }
+  const title = (year === new Date().getFullYear() ? '' : year + '年') + (month + 1) + '月';
+  const weekdays = '一二三四五六日'
+    .split('')
+    .map(w => `<span>${w}</span>`)
+    .join('');
+  return `<div class="month"><div class="month-t">${title}<span>${count} 天</span></div><div class="wk">${weekdays}</div><div class="days">${cells}</div></div>`;
+}
+
+function monthsHtml(dates, tierKey) {
+  const mine = dates.filter(x => x.tier === tierKey);
+  if (!mine.length) return '';
+  const byDate = new Map(dates.map(x => [x.date, x]));
+  const first = parseDate(mine[0].date);
+  const last = parseDate(mine[mine.length - 1].date);
+  let html = '';
+  for (
+    let year = first.getFullYear(), month = first.getMonth();
+    year < last.getFullYear() || (year === last.getFullYear() && month <= last.getMonth());
+
+  ) {
+    html += monthHtml(year, month, byDate, tierKey);
+    if (month === 11) {
+      year++;
+      month = 0;
+    } else {
+      month++;
+    }
+  }
+  return html;
+}
+
+function showDay(date) {
+  const route = state.routes.get(state.card.o + '|' + state.card.d);
+  const day = route && route.dates.find(x => x.date === date);
+  if (!day) return;
+  state.day = date;
+  $$('.drawer .day.sel').forEach(el => el.classList.remove('sel'));
+  const button = $(`.drawer .day[data-day="${date}"]`);
+  if (button) button.classList.add('sel');
+  const check = day.check;
+  let facts = `<dt>里程</dt><dd>${fmtInt(day.miles)} / 人</dd><dt>税费</dt><dd>${money(day.cash)} / 人</dd><dt>日历查询</dt><dd>${ago(day.scanned)}</dd>`;
+  if (check && check.flights) {
+    facts += `<dt>航班</dt><dd>${esc(check.flights)}</dd><dt>经停</dt><dd>${esc(check.path || '')}</dd>${check.seats ? `<dt>剩余座位</dt><dd>${check.seats}</dd>` : ''}<dt>核实</dt><dd>${ago(check.checked_at)}</dd>`;
+  } else if (check) {
+    facts += `<dt>上次核实</dt><dd>${esc(check.note || check.status)}，${ago(check.checked_at)}</dd>`;
+  }
+  const note = check && check.note && check.flights ? ' ' + esc(check.note) : '';
+  const verifyButton =
+    prefs.mode === 'semi'
+      ? `<button class="btn primary small" data-verify="${day.date}">核实这一天</button>`
+      : '';
+  const box = $('.daybox');
+  box.innerHTML = `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${fmtDate(day.date)}</b>${badge(day.status)}</div>
+    <p>${DATE_EXPLAIN[day.status]}${note}</p><dl class="facts">${facts}</dl>
+    <div class="actions">${verifyButton}<button class="btn small" data-open="${day.date}">在 aa.com 打开</button></div>`;
+  box.hidden = false;
+}
+
+// 预览版会替换这两个动作
+let openExternal = url => window.open(url, '_blank');
+
+let verify = date => {
+  const current = combo();
+  const item = {
+    o: state.card.o,
+    d: state.card.d,
+    cabin: current.cabin,
+    pax: current.pax,
+    date,
+    atMs: Date.now(),
+  };
+  Store.set('pending', item);
+  const url = bookingUrl(item.o, item.d, date, item.cabin, item.pax);
+  if (typeof GM_openInTab === 'function') GM_openInTab(url, { active: true, insert: true });
+  else if (typeof GM !== 'undefined' && GM && typeof GM.openInTab === 'function')
+    GM.openInTab(url, false);
+  else window.open(url, '_blank');
+  toast('在新标签页打开了搜索页，出现人机验证就勾一下，我会自己读结果～', 4500);
+};
+
+// ----- 事件 -----
+
+function onOptionClick(button) {
+  const option = button.parentElement.dataset.opt;
+  const value = button.dataset.v;
+  if (option === 'cabins') {
+    const cabins = new Set(prefs.sel.cabins);
+    if (cabins.has(value)) cabins.delete(value);
+    else cabins.add(value);
+    if (!cabins.size) return toast('至少选一个舱位哦', 2000, 'worry');
+    prefs.sel.cabins = ['J', 'Y'].filter(c => cabins.has(c));
+  } else {
+    prefs.sel[option] = value;
+  }
+  savePrefs();
+  renderOptions();
+  renderEstimate();
+  if (prefs.view === 'matrix') renderMatrix();
+}
+
+function toggleCodes(side, codes) {
+  const current = prefs.sel[side];
+  const allSelected = codes.every(code => current.includes(code));
+  setSelection(
+    side,
+    allSelected ? current.filter(code => !codes.includes(code)) : current.concat(codes),
+  );
+}
+
+const ACTIONS = {
+  mute() {
+    sessionStorage.setItem('ar-mute', '1');
+    $('.bubble').hidden = true;
+    renderDock();
+  },
+  closeMini: () => closeMini(),
+  openFull: () => openFull(false),
+  openSetup: () => openFull(true),
+  closeFull: () => closeFull(),
+  toggleSetup() {
+    state.setupOpen = !state.setupOpen;
+    $('.setup').classList.toggle('open', state.setupOpen);
+  },
+  quickScan: () => startScan(prefs.sel),
+  scan() {
+    if (isPhone()) {
+      state.setupOpen = false;
+      $('.setup').classList.remove('open');
+    }
+    startScan(prefs.sel);
+  },
+  stop: () => Scan.cancel(),
+  closeDrawer: () => closeDrawer(),
+  clearRoute() {
+    state.routeFilter = null;
+    renderFeed(true);
+  },
+  clear: button => setSelection(button.dataset.side, []),
+  'pax-'() {
+    prefs.sel.pax = Math.max(1, prefs.sel.pax - 1);
+    savePrefs();
+    renderOptions();
+    renderEstimate();
+  },
+  'pax+'() {
+    prefs.sel.pax = Math.min(9, prefs.sel.pax + 1);
+    savePrefs();
+    renderOptions();
+    renderEstimate();
+  },
+  csv: () => exportCsv(),
+};
+
+function onRootClick(event) {
+  wake();
+  const suggestion = event.target.closest('.sug[data-i]');
+  if (suggestion) return pickSuggestion(suggestion.dataset.side, +suggestion.dataset.i);
+  if (event.target.classList.contains('scrim-all')) return closeDrawer();
+  const el = event.target.closest('button, [data-card], td[data-o]');
+  if (!el) return;
+  const data = el.dataset;
+  if (data.fav) {
+    event.stopPropagation();
+    return toggleFavorite(data.fav, el);
+  }
+  if (data.card) return openCardDrawer(data.card, el);
+  if (el.matches('td[data-o]')) {
+    state.routeFilter = { o: data.o, d: data.d };
+    state.channel = 'all';
+    prefs.view = 'feed';
+    savePrefs();
+    updateTabs();
+    return renderFeed(true);
+  }
+  if (data.view) {
+    prefs.view = data.view;
+    savePrefs();
+    updateTabs();
+    return prefs.view === 'matrix' ? renderMatrix() : renderFeed(true);
+  }
+  if (data.mode) {
+    prefs.mode = data.mode;
+    savePrefs();
+    renderMode();
+    if (state.card) renderDrawer();
+    return renderFeed(true);
+  }
+  if (data.ch) {
+    state.channel = data.ch;
+    return renderFeed(true);
+  }
+  if (el.parentElement && el.parentElement.dataset.opt) return onOptionClick(el);
+  if (data.rm)
+    return setSelection(
+      data.side,
+      prefs.sel[data.side].filter(code => code !== data.rm),
+    );
+  if (data.code) return toggleCodes(data.side, [data.code]);
+  if (data.grp)
+    return toggleCodes(data.side, Object.keys(DATA.groups.find(g => g.key === data.grp).codes));
+  if (data.tier) {
+    state.card = Object.assign({}, state.card, { id: data.tier });
+    state.day = null;
+    renderDrawer();
+    $('.drawer').scrollTop = 0;
+    return;
+  }
+  if (data.day) return showDay(data.day);
+  if (data.verify) return verify(data.verify);
+  if (data.open) {
+    const current = combo();
+    return openExternal(
+      bookingUrl(state.card.o, state.card.d, data.open, current.cabin, current.pax),
+    );
+  }
+  if (ACTIONS[data.act]) ACTIONS[data.act](el);
+}
+
+function onRootChange(event) {
+  const el = event.target;
+  if (el.classList.contains('combo')) {
+    const [pax, cabin] = el.value.split('|');
+    prefs.combo = { pax: +pax, cabin };
+    savePrefs();
+    closeDrawer();
+    refreshData();
+  } else if (el.classList.contains('sort')) {
+    prefs.sort = el.value;
+    savePrefs();
+    renderFeed(true);
+  } else if (el.classList.contains('showbad')) {
+    state.showExcluded = el.checked;
+    renderFeed(true);
+  } else if (el.classList.contains('months')) {
+    prefs.sel.months = +el.value;
+    savePrefs();
+    renderEstimate();
+  } else if (el.classList.contains('presets')) {
+    const preset = DATA.presets[el.value];
+    if (preset) {
+      setSelection('A', preset.A);
+      setSelection('B', preset.B);
+    }
+    el.value = '';
+  }
+}
+
+function onSearchKey(event, input) {
+  const side = input.dataset.side;
+  const count = state.suggestions[side].length;
+  if (event.key === 'ArrowDown' && count) {
+    state.suggestionAt[side] = (state.suggestionAt[side] + 1) % count;
+    renderSuggestions(side);
+    event.preventDefault();
+  } else if (event.key === 'ArrowUp' && count) {
+    state.suggestionAt[side] = (state.suggestionAt[side] - 1 + count) % count;
+    renderSuggestions(side);
+    event.preventDefault();
+  } else if (event.key === 'Enter' && count) {
+    pickSuggestion(side, state.suggestionAt[side]);
+    event.preventDefault();
+  } else if (event.key === 'Escape') {
+    closeSuggestions(side, true);
+  }
+  event.stopPropagation(); // 别让 aa.com 自己的快捷键吃掉输入
+}
+
+function onRootKey(event) {
+  const el = event.target;
+  if (el.matches && el.matches('.search input')) return onSearchKey(event, el);
+  if (event.key === 'Escape') {
+    if (state.card) closeDrawer();
+    else if (state.fullOpen) closeFull();
+    else if (state.miniOpen) closeMini();
+  }
+  if (event.key === 'Enter' && el.dataset && el.dataset.card) openCardDrawer(el.dataset.card, el);
+}
+
+// 卡片三层视差：远景动得少、近景动得多（只对鼠标，触屏没有悬停）
+function bindCardTilt(root) {
+  let tilted = null;
+  let frame = 0;
+  let lastEvent = null;
+  const reset = el => {
+    if (!el) return;
+    el.style.removeProperty('--tx');
+    el.style.removeProperty('--ty');
+  };
+  root.addEventListener(
+    'pointermove',
+    event => {
+      if (reducedMotion() || event.pointerType === 'touch') return;
+      const card = event.target.closest ? event.target.closest('.card') : null;
+      if (tilted !== card) {
+        reset(tilted);
+        tilted = card;
+      }
+      if (!card) return;
+      lastEvent = event;
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        if (!tilted || !lastEvent) return;
+        const rect = tilted.getBoundingClientRect();
+        tilted.style.setProperty(
+          '--tx',
+          (((lastEvent.clientX - rect.left) / rect.width) * 2 - 1).toFixed(3),
+        );
+        tilted.style.setProperty(
+          '--ty',
+          (((lastEvent.clientY - rect.top) / rect.height) * 2 - 1).toFixed(3),
+        );
+      });
+    },
+    { passive: true },
+  );
+  root.addEventListener('pointerout', event => {
+    if (tilted && !(event.relatedTarget && tilted.contains(event.relatedTarget))) {
+      reset(tilted);
+      tilted = null;
+    }
+  });
+}
+
+function bindRoot() {
+  const root = state.root;
+  root.addEventListener('click', onRootClick);
+  root.addEventListener('change', onRootChange);
+  root.addEventListener('input', event => {
+    const side = event.target.dataset && event.target.dataset.side;
+    if (!side || !event.target.matches('.search input')) return;
+    state.suggestionAt[side] = 0;
+    renderSuggestions(side);
+  });
+  root.addEventListener('keydown', onRootKey);
+  root.addEventListener('mousedown', event => {
+    for (const side of ['A', 'B']) {
+      if (!event.target.closest(`.picker[data-side="${side}"] .search`)) closeSuggestions(side);
+    }
+  });
+  bindCardTilt(root);
+}
+
+// ===== 启动：结果页核实、诊断信息、启动守卫 =====
+
+const IS_RESULTS_PAGE = /^\/booking\/(search|choose-flights)/.test(location.pathname);
+
+// ----- 诊断 -----
+
+const Diagnostics = {
+  notes: [],
+
+  note(message) {
+    this.notes.push(`${new Date().toTimeString().slice(0, 8)} ${message}`);
+    if (this.notes.length > 20) this.notes.shift();
+  },
+
+  buildLabel() {
+    return `v${DATA.build.version} ${DATA.build.label}`;
+  },
+
+  browser() {
+    const ua = navigator.userAgent;
+    const system = (ua.match(
+      /Android [\d.]+|iPhone OS [\d_]+|iPad; CPU OS [\d_]+|Windows NT [\d.]+|Mac OS X [\d_.]+/,
+    ) || [''])[0];
+    const engine =
+      (ua.match(/(Firefox|FxiOS|EdgA?|Edg|CriOS|Chrome|Version)\/[\d.]+/g) || []).pop() || '';
+    const app = (ua.match(
+      /\b(Via|XBrowser|MQQBrowser|UCBrowser|Quark|MiuiBrowser|SamsungBrowser)\b/,
+    ) || [''])[0];
+    return [system.replace(/_/g, '.'), engine, app].filter(Boolean).join(' ');
+  },
+
+  manager() {
+    const info =
+      typeof GM_info !== 'undefined'
+        ? GM_info
+        : typeof GM !== 'undefined' && GM && GM.info
+          ? GM.info
+          : null;
+    return info ? `${info.scriptHandler || '未知'} ${info.version || ''}`.trim() : '没有检测到';
+  },
+
+  text() {
+    const renderer = state && state.renderer ? state.renderer.kind : '未挂载';
+    return [
+      `版本：${this.buildLabel()}`,
+      `浏览器：${this.browser()}`,
+      `脚本管理器：${this.manager()}`,
+      `存储：${{ gm: 'GM_* 同步', gm4: 'GM.* 异步', local: '页面 localStorage' }[Store.mode]}`,
+      `看板娘：${renderer}`,
+      `页面：${location.pathname}`,
+      this.notes.length ? '最近的问题：\n' + this.notes.join('\n') : '最近的问题：无',
+    ].join('\n');
+  },
+};
+
+// 启动失败时在页面角落留一个能截图的角标
+function showStartupFailure(error) {
+  if (!document.body) {
+    whenBodyReady(() => showStartupFailure(error));
+    return;
+  }
+  if (document.getElementById('award-radar-failure')) return;
+  const badge = document.createElement('div');
+  badge.id = 'award-radar-failure';
+  badge.setAttribute(
+    'style',
+    'position:fixed;left:8px;bottom:8px;z-index:2147483647;max-width:90vw;padding:8px 12px;' +
+      'background:#fff;color:#a3263a;border:2px solid #d43d4b;border-radius:10px;' +
+      'font:13px/1.5 system-ui,sans-serif;box-shadow:0 4px 18px rgba(0,0,0,.2);' +
+      'user-select:text;-webkit-user-select:text;word-break:break-all',
+  );
+  const message = (error && error.message) || String(error);
+  let label = '';
+  try {
+    label = Diagnostics.buildLabel();
+  } catch (ignored) {
+    label = '版本未知';
+  }
+  badge.textContent = `里程票雷达启动失败：${message}（${label}，${Diagnostics.browser()}）`;
+  document.body.appendChild(badge);
+}
+
+// ----- 结果页核实 -----
+// 只被动读取页面自己收到的数据；人机验证永远由人来勾，这里不碰它。
+
+function pendingItem() {
+  const url = new URL(location.href);
+  const params = url.searchParams;
+  if (
+    url.pathname.startsWith('/booking/search') &&
+    params.get('searchType') === 'Award' &&
+    params.get('from')
+  ) {
+    return {
+      o: params.get('from'),
+      d: params.get('to'),
+      date: params.get('depart'),
+      pax: +(params.get('pax') || 1),
+      cabin: (params.get('cabin') || '').toUpperCase().startsWith('COACH') ? 'Y' : 'J',
+    };
+  }
+  // 结果页会跳转到不带参数的地址，这时用打开前记下的待核实项
+  const pending = Store.get('pending', null);
+  return pending && Date.now() - (pending.atMs || 0) < 20 * 60e3 ? pending : null;
+}
+
+const Capture = {
+  item: null,
+  done: false,
+  seen: new Set(),
+
+  onText(text) {
+    if (this.done || !text || text.length < 50) return;
+    const fingerprint = text.length + ':' + text.slice(0, 64);
+    if (this.seen.has(fingerprint)) return;
+    this.seen.add(fingerprint);
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (error) {
+      return;
+    }
+    const slices = findSlices(data);
+    if (slices)
+      this.finish(judge(slices, this.item.o, this.item.d, this.item.cabin, this.item.pax));
+  },
+
+  finish(result, extra) {
+    if (this.done) return;
+    this.done = true;
+    DB.saveCheck(this.item, result);
+    Store.remove('pending');
+    whenBodyReady(() =>
+      sayVerdict(this.item, result, extra || '已记到雷达里，回原来的标签页就能看到'),
+    );
+  },
+};
+
+// 页面里的 fetch/XHR 收到 JSON 时转发一份给我们
+const PAGE_HOOK = `(() => {
+  if (window.__arHook) return;
+  window.__arHook = 1;
+  const post = text => window.postMessage({ __ar: 1, text }, location.origin);
+  const isJson = type => (type || '').includes('json');
+  const fetchOriginal = window.fetch;
+  window.fetch = function () {
+    const request = fetchOriginal.apply(this, arguments);
+    request.then(r => { if (isJson(r.headers.get('content-type'))) r.clone().text().then(post, () => {}); }, () => {});
+    return request;
+  };
+  const sendOriginal = XMLHttpRequest.prototype.send;
+  XMLHttpRequest.prototype.send = function () {
+    this.addEventListener('load', function () {
+      if (!isJson(this.getResponseHeader('content-type'))) return;
+      post(this.responseType === 'json' ? JSON.stringify(this.response) : this.responseText);
+    });
+    return sendOriginal.apply(this, arguments);
+  };
+})();`;
+
+function hookPage() {
+  window.addEventListener('message', event => {
+    if (event.source === window && event.data && event.data.__ar) Capture.onText(event.data.text);
+  });
+  // 用 <script> 注入到页面环境：脚本管理器把我们放在隔离环境时（iOS Userscripts 默认如此）也能拦到
+  injectPageScript(PAGE_HOOK, () => {
+    if (PAGE.__arHook || PAGE === window) return;
+    // 页面不允许内联脚本时，退而通过 unsafeWindow 直接挂钩
+    try {
+      hookThroughUnsafeWindow();
+    } catch (error) {
+      Diagnostics.note('结果页挂钩失败：' + error.message);
+    }
+  });
+}
+
+function hookThroughUnsafeWindow() {
+  PAGE.__arHook = 1;
+  const forward = text => Capture.onText(text);
+  const isJson = type => (type || '').includes('json');
+  const fetchOriginal = PAGE.fetch;
+  PAGE.fetch = function () {
+    const request = fetchOriginal.apply(this, arguments);
+    request.then(
+      r => {
+        if (isJson(r.headers.get('content-type')))
+          r.clone()
+            .text()
+            .then(forward, () => {});
+      },
+      () => {},
+    );
+    return request;
+  };
+  const sendOriginal = PAGE.XMLHttpRequest.prototype.send;
+  PAGE.XMLHttpRequest.prototype.send = function () {
+    this.addEventListener('load', function () {
+      if (!isJson(this.getResponseHeader('content-type'))) return;
+      forward(this.responseType === 'json' ? JSON.stringify(this.response) : this.responseText);
+    });
+    return sendOriginal.apply(this, arguments);
+  };
+}
+
+function humanCheckShown() {
+  const text = (document.body && document.body.innerText) || '';
+  return (
+    /challenge/i.test(document.title || '') || /confirm you.?re a human|not a robot/i.test(text)
+  );
+}
+
+function watchResultsPage() {
+  const startedAt = Date.now();
+  let askedForHuman = false;
+  let readySince = 0;
+  const tick = () => {
+    if (Capture.done) return;
+    if (humanCheckShown()) {
+      readySince = 0;
+      if (!askedForHuman) {
+        askedForHuman = true;
+        talk('human_check', null, {
+          sticky: true,
+          sub: '勾选 “I&#39;m not a robot” 再点 Continue，我会自己读结果',
+        });
+      }
+    } else {
+      if (askedForHuman) {
+        askedForHuman = false;
+        $('.bubble').hidden = true;
+        setMood('', 1);
+      }
+      const serverState = document.getElementById('ng-state');
+      if (serverState && serverState.textContent) Capture.onText(serverState.textContent);
+      const text = (document.body && document.body.innerText) || '';
+      if (/no flights|couldn.?t find any|no results|not available on this date/i.test(text)) {
+        Capture.finish({ status: 'none', note: '页面显示这一天没有可兑换航班' });
+      }
+      if (document.readyState === 'complete') readySince = readySince || Date.now();
+      if (readySince && Date.now() - readySince > 60000 && Date.now() - startedAt > 75000) {
+        Capture.finish(
+          { status: 'failed', note: '页面没有加载出航班数据' },
+          '可能 aa.com 改版了，页面上看到什么以页面为准',
+        );
+        return;
+      }
+    }
+    setTimeout(tick, 2000);
+  };
+  tick();
+}
+
+// ----- 启动 -----
+
+function whenBodyReady(callback) {
+  if (document.body) callback();
+  else document.addEventListener('DOMContentLoaded', callback);
+}
+
+function isMounted() {
+  const host = document.getElementById('award-radar-host');
+  return !!(host && host.shadowRoot && host.shadowRoot.querySelector('.dock'));
+}
+
+function boot() {
+  DB.purgePast();
+  initState();
+  PageBridge.install();
+  if (IS_RESULTS_PAGE) {
+    Capture.item = pendingItem();
+    if (Capture.item) hookPage();
+  }
+  whenBodyReady(() => {
+    try {
+      mount();
+      if (Capture.item && !Capture.done) {
+        const { o, d, date } = Capture.item;
+        say(`我在帮你读 ${esc(cityName(o))}→${esc(cityName(d))} ${esc(date.slice(5))} 的结果……`, {
+          ms: 5000,
+        });
+        watchResultsPage();
+      }
+    } catch (error) {
+      Diagnostics.note(error.message);
+      showStartupFailure(error);
+    }
+  });
+}
+
+async function start() {
+  try {
+    await Store.init();
+    if (typeof installPreview === 'function') installPreview();
+    boot();
+  } catch (error) {
+    showStartupFailure(error);
+    return;
+  }
+  whenBodyReady(() =>
+    setTimeout(() => {
+      if (!isMounted()) showStartupFailure(new Error('5 秒内没能显示看板娘'));
+    }, 5000),
+  );
+}
+
+// ===== 内嵌数据（build.py 生成，勿手改） =====
+
+const DATA = {
+  // 构建信息
+  build: {"version":"1.0.0","target":"lite","label":"手机版"},
+  // 人设
+  persona: {"key":"miku","name":"Miku","about":"看板娘：Miku（初音未来，占位）"},
+  // 机场字典：三字码 → [显示名, 城市, 中文机场名, 英文城市, 国家, 地区, 同城键, 大机场]
+  airports: {"AAA":["阿納環礁","阿納環礁","","Anaa","法属波利尼西亚","OC"],"AAC":["阿里什","阿里什","","El Arish","埃及","AF","",1],"AAE":["安纳巴","安纳巴","","Annaba","阿尔及利亚","AF","",1],"AAL":["奥尔堡","奥尔堡","","Aalborg","丹麦","EU","",1],"AAN":["艾因","艾因","","Al Ain","阿联酋","ME","",1],"AAP":["沙马林达","沙马林达","","Samarinda","印度尼西亚","SEA"],"AAR":["奥胡斯","奥胡斯","","Aarhus","丹麦","EU","",1],"AAT":["阿勒泰","阿勒泰","","Altay","中国","CN"],"AAX":["阿拉沙","阿拉沙","","Araxá","巴西","LA"],"AAY":["蓋達 (也門城市)","蓋達 (也門城市)","","Al Ghaydah","也门","ME"],"ABA":["阿巴坎","阿巴坎","","Abakan","俄罗斯","EU","",1],"ABB":["阿萨巴","阿萨巴","","Asaba","尼日利亚","AF","",1],"ABD":["阿巴丹","阿巴丹","","Abadan","伊朗","ME","",1],"ABE":["艾伦敦","艾伦敦","","Allentown/Bethlehem","美国","NA"],"ABI":["阿比林","阿比林","","Abilene","美国","NA"],"ABJ":["阿比让","阿比让","","Abidjan","科特迪瓦","AF","",1],"ABK":["克卜里德哈爾","克卜里德哈爾","","Kebri Dahar","埃塞俄比亚","AF"],"ABL":["安布勒","安布勒","","Ambler","美国","NA"],"ABQ":["阿尔伯克基","阿尔伯克基","","Albuquerque","美国","NA","",1],"ABR":["阿伯丁","阿伯丁","","Aberdeen","美国","NA"],"ABS":["阿布辛贝","阿布辛贝","","Abu Simbel","埃及","AF"],"ABT":["巴哈","巴哈","","Al-Baha","沙特阿拉伯","ME"],"ABV":["阿布贾","阿布贾","","Abuja","尼日利亚","AF","",1],"ABX":["奥尔伯里","奥尔伯里","","East Albury","澳大利亚","OC"],"ABY":["奥尔巴尼","奥尔巴尼","","Albany","美国","NA"],"ABZ":["阿伯丁","阿伯丁","","Aberdeen","英国","EU","",1],"ACA":["阿卡普尔科","阿卡普尔科","","Acapulco","墨西哥","NA","",1],"ACC":["阿克拉","阿克拉","","Accra","加纳","AF","",1],"ACE":["圣巴托洛梅","圣巴托洛梅","","San Bartolomé","西班牙","AF","",1],"ACH":["圣加仑","圣加仑","","St. Gallen","瑞士","EU"],"ACI":["奥尔德尼岛","奥尔德尼岛","","Saint Anne","根西","EU"],"ACK":["南塔克特紀念","","","Nantucket","美国","NA"],"ACT":["韦科","韦科","","Waco","美国","NA"],"ACV":["洪堡县","洪堡县","","Arcata/Eureka","美国","NA"],"ACX":["道袍","道袍","","Xingyi","中国","CN"],"ACY":["大西洋城","大西洋城","","Atlantic City","美国","NA"],"ADB":["伊兹密尔","伊兹密尔","","Gaziemir","土耳其","EU","",1],"ADD":["亚的斯亚贝巴","亚的斯亚贝巴","","Addis Ababa","埃塞俄比亚","AF","",1],"ADE":["亚丁","亚丁","","Aden","也门","ME","",1],"ADF":["阿德亚曼","阿德亚曼","","Adıyaman","土耳其","EU"],"ADJ":["安曼马尔卡","安曼","","Amman","约旦","ME","Q3805",1],"ADK":["埃達克島","埃達克島","","Adak","美国","NA"],"ADL":["阿德莱德","阿德莱德","","Adelaide","澳大利亚","OC","",1],"ADQ":["科迪亚克","科迪亚克","","Kodiak","美国","NA"],"ADU":["阿尔达比勒","阿尔达比勒","","Ardabil","伊朗","ME"],"ADZ":["圣安德烈斯","圣安德烈斯","","San Andrés","哥伦比亚","NA","",1],"AEB":["百色","百色","","Baise (Tianyang)","中国","CN"],"AEP":["布宜诺斯艾利斯乔治·纽伯里","布宜诺斯艾利斯","","Buenos Aires","阿根廷","LA","Q1486",1],"AER":["索契","索契","","Sochi","俄罗斯","EU","Q39420",1],"AES":["奥勒松","奥勒松","","Ålesund","挪威","EU","",1],"AEU":["Abu Musa","","","Abu Musa","伊朗","ME"],"AEX":["亚历山德里亚","亚历山德里亚","","Alexandria","美国","NA"],"AEY":["阿克雷里","阿克雷里","","Akureyri","冰岛","EU","",1],"AFA":["聖拉斐爾縣","聖拉斐爾縣","","San Rafael","阿根廷","LA"],"AFL":["上弗洛雷斯塔","上弗洛雷斯塔","","Alta Floresta","巴西","LA"],"AFZ":["萨卜泽瓦尔","萨卜泽瓦尔","","Sabzevar","伊朗","ME"],"AGA":["阿加迪尔","阿加迪尔","","Agadir (Temsia)","摩洛哥","AF","",1],"AGH":["恩厄尔霍尔姆","恩厄尔霍尔姆","","Ängelholm","瑞典","EU"],"AGP":["马拉加","马拉加","","Málaga","西班牙","EU","",1],"AGR":["阿格拉","","","Agra","印度","SA"],"AGS":["奥古斯塔","奥古斯塔","","Augusta","美国","NA"],"AGT":["埃斯特城","埃斯特城","","Ciudad del Este","巴拉圭","LA","",1],"AGU":["阿瓜斯卡连特斯","阿瓜斯卡连特斯","","Aguascalientes","墨西哥","NA","",1],"AGX":["拉克沙群岛","拉克沙群岛","","Agatti","印度","SA"],"AHA":["Ambikapur","","","Ambikapur","印度","SA"],"AHB":["艾卜哈","艾卜哈","","Abha","沙特阿拉伯","ME","",1],"AHE":["阿亥环礁","阿亥环礁","","Ahe Atoll","法属波利尼西亚","OC"],"AHO":["阿尔盖罗","阿尔盖罗","","Alghero","意大利","EU"],"AHU":["胡塞马","胡塞马","","Al Hoceima","摩洛哥","AF"],"AIA":["阿莱恩斯","阿莱恩斯","","Alliance","美国","NA"],"AIN":["温赖特","温赖特","","Wainwright","美国","NA"],"AJA":["阿雅克肖","阿雅克肖","","Ajaccio","法国","EU"],"AJF":["塞卡凱","塞卡凱","","Al-Jawf","沙特阿拉伯","ME","",1],"AJI":["阿勒","阿勒","","Ağrı","土耳其","EU"],"AJL":["艾藻尔","艾藻尔","","Aizawl (Lengpui)","印度","SA"],"AJN":["欧阿尼","欧阿尼","","Ouani","科摩罗","AF"],"AJR":["阿尔维斯尧尔市镇","阿尔维斯尧尔市镇","","Arvidsjaur","瑞典","EU"],"AJU":["阿拉卡茹","阿拉卡茹","","Aracaju","巴西","LA"],"AKF":["库夫拉","库夫拉","","Kufra","利比亚","AF"],"AKJ":["旭川","旭川","","Higashikagura","日本","EA"],"AKL":["奥克兰","奥克兰","","Auckland","新西兰","OC","",1],"AKN":["鮭魚王","鮭魚王","","King Salmon","美国","NA"],"AKP":["阿纳克图沃克帕斯","阿纳克图沃克帕斯","","Anaktuvuk Pass","美国","NA"],"AKR":["阿庫雷","阿庫雷","","Akure","尼日利亚","AF"],"AKU":["阿克苏","阿克苏","","Aksu (Onsu)","中国","CN"],"AKX":["阿克托别","阿克托别","","Aktobe","哈萨克斯坦","CA","",1],"AKY":["實兌","","","Sittwe","缅甸","SEA"],"ALA":["阿拉木图","阿拉木图","","Almaty","哈萨克斯坦","CA","",1],"ALB":["奥尔巴尼","奥尔巴尼","","Albany","美国","NA","",1],"ALC":["阿利坎特","阿利坎特","","Alicante","西班牙","EU","",1],"ALF":["阿尔塔镇","阿尔塔镇","","Alta","挪威","EU"],"ALG":["阿尔及尔","阿尔及尔","","Algiers","阿尔及利亚","AF","",1],"ALH":["奥班尼","奥班尼","","Albany","澳大利亚","OC"],"ALO":["滑铁卢","滑铁卢","","Waterloo","美国","NA"],"ALP":["阿勒颇","阿勒颇","","Aleppo","叙利亚","ME","",1],"ALS":["阿拉莫萨","阿拉莫萨","","Alamosa","美国","NA"],"ALW":["瓦拉瓦拉","瓦拉瓦拉","","Walla Walla","美国","NA"],"AMA":["阿马里洛","阿马里洛","","Amarillo","美国","NA"],"AMD":["艾哈迈达巴德","艾哈迈达巴德","","Ahmedabad","印度","SA","",1],"AMH":["阿尔巴门奇","阿尔巴门奇","","Arba Minch","埃塞俄比亚","AF"],"AMM":["安曼","安曼","","Amman","约旦","ME","Q3805",1],"AMQ":["安汶","安汶","","Ambon","印度尼西亚","SEA","",1],"AMS":["阿姆斯特丹","阿姆斯特丹","","Amsterdam","荷兰王国","EU","",1],"AMV":["阿姆傑爾馬","阿姆傑爾馬","","Amderma","俄罗斯","EU"],"ANC":["泰德·史蒂文斯安克雷奇","安克雷奇","","Anchorage","美国","NA","Q39450",1],"ANF":["安托法加斯塔","安托法加斯塔","","Antofagasta","智利","LA","",1],"ANI":["阿尼亚克","阿尼亚克","","Aniak","美国","NA"],"ANR":["安特卫普","安特卫普","","Antwerp","比利时","EU"],"ANU":["圣约翰","圣约翰","","Osbourn","安提瓜和巴布达","NA","",1],"ANV":["安維克","","","Anvik","美国","NA"],"ANX":["安德內斯","安德內斯","","Andenes","挪威","EU"],"AOE":["埃斯基谢希尔","埃斯基谢希尔","","Eskişehir","土耳其","EU","",1],"AOG":["鞍山","鞍山","","Anshan","中国","CN"],"AOI":["安科納","安科納","","Falconara Marittima (AN)","意大利","EU"],"AOJ":["青森","青森","","Aomori","日本","EA","",1],"AOK":["卡尔帕索斯","卡尔帕索斯","","Karpathos Island","希腊","EU"],"AOO":["阿尔图纳","阿尔图纳","","Altoona","美国","NA"],"AOR":["亚罗士打","亚罗士打","","Alor Satar","马来西亚","SEA"],"APL":["楠普拉","楠普拉","","Nampula","莫桑比克","AF","",1],"APN":["阿尔皮纳","阿尔皮纳","","Alpena","美国","NA"],"APO":["邮政信箱","邮政信箱","","Carepa","哥伦比亚","LA"],"APW":["阿皮亚","阿皮亚","","Apia","萨摩亚","OC","",1],"AQA":["阿拉拉夸拉","阿拉拉夸拉","","Araraquara","巴西","LA"],"AQG":["安庆","安庆","","Anqing","中国","CN"],"AQI":["盖苏迈","盖苏迈","","Qaisumah","沙特阿拉伯","ME","",1],"AQJ":["亚喀巴","亚喀巴","","Aqaba","约旦","ME","",1],"AQP":["阿雷基帕","阿雷基帕","","Arequipa","秘鲁","LA","",1],"ARC":["北極村","北極村","","Arctic Village","美国","NA"],"ARH":["阿尔汉格尔斯克","阿尔汉格尔斯克","","Archangelsk","俄罗斯","EU"],"ARI":["阿里卡","阿里卡","","Arica","智利","LA"],"ARK":["阿鲁沙","阿鲁沙","","Arusha","坦桑尼亚","AF"],"ARM":["阿米代尔","阿米代尔","","Armidale","澳大利亚","OC"],"ARN":["乌普萨拉","乌普萨拉","","Stockholm","瑞典","EU","",1],"ART":["水镇","水镇","","Watertown","美国","NA"],"ARU":["阿拉萨图巴","阿拉萨图巴","","Araçatuba","巴西","LA"],"ARW":["阿拉德","阿拉德","","Arad","罗马尼亚","EU"],"ASB":["阿什哈巴德","阿什哈巴德","","Ashgabat","土库曼斯坦","CA","",1],"ASD":["安德羅斯鎮","安德羅斯鎮","","Andros Town","巴哈马","NA"],"ASE":["阿斯彭","阿斯彭","","Aspen","美国","NA"],"ASF":["阿斯特拉罕","阿斯特拉罕","","Astrakhan","俄罗斯","EU","",1],"ASI":["乔治敦","乔治敦","","Cat Hill","圣赫勒拿、阿森松和特里斯坦-达库尼亚","AF"],"ASJ":["奄美大岛","奄美大岛","","Amami","日本","EA"],"ASM":["阿斯马拉","阿斯马拉","","Asmara","厄立特里亚","AF"],"ASO":["阿索萨","阿索萨","","Asosa","埃塞俄比亚","AF"],"ASP":["艾丽斯斯普林斯","艾丽斯斯普林斯","","Alice Springs","澳大利亚","OC"],"ASR":["开塞利","开塞利","","Kayseri","土耳其","EU","",1],"ASU":["亚松森","亚松森","","Asunción","巴拉圭","LA","",1],"ASV":["安博塞利","","","Ol Tukai","肯尼亚","AF"],"ASW":["阿斯旺","阿斯旺","","Aswan","埃及","AF","",1],"ATC":["阿瑟鎮","","","Arthur's Town","巴哈马","NA"],"ATH":["雅典","雅典","","Spata-Artemida","希腊","EU","",1],"ATK":["阿特卡苏克","阿特卡苏克","","Atqasuk","美国","NA"],"ATL":["哈茨菲尔德－杰克逊亚特兰大","亚特兰大","","Atlanta","美国","NA","Q23556",1],"ATM":["阿爾塔米拉","阿爾塔米拉","","Altamira","巴西","LA"],"ATQ":["阿姆利则","阿姆利则","","Amritsar","印度","SA","",1],"ATW":["阿普尔顿","阿普尔顿","","Appleton","美国","NA"],"ATY":["沃特敦","沃特敦","","Watertown","美国","NA"],"ATZ":["艾斯尤特","艾斯尤特","","Asyut","埃及","AF","",1],"AUA":["奥腊涅斯塔德","奥腊涅斯塔德","","Oranjestad","阿鲁巴","NA","",1],"AUC":["阿劳卡","阿劳卡","","Arauca","哥伦比亚","LA"],"AUG":["奥古斯塔","奥古斯塔","","Augusta","美国","NA"],"AUH":["阿布扎比","阿布扎比","","Abu Dhabi","阿联酋","ME","",1],"AUQ":["阿图奥纳","阿图奥纳","","Hiva Oa Island","法属波利尼西亚","OC"],"AUR":["欧里亚克","欧里亚克","","Aurillac","法国","EU"],"AUS":["大奥斯汀","大奥斯汀","","Austin","美国","NA","",1],"AUX":["阿拉瓜伊纳","阿拉瓜伊纳","","Araguaína","巴西","LA"],"AVA":["安顺","安顺","","Anshun (Xixiu)","中国","CN"],"AVK":["阿爾拜赫雷","","","Arvaikheer","蒙古国","EA"],"AVL":["阿什维尔","阿什维尔","","Asheville","美国","NA"],"AVN":["阿维尼翁","阿维尼翁","","Avignon","法国","EU"],"AVP":["威尔克斯-巴里","威尔克斯-巴里","","Wilkes-Barre/Scranton","美国","NA"],"AVR":["阿姆劳蒂","阿姆劳蒂","","Amravati","印度","SA"],"AVV":["吉朗","吉朗","","Geelong/Melbourne","澳大利亚","OC","",1],"AWA":["阿瓦萨","阿瓦萨","","Hawassa","埃塞俄比亚","AF","",1],"AWK":["威克島飛行場","","","Wake Island","美国本土外小岛屿","OC"],"AWZ":["阿瓦士","阿瓦士","","Ahvaz","伊朗","ME","",1],"AXA":["瓦利","瓦利","","The Valley","安圭拉","NA"],"AXD":["亚历山德鲁波利斯","亚历山德鲁波利斯","","Alexandroupolis","希腊","EU"],"AXF":["阿拉善左旗","阿拉善左旗","","Bayanhot","中国","CN"],"AXJ":["天草","天草","","Amakusa","日本","EA"],"AXM":["亚美尼亚城","亚美尼亚城","","Armenia","哥伦比亚","LA"],"AXP":["斯普林波因特","","","Spring Point","巴哈马","NA"],"AXR":["阿鲁图阿","阿鲁图阿","","","法属波利尼西亚","OC"],"AXT":["秋田","秋田","","Akita","日本","EA"],"AXU":["阿克苏姆","阿克苏姆","","Axum","埃塞俄比亚","AF"],"AYJ":["阿约提亚","阿约提亚","","Faizabad","印度","SA"],"AYP":["阿亚库乔","阿亚库乔","","Ayacucho","秘鲁","LA"],"AYQ":["乌鲁汝","乌鲁汝","","Yulara","澳大利亚","OC"],"AYT":["安塔利亚","安塔利亚","","Antalya","土耳其","EU","",1],"AZA":["梅萨","梅萨","","Mesa","美国","NA"],"AZD":["亚兹德","亚兹德","","Yazd","伊朗","ME"],"AZN":["安集延","安集延","","Andijan","乌兹别克斯坦","CA"],"AZO":["卡拉马祖","卡拉马祖","","Kalamazoo","美国","NA"],"AZR":["阿德拉尔","阿德拉尔","","Adrar","阿尔及利亚","AF"],"AZS":["圣塔芭芭拉-山美纳","圣塔芭芭拉-山美纳","","Samana","多米尼加","NA"],"BAH":["巴林","里法","","Manama","巴林","ME","",1],"BAL":["巴特曼","巴特曼","","Batman","土耳其","EU"],"BAQ":["巴兰基亚","巴兰基亚","","Barranquilla","哥伦比亚","LA","",1],"BAR":["琼海","琼海","","Qionghai (Basuo)","中国","CN"],"BAV":["包头","包头","","Baotou","中国","CN","",1],"BAX":["巴尔瑙尔","巴尔瑙尔","","Barnaul","俄罗斯","EU","",1],"BAY":["巴亚马雷","巴亚马雷","","Tăuții-Măgherăuș","罗马尼亚","EU"],"BBA":["科伊艾克","科伊艾克","","Balmaceda","智利","LA"],"BBI":["布巴内什瓦尔","布巴内什瓦尔","","Bhubaneswar","印度","SA","",1],"BBK":["卡萨内","卡萨内","","Kasane","博茨瓦纳","AF","",1],"BBM":["马德望","马德望","","Battambang","柬埔寨","SEA"],"BBN":["巴里奥","巴里奥","","Bario","马来西亚","SEA"],"BBO":["柏培拉","柏培拉","","Berbera","索马里","AF"],"BBQ":["科德灵顿","科德灵顿","","Codrington","安提瓜和巴布达","NA"],"BBU":["布加勒斯特火車北站","布加勒斯特火車北站","","Bucharest","罗马尼亚","EU","",1],"BCA":["巴拉科阿","巴拉科阿","","Baracoa","古巴","NA"],"BCD":["巴科洛德","巴科洛德","","Bacolod City","菲律宾","SEA","",1],"BCH":["包考","包考","","Baucau","东帝汶","SEA"],"BCI":["巴卡尔丁","","","Barcaldine","澳大利亚","OC"],"BCM":["巴克乌","巴克乌","","Bacău","罗马尼亚","EU","",1],"BCN":["巴塞罗那","巴塞罗那","","Barcelona","西班牙","EU","",1],"BCO":["金卡","金卡","","Jinka","埃塞俄比亚","AF"],"BCU":["包奇","包奇","","Bauchi","尼日利亚","AF","",1],"BDA":["哈密尔顿","哈密尔顿","","Hamilton","百慕大","NA","",1],"BDB":["班德堡","班德堡","","Bundaberg","澳大利亚","OC"],"BDH":["倫格港","倫格港","","Bandar Lengeh","伊朗","ME"],"BDJ":["马辰","马辰","","Banjarbaru","印度尼西亚","SEA","",1],"BDL":["奥尔巴尼县","奥尔巴尼县","","Hartford","美国","NA","",1],"BDO":["万隆","万隆","","Bandung","印度尼西亚","SEA"],"BDQ":["瓦多达拉","瓦多达拉","","Vadodara","印度","SA","",1],"BDS":["布林迪西","布林迪西","","Brindisi","意大利","EU","",1],"BDT":["戈巴多莱","","","Gbadolite","刚果民主共和国","AF"],"BDU":["莫尔塞尔夫","莫尔塞尔夫","","Målselv","挪威","EU"],"BEB":["本贝丘拉岛","本贝丘拉岛","","Balivanich","英国","EU"],"BED":["汉斯科姆菲尔德","","","Bedford","美国","NA"],"BEF":["布盧菲爾茲","","","Bluefields","尼加拉瓜","NA"],"BEG":["贝尔格莱德","贝尔格莱德","","Belgrade","塞尔维亚","EU","",1],"BEJ":["丹戎勒德布","丹戎勒德布","","Tanjung Redeb - Borneo Island","印度尼西亚","SEA"],"BEK":["巴雷利","","","Bareilly","印度","SA"],"BEL":["贝伦","贝伦","","Belém","巴西","LA","",1],"BEM":["贝尼迈拉勒","贝尼迈拉勒","","Oulad Yaich","摩洛哥","AF","",1],"BEN":["贝尼纳","","","Benina","利比亚","AF","",1],"BER":["柏林","柏林","","Berlin","德国","EU","",1],"BES":["布雷斯特","布雷斯特","","Brest","法国","EU","",1],"BET":["伯特利","伯特利","","Bethel","美国","NA"],"BEU":["貝杜里","","","Bedourie","澳大利亚","OC"],"BEW":["贝拉","贝拉","","Beira","莫桑比克","AF","",1],"BEY":["贝鲁特","贝鲁特","","Beirut","黎巴嫩","ME","",1],"BFD":["布雷德福","布雷德福","","Bradford","美国","NA"],"BFF":["斯科茨布拉夫","斯科茨布拉夫","","Scottsbluff","美国","NA"],"BFI":["西雅图波音飞行场","西雅图","","Seattle","美国","NA","Q5083"],"BFJ":["毕节","毕节","","Bijie","中国","CN"],"BFL":["贝克斯菲尔德","贝克斯菲尔德","","Bakersfield","美国","NA"],"BFN":["布隆方丹","布隆方丹","","Bloemfontein","南非","AF","",1],"BFS":["贝尔法斯特","贝尔法斯特","","Belfast","英国","EU","Q10686",1],"BFV":["武里南","武里南","","Buriram","泰国","SEA"],"BFY":["蚌埠滕湖","","","Bengbu","中国","CN"],"BGA":["布卡拉曼加","布卡拉曼加","","Bucaramanga","哥伦比亚","LA"],"BGC":["布拉干萨","布拉干萨","","Bragança","葡萄牙","EU"],"BGF":["班吉","班吉","","Bangui","中非共和国","AF","",1],"BGG":["宾格尔","宾格尔","","Bingöl","土耳其","EU"],"BGI":["布里奇顿","布里奇顿","","Bridgetown","巴巴多斯","NA","",1],"BGM":["宾厄姆顿","宾厄姆顿","","Binghamton","美国","NA"],"BGO":["卑尔根","卑尔根","","Bergen","挪威","EU","",1],"BGR":["班戈","班戈","","Bangor","美国","NA"],"BGW":["曼苏尔区","曼苏尔区","","Baghdad","伊拉克","ME","",1],"BGY":["贝加莫","贝加莫","","Orio al Serio (BG)","意大利","EU","",1],"BHB":["汉考克县","汉考克县","","Bar Harbor","美国","NA"],"BHD":["乔治·贝斯特贝尔法斯特城市","贝尔法斯特","","Belfast","英国","EU","Q10686"],"BHE":["布伦亨","布伦亨","","Blenheim","新西兰","OC"],"BHH":["比沙堡","比沙堡","","Bisha","沙特阿拉伯","ME"],"BHI":["布兰卡港","布兰卡港","","Bahía Blanca","阿根廷","LA"],"BHJ":["普杰","普杰","","Bhuj","印度","SA"],"BHK":["布哈拉","布哈拉","","Bukhara","乌兹别克斯坦","CA","",1],"BHM":["伯明翰","伯明翰","","Birmingham","美国","NA","",1],"BHO":["博帕尔","博帕尔","","Bhopal","印度","SA","",1],"BHQ":["布罗肯希尔","布罗肯希尔","","Broken Hill","澳大利亚","OC"],"BHS":["巴瑟斯特","巴瑟斯特","","Bathurst","澳大利亚","OC"],"BHU":["巴夫那加尔","巴夫那加尔","","Bhavnagar","印度","SA"],"BHV":["巴哈瓦尔布尔县","巴哈瓦尔布尔县","","Bahawalpur","巴基斯坦","SA"],"BHX":["伯明翰","伯明翰","","Birmingham, West Midlands","英国","EU","",1],"BHY":["北海","北海","","Beihai","中国","CN"],"BIA":["巴斯蒂亚","巴斯蒂亚","","Bastia","法国","EU","",1],"BIH":["毕晓普","毕晓普","","Bishop","美国","NA"],"BIK":["比亞克島","比亞克島","","Biak","印度尼西亚","SEA"],"BIL":["比灵斯","比灵斯","","Billings","美国","NA"],"BIM":["北比米尼岛","北比米尼岛","","South Bimini","巴哈马","NA"],"BIO":["毕尔巴鄂","毕尔巴鄂","","Bilbao","西班牙","EU","",1],"BIQ":["比亚里茨","比亚里茨","","Biarritz","法国","EU"],"BIR":["比拉德讷格尔","比拉德讷格尔","","Biratnagar","尼泊尔","SA"],"BIS":["俾斯麦","俾斯麦","","Bismarck","美国","NA"],"BJA":["贝贾亚","贝贾亚","","Béjaïa","阿尔及利亚","AF","",1],"BJB":["博季努爾德","","","Bojnord","伊朗","ME"],"BJC":["丹佛洛基山脈大都會","丹佛","","Denver","美国","NA","Q16554"],"BJF":["博茨菲尤爾","博茨菲尤爾","","Båtsfjord","挪威","EU"],"BJL":["班珠尔","班珠尔","","Banjul (Yundum)","冈比亚","AF","",1],"BJM":["布琼布拉","布琼布拉","","Bujumbura","布隆迪","AF","",1],"BJR":["巴赫达尔","巴赫达尔","","Bahir Dar","埃塞俄比亚","AF"],"BJV":["博德鲁姆","博德鲁姆","","Bodrum","土耳其","EU","",1],"BJX":["莱昂","莱昂","","Silao","墨西哥","NA","",1],"BJZ":["巴达霍斯","巴达霍斯","","Badajoz","西班牙","EU"],"BKG":["布兰森","布兰森","","Branson","美国","NA"],"BKI":["哥打基纳巴卢","哥打基纳巴卢","","Kota Kinabalu","马来西亚","SEA","",1],"BKK":["曼谷","曼谷","","Bangkok","泰国","SEA","Q806484",1],"BKN":["Balkanabat","","","Balkanabat","土库曼斯坦","CA"],"BKO":["巴马科","巴马科","","Bamako","马里","AF","",1],"BKQ":["布雷蔻","布雷蔻","","Blackall","澳大利亚","OC"],"BKS":["明古鲁","明古鲁","","Bengkulu","印度尼西亚","SEA"],"BKW":["贝克利","贝克利","","Beaver","美国","NA"],"BLA":["巴塞罗那","巴塞罗那","","Barcelona","委内瑞拉","LA","",1],"BLB":["巴拿马太平洋项目","巴拿马太平洋项目","","Panamá City","巴拿马","NA"],"BLD":["博尔德城","博尔德城","","Boulder City","美国","NA"],"BLE":["达拉","","","Borlange","瑞典","EU"],"BLI":["贝灵厄姆","贝灵厄姆","","Bellingham","美国","NA"],"BLJ":["巴特纳","巴特纳","","Batna","阿尔及利亚","AF","",1],"BLL":["比隆","比隆","","Billund","丹麦","EU","",1],"BLQ":["博洛尼亚","博洛尼亚","","Bologna","意大利","EU","",1],"BLR":["班加罗尔","班加罗尔","","Bengaluru","印度","SA","",1],"BLV":["贝尔维尔","贝尔维尔","","Belleville","美国","NA"],"BLZ":["布兰太尔","布兰太尔","","Blantyre","马拉维","AF","",1],"BMA":["斯德哥尔摩布罗马","斯德哥尔摩","","Stockholm","瑞典","EU","Q1754"],"BME":["布鲁姆","布鲁姆","","Broome","澳大利亚","OC","",1],"BMI":["伊利諾州中部","伊利諾州中部","","Bloomington/Normal","美国","NA"],"BMU":["比马","比马","","Bima","印度尼西亚","SEA"],"BMV":["邦美蜀","邦美蜀","","Buon Ma Thuot","越南","SEA"],"BMW":["巴吉穆赫塔尔堡省","巴吉穆赫塔尔堡省","","Bordj Badji Mokhtar","阿尔及利亚","AF"],"BNA":["纳什维尔","纳什维尔","","Nashville","美国","NA","",1],"BND":["阿巴斯港","阿巴斯港","","Bandar Abbas","伊朗","ME","",1],"BNE":["布里斯班","布里斯班","","Brisbane","澳大利亚","OC","",1],"BNI":["贝宁城","贝宁城","","Benin","尼日利亚","AF"],"BNK":["巴利納 (新南威爾士州)","巴利納 (新南威爾士州)","","Ballina","澳大利亚","OC"],"BNN":["布伦讷于松","布伦讷于松","","Brønnøy","挪威","EU"],"BNS":["巴里纳斯","巴里纳斯","","Barinas","委内瑞拉","LA"],"BNX":["巴尼亚卢卡","巴尼亚卢卡","","Mahovljani","波斯尼亚和黑塞哥维那","EU","",1],"BOB":["博拉博拉","博拉博拉","","Motu Mute","法属波利尼西亚","OC"],"BOC":["博卡斯德尔托罗","博卡斯德尔托罗","","Isla Colón","巴拿马","NA"],"BOD":["波尔多","波尔多","","Bordeaux","法国","EU","",1],"BOG":["波哥大","波哥大","","Bogota","哥伦比亚","LA","",1],"BOH":["伯恩茅斯","伯恩茅斯","","Bournemouth","英国","EU"],"BOI":["博伊西","博伊西","","Boise","美国","NA","",1],"BOJ":["布尔加斯市镇","布尔加斯市镇","","Burgas","保加利亚","EU","",1],"BOM":["孟买","孟买","","Mumbai","印度","SA","",1],"BON":["博奈尔","博奈尔","","Kralendijk","荷兰加勒比区","NA","",1],"BOO":["博德","博德","","Bodø","挪威","EU","",1],"BOR":["金三角經濟特區","金三角經濟特區","","Ton Phueng","老挝","SEA"],"BOS":["波士顿","波士顿","","Boston","美国","NA","",1],"BOY":["博博迪乌拉索","博博迪乌拉索","","Bobo Dioulasso","布基纳法索","AF","",1],"BPE":["秦皇岛","秦皇岛","","Qinhuangdao (Changli)","中国","CN"],"BPL":["博乐","博乐","","Bole","中国","CN"],"BPN":["巴厘巴板","巴厘巴板","","Balikpapan","印度尼西亚","SEA","",1],"BPS":["塞古鲁港","塞古鲁港","","Porto Seguro","巴西","LA","",1],"BPT":["博蒙特","博蒙特","","Beaumont/Port Arthur","美国","NA"],"BPX":["昌都","昌都","","Bangda","中国","CN"],"BPY":["贝萨兰皮","贝萨兰皮","","Besalampy","马达加斯加","AF"],"BQK":["不伦瑞克","不伦瑞克","","Brunswick","美国","NA"],"BQL":["Boulia","","","","澳大利亚","OC","AU:"],"BQN":["阿瓜迪亚","阿瓜迪亚","","Aguadilla","波多黎各","NA"],"BQS":["海兰泡","海兰泡","","Blagoveschensk","俄罗斯","EU"],"BQT":["布列斯特","","","Brest","白俄罗斯","EU","",1],"BQU":["贝基亚岛","贝基亚岛","","Bequia","圣文森特和格林纳丁斯","NA"],"BRC":["圣卡洛斯-德巴里洛切","圣卡洛斯-德巴里洛切","","San Carlos de Bariloche","阿根廷","LA","",1],"BRD":["布雷納德","布雷納德","","Brainerd","美国","NA"],"BRE":["不来梅","不来梅","","Bremen","德国","EU","",1],"BRI":["巴里","巴里","","Bari","意大利","EU","",1],"BRK":["Bourke","","","","澳大利亚","OC"],"BRL":["伯灵顿","伯灵顿","","Burlington","美国","NA"],"BRM":["巴基西梅托","巴基西梅托","","Barquisimeto","委内瑞拉","LA","",1],"BRN":["伯尔尼","伯尔尼","","Bern","瑞士","EU"],"BRO":["布朗斯维尔","布朗斯维尔","","Brownsville","美国","NA"],"BRQ":["布尔诺","布尔诺","","Brno","捷克","EU"],"BRR":["巴拉岛","巴拉岛","","Eoligarry","英国","EU"],"BRS":["布里斯托尔","布里斯托尔","","Bristol","英国","EU","",1],"BRU":["布鲁塞尔首都大区","布鲁塞尔首都大区","","Zaventem","比利时","EU","",1],"BRW":["Wiley Post–Will Rogers紀念","","","Utqiaġvik","美国","NA"],"BRX":["巴拉奥纳","巴拉奥纳","","Barahona","多米尼加","NA"],"BSA":["博萨索","博萨索","","Bosaso","索马里","AF","",1],"BSB":["巴西利亚","巴西利亚","","Brasília","巴西","LA","",1],"BSC":["巴亚索拉诺","巴亚索拉诺","","Bahía Solano","哥伦比亚","LA"],"BSD":["保山","保山","","Baoshan (Longyang)","中国","CN"],"BSG":["巴塔","","","Bata","赤道几内亚","AF","",1],"BSK":["比斯克拉","比斯克拉","","Biskra","阿尔及利亚","AF","",1],"BSL":["米卢斯","米卢斯","","Bâle / Mulhouse","法国","EU","",1],"BSO":["巴士古","巴士古","","Basco","菲律宾","SEA"],"BSR":["巴士拉","巴士拉","","Basra","伊拉克","ME","",1],"BSZ":["比什凯克","比什凯克","","Bishkek","吉尔吉斯斯坦","CA","",1],"BTC":["巴提卡洛阿","巴提卡洛阿","","Batticaloa","斯里兰卡","SA"],"BTH":["巴淡","巴淡","","Batam","印度尼西亚","SEA","",1],"BTI":["巴特島長距雷達站","","","Barter Island","美国","NA"],"BTJ":["班达亚齐","班达亚齐","","Banda Aceh","印度尼西亚","SEA","",1],"BTK":["布拉茨克","布拉茨克","","Bratsk","俄罗斯","EU"],"BTM":["比尤特","比尤特","","Butte","美国","NA"],"BTR":["巴吞鲁日","巴吞鲁日","","Baton Rouge","美国","NA"],"BTS":["布拉迪斯拉发","布拉迪斯拉发","","Bratislava","斯洛伐克","EU","",1],"BTU":["民都鲁","民都鲁","","Bintulu","马来西亚","SEA"],"BTV":["伯灵顿","伯灵顿","","Burlington","美国","NA"],"BUA":["布卡岛","布卡岛","","Buka Island","巴布亚新几内亚","OC"],"BUD":["布达佩斯","布达佩斯","","Budapest","匈牙利","EU","",1],"BUF":["伊利县","伊利县","","Buffalo","美国","NA","",1],"BUN":["布埃纳文图拉","布埃纳文图拉","","Buenaventura","哥伦比亚","LA"],"BUQ":["Joshua Mqabuko Nkomo","","","Bulawayo","津巴布韦","AF","",1],"BUR":["伯班克","伯班克","","Burbank","美国","NA","",1],"BUS":["巴统","巴统","","Batumi","格鲁吉亚","CA","",1],"BUX":["布尼亞","","","Bunia","刚果民主共和国","AF"],"BUZ":["布什尔","布什尔","","Bushehr","伊朗","ME"],"BVA":["博韦","博韦","","Beauvais","法国","EU","",1],"BVB":["博阿维斯塔","博阿维斯塔","","Boa Vista","巴西","LA","",1],"BVC":["博阿维斯塔","博阿维斯塔","","Rabil","佛得角","AF","",1],"BVE":["布里夫拉盖亚尔德","布里夫拉盖亚尔德","","Brive","法国","EU"],"BVG":["贝勒沃格","贝勒沃格","","Berlevåg","挪威","EU"],"BVH":["维列纳","维列纳","","Vilhena","巴西","LA"],"BVI":["伯茲維爾","伯茲維爾","","","澳大利亚","OC"],"BVJ":["Bovanenkovo","","","Bovanenkovo","俄罗斯","EU"],"BWA":["錫陀塔那迦","錫陀塔那迦","","Siddharthanagar (Bhairahawa)","尼泊尔","SA","",1],"BWI":["巴爾的摩都會區","巴爾的摩都會區","","Baltimore","美国","NA","",1],"BWK":["布拉奇岛","布拉奇岛","","Gornji Humac","克罗地亚","EU"],"BWN":["林梦机场","林梦机场","","Bandar Seri Begawan","文莱","SEA","",1],"BWO":["巴拉科沃","","","Balakovo","俄罗斯","EU"],"BWT":["伯尔尼","伯尔尼","","Burnie","澳大利亚","OC"],"BXH":["巴爾喀什","巴爾喀什","","Balkhash","哈萨克斯坦","CA"],"BXR":["巴姆","巴姆","","Bam","伊朗","ME"],"BXU":["武端","武端","","Butuan","菲律宾","SEA"],"BXY":["Baikonur","","","Baikonur","哈萨克斯坦","CA","",1],"BYK":["布瓦凯","布瓦凯","","Bouaké","科特迪瓦","AF"],"BYM":["巴亚莫","巴亚莫","","Bayamo","古巴","NA"],"BYN":["巴彥洪戈爾","","","Bayankhongor","蒙古国","EA"],"BZE":["伯利兹伯利茲市","伯利兹","","Belize City","伯利兹","NA","Q108223",1],"BZG":["比得哥什","比得哥什","","Bydgoszcz","波兰","EU"],"BZI":["巴勒克埃西尔","巴勒克埃西尔","","Balıkesir","土耳其","EU"],"BZL":["博里萨尔","博里萨尔","","Barisal","孟加拉国","SA"],"BZN":["博兹曼","博兹曼","","Bozeman","美国","NA"],"BZO":["波尔查诺","波尔查诺","","Bolzano (BZ)","意大利","EU"],"BZR":["贝济耶","贝济耶","","Béziers","法国","EU"],"BZV":["布拉柴维尔","布拉柴维尔","","Brazzaville","刚果共和国","AF","",1],"BZX":["巴中","巴中","","Bazhong","中国","CN"],"CAB":["卡宾达","卡宾达","","Cabinda","安哥拉","AF"],"CAC":["卡斯卡韦尔","卡斯卡韦尔","","Cascavel","巴西","LA"],"CAE":["哥伦比亚","哥伦比亚","","Columbia","美国","NA"],"CAG":["卡利亞里","卡利亞里","","Cagliari","意大利","EU","",1],"CAH":["金瓯","金瓯","","Ca Mau City","越南","SEA"],"CAI":["开罗","开罗","","Cairo","埃及","AF","",1],"CAJ":["Canaima","","","Canaima","委内瑞拉","LA"],"CAK":["阿克伦","阿克伦","","Akron","美国","NA"],"CAL":["坎貝爾城","坎貝爾城","","Campbeltown","英国","EU"],"CAN":["广州","广州","","Guangzhou (Huadu)","中国","CN","",1],"CAP":["海地角","海地角","","Cap Haitien","海地","NA","",1],"CAT":["卡斯凯什","卡斯凯什","","Cascais","葡萄牙","EU"],"CAW":["坎普斯-杜若尔当","坎普斯-杜若尔当","","Campos dos Goytacazes","巴西","LA"],"CAY":["巴西禮砲連","巴西禮砲連","","Matoury","法属圭亚那","LA","",1],"CAZ":["科巴 (新南威爾士州)","科巴 (新南威爾士州)","","","澳大利亚","OC"],"CBB":["科恰班巴","科恰班巴","","Cochabamba","玻利维亚","LA","",1],"CBH":["贝沙尔","贝沙尔","","Béchar","阿尔及利亚","AF"],"CBO":["哥打巴托","哥打巴托","","Datu Odin Sinsuat","菲律宾","SEA"],"CBQ":["卡拉巴尔","卡拉巴尔","","Calabar","尼日利亚","AF"],"CBR":["堪培拉","堪培拉","","Canberra","澳大利亚","OC"],"CBT":["卡通布拉","卡通布拉","","Catumbela","安哥拉","AF"],"CCC":["科科島","科科島","","Cayo Coco","古巴","NA"],"CCE":["新首都","新首都","","New Cairo","埃及","AF"],"CCF":["卡尔卡松城堡","卡尔卡松城堡","","Carcassonne","法国","EU"],"CCJ":["科兹科德","科兹科德","","Calicut","印度","SA","",1],"CCK":["西岛","西岛","","West Island","科科斯（基林）群岛","EA","",1],"CCP":["塔尔卡瓦诺","塔尔卡瓦诺","","Concepcion","智利","LA","",1],"CCR":["康特拉科斯塔县","康特拉科斯塔县","","Concord","美国","NA"],"CCS":["加拉加斯","加拉加斯","","Maiquetía","委内瑞拉","LA","",1],"CCU":["加尔各答","加尔各答","","Kolkata","印度","SA","",1],"CCZ":["Chub島","","","Chub Cay","巴哈马","NA"],"CDB":["冷湾","冷湾","","Cold Bay","美国","NA"],"CDC":["雪松城","雪松城","","Cedar City","美国","NA"],"CDE":["承德","","","Chengde","中国","CN"],"CDG":["巴黎戴高乐","巴黎","","Paris (Roissy-en-France, Val-d'Oise)","法国","EU","Q90",1],"CDP":["卡达帕","卡达帕","","Kadapa","印度","SA"],"CDR":["沙德伦","沙德伦","","Chadron","美国","NA"],"CDT":["卡斯特利翁-德拉普拉纳","卡斯特利翁-德拉普拉纳","","Castellón de la Plana","西班牙","EU"],"CDV":["科尔多瓦","科尔多瓦","","Cordova","美国","NA"],"CEB":["宿务","宿霧都會區","","Cebu City/Lapu-Lapu City","菲律宾","SEA","",1],"CEC":["克雷森特城","克雷森特城","","Crescent City","美国","NA"],"CED":["塞杜纳 (南澳洲)","塞杜纳 (南澳洲)","","","澳大利亚","OC"],"CEE":["切列波韦茨","","","Cherepovets","俄罗斯","EU"],"CEI":["清莱","清莱","","Chiang Rai","泰国","SEA","",1],"CEK":["车里雅宾斯克","车里雅宾斯克","","Chelyabinsk","俄罗斯","EU","",1],"CEN":["奧夫雷貢城","奧夫雷貢城","","Ciudad Obregón","墨西哥","NA"],"CEZ":["科尔特斯","科尔特斯","","Cortez","美国","NA"],"CFE":["克莱蒙费朗","克莱蒙费朗","","Clermont-Ferrand","法国","EU","",1],"CFG":["西恩富戈斯","西恩富戈斯","","Cienfuegos","古巴","NA"],"CFK":["谢利夫","谢利夫","","Chlef","阿尔及利亚","AF","",1],"CFN":["多尼戈尔郡","多尼戈尔郡","","Donegal","爱尔兰","EU"],"CFR":["卡昂","卡昂","","Caen","法国","EU"],"CFS":["科夫斯港","科夫斯港","","Coffs Harbour","澳大利亚","OC"],"CFU":["克基拉","克基拉","","Kerkyra (Corfu)","希腊","EU","",1],"CGB":["大瓦尔泽亚","大瓦尔泽亚","","Cuiabá","巴西","LA","",1],"CGD":["常德","常德","","Changde (Dingcheng)","中国","CN"],"CGH":["圣保罗","圣保罗","","São Paulo","巴西","LA","",1],"CGI":["开普吉拉多","开普吉拉多","","Cape Girardeau","美国","NA"],"CGK":["雅加达","雅茂德坦勿","","Jakarta","印度尼西亚","SEA","",1],"CGM":["曼巴豪","曼巴豪","","Mambajao","菲律宾","SEA"],"CGN":["波恩","波恩","","Köln (Cologne)","德国","EU","",1],"CGO":["郑州","郑州","","Zhengzhou","中国","CN","",1],"CGP":["吉大港","吉大港","","Chattogram (Chittagong)","孟加拉国","SA","",1],"CGQ":["长春","长春","","Changchun","中国","CN","",1],"CGR":["大坎普","大坎普","","Campo Grande","巴西","LA"],"CGY":["卡加延德奥罗","卡加延德奥罗","","Laguindingan","菲律宾","SEA","",1],"CHA":["查塔努加","查塔努加","","Chattanooga","美国","NA"],"CHC":["克赖斯特彻奇","克赖斯特彻奇","","Christchurch","新西兰","OC","",1],"CHG":["朝阳","朝阳","","Shuangta, Chaoyang","中国","CN"],"CHH":["查查波亚斯","查查波亚斯","","Chachapoyas","秘鲁","LA"],"CHM":["钦博特","钦博特","","Chimbote","秘鲁","LA"],"CHO":["夏洛茨维尔","夏洛茨维尔","","Charlottesville","美国","NA"],"CHQ":["哈尼亚","哈尼亚","","Souda","希腊","EU","",1],"CHS":["查尔斯顿","查尔斯顿","","Charleston","美国","NA","",1],"CHT":["查塔姆群岛","","","Te One","新西兰","OC"],"CHX":["錢吉諾拉","錢吉諾拉","","Changuinola","巴拿马","NA"],"CIA":["罗马钱皮诺","罗马","","Rome","意大利","EU","Q220",1],"CID":["锡达拉皮兹","锡达拉皮兹","","Cedar Rapids","美国","NA"],"CIF":["赤峰","赤峰","","Chifeng","中国","CN"],"CIJ":["科維哈","科維哈","","Cobija","玻利维亚","LA"],"CIT":["希姆肯特","希姆肯特","","Shymkent","哈萨克斯坦","CA","",1],"CIU":["苏圣玛丽契皮瓦縣","苏圣玛丽","","Kincheloe","美国","NA","Q986634"],"CIW":["卡努安岛","卡努安岛","","Canouan","圣文森特和格林纳丁斯","NA"],"CIX":["奇克拉约","奇克拉约","","Chiclayo","秘鲁","LA","",1],"CIY":["科米索","科米索","","Comiso","意大利","EU"],"CJA":["卡哈马卡","卡哈马卡","","Cajamarca","秘鲁","LA"],"CJB":["哥印拜陀","哥印拜陀","","Coimbatore","印度","SA","",1],"CJC":["卡拉马","卡拉马","","Calama","智利","LA"],"CJJ":["清州","清州","","Cheongju","韩国","EA","",1],"CJL":["吉德拉尔","吉德拉尔","","Chitral","巴基斯坦","SA"],"CJM":["春蓬府","春蓬府","","Chumphon","泰国","SEA"],"CJS":["华雷斯城","华雷斯城","","Ciudad Juárez","墨西哥","NA","",1],"CJU":["济州","济州","","Jeju City","韩国","EA","",1],"CKB":["克拉克斯堡","克拉克斯堡","","Bridgeport","美国","NA"],"CKG":["重庆","重庆","","Chongqing","中国","CN","",1],"CKH":["喬庫爾達赫","喬庫爾達赫","","Chokurdah","俄罗斯","EU"],"CKS":["帕劳阿佩巴斯","帕劳阿佩巴斯","","Parauapebas","巴西","LA"],"CKY":["科纳克里","科纳克里","","Conakry","几内亚","AF","",1],"CKZ":["恰纳卡莱","恰纳卡莱","","Çanakkale","土耳其","EU"],"CLD":["卡尔斯巴德","卡尔斯巴德","","Carlsbad","美国","NA"],"CLE":["克利夫兰","克利夫兰","","Cleveland","美国","NA","",1],"CLJ":["克卢日-纳波卡","克卢日-纳波卡","","Cluj-Napoca","罗马尼亚","EU","",1],"CLL":["Easterwood","","","College Station","美国","NA"],"CLO":["卡利","卡利","","Cali","哥伦比亚","LA","",1],"CLQ":["科利马","科利马","","Colima","墨西哥","NA"],"CLT":["夏洛特都會區","夏洛特都會區","","Charlotte","美国","NA","",1],"CLY":["卡尔维","卡尔维","","Calvi","法国","EU"],"CMA":["坎納馬拉","","","","澳大利亚","OC","AU:"],"CMB":["科伦坡","科伦坡","","Colombo","斯里兰卡","SA","Q35381",1],"CME":["卡门城","卡门城","","Ciudad del Carmen","墨西哥","NA"],"CMF":["尚贝里","尚贝里","","Chambéry","法国","EU"],"CMG":["科伦巴","科伦巴","","Corumbá","巴西","LA"],"CMH":["哥伦布","哥伦布","","Columbus","美国","NA","Q16567",1],"CMI":["尚佩恩-厄巴纳","尚佩恩-厄巴纳","","Savoy","美国","NA"],"CMN":["卡萨布兰卡","卡萨布兰卡","","Casablanca","摩洛哥","AF","",1],"CMU":["钦布","","","Kundiawa","巴布亚新几内亚","OC"],"CMW":["卡马圭","卡马圭","","Camaguey","古巴","NA","",1],"CMX":["汉考克","汉考克","","Hancock","美国","NA"],"CNB":["庫南布爾","","","","澳大利亚","OC","AU:"],"CND":["康斯坦察","康斯坦察","","Constanța","罗马尼亚","EU","",1],"CNF":["孔芬斯","孔芬斯","","Belo Horizonte","巴西","LA","",1],"CNJ":["克朗克里","克朗克里","","Cloncurry","澳大利亚","OC"],"CNM":["卡尔斯巴德","卡尔斯巴德","","Carlsbad","美国","NA"],"CNN":["肯努爾縣","肯努爾縣","","Kannur","印度","SA","",1],"CNP":["斯科斯比松","斯科斯比松","","Neerlerit Inaat","格陵兰","NA"],"CNQ":["科连特斯","科连特斯","","Corrientes","阿根廷","LA"],"CNS":["凯恩斯","凯恩斯","","Cairns","澳大利亚","OC","",1],"CNX":["清迈府","清迈府","","Chiang Mai","泰国","SEA","",1],"CNY":["摩押","摩押","","Moab","美国","NA"],"COD":["科迪","科迪","","Cody","美国","NA"],"COK":["戈奇","戈奇","","Kochi","印度","SA","",1],"COO":["科托努","科托努","","Cotonou","贝宁","AF","",1],"COQ":["乔巴山","乔巴山","","","蒙古国","EA"],"COR":["科尔多瓦","科尔多瓦","","Cordoba","阿根廷","LA","",1],"COS":["科罗拉多斯普林斯","科罗拉多斯普林斯","","Colorado Springs","美国","NA","",1],"COU":["哥伦比亚","哥伦比亚","","Columbia","美国","NA"],"COV":["奥斯曼尼耶省","奥斯曼尼耶省","","Tarsus","土耳其","EU","",1],"CPC":["聖馬丁德洛斯安第斯","聖馬丁德洛斯安第斯","","Chapelco/San Martin de los Andes","阿根廷","LA"],"CPD":["库伯佩地","库伯佩地","","Coober Pedy","澳大利亚","OC"],"CPE":["坎佩切","坎佩切","","Campeche","墨西哥","NA"],"CPH":["哥本哈根","哥本哈根","","Copenhagen","丹麦","EU","",1],"CPO":["科皮亚波","科皮亚波","","Copiapo","智利","LA"],"CPR":["卡斯珀","卡斯珀","","Casper","美国","NA"],"CPT":["开普敦","开普敦","","Cape Town","南非","AF","",1],"CPV":["大坎皮纳","大坎皮纳","","Campina Grande","巴西","LA"],"CPX":["库莱布拉岛","库莱布拉岛","","Culebra","波多黎各","NA"],"CQW":["武隆区","武隆区","","Wulong","中国","CN"],"CRA":["克拉约瓦","克拉约瓦","","Craiova","罗马尼亚","EU","",1],"CRD":["里瓦达维亚海军准将城","里瓦达维亚海军准将城","","Comodoro Rivadavia","阿根廷","LA","",1],"CRI":["Colonel Hill","","","Colonel Hill","巴哈马","NA"],"CRK":["安赫莱斯","安赫莱斯","","Mabalacat","菲律宾","SEA","",1],"CRL":["沙勒罗瓦","沙勒罗瓦","","Charleroi","比利时","EU","",1],"CRM":["卡塔曼","卡塔曼","","Catarman","菲律宾","SEA"],"CRP":["科珀斯克里斯蒂","科珀斯克里斯蒂","","Corpus Christi","美国","NA"],"CRV":["克罗托内","克罗托内","","Isola di Capo Rizzuto (KR)","意大利","EU"],"CRW":["查尔斯顿","查尔斯顿","","Charleston","美国","NA"],"CRZ":["土库曼纳巴德","土库曼纳巴德","","Türkmenabat","土库曼斯坦","CA","",1],"CSG":["哥伦布","哥伦布","","Columbus","美国","NA"],"CSK":["开普斯科灵","开普斯科灵","","Cap Skirring","塞内加尔","AF"],"CSW":["Cabo San Lucas","","","Cabo San Lucas","墨西哥","NA"],"CSX":["长沙","长沙","","Changsha (Changsha)","中国","CN","",1],"CSY":["切博克萨雷","切博克萨雷","","Cheboksary","俄罗斯","EU"],"CTA":["卡塔尼亚","卡塔尼亚","","Catania","意大利","EU","",1],"CTC":["卡塔马卡","卡塔马卡","","Catamarca","阿根廷","LA"],"CTD":["奇特雷","奇特雷","","Chitré","巴拿马","NA"],"CTG":["卡塔赫纳","卡塔赫纳","","Cartagena","哥伦比亚","LA","",1],"CTL":["查尔维尔","查尔维尔","","Charleville","澳大利亚","OC"],"CTM":["切图马尔","切图马尔","","Chetumal","墨西哥","NA"],"CTN":["库克敦","库克敦","","","澳大利亚","OC"],"CTS":["札幌新千岁","札幌","","Sapporo","日本","EA","Q37951",1],"CTU":["成都双流","成都","","Chengdu (Shuangliu)","中国","CN","C:CTU",1],"CUC":["库库塔","库库塔","","Cúcuta","哥伦比亚","LA"],"CUE":["昆卡","昆卡","","Cuenca","厄瓜多尔","LA"],"CUF":["库内奥","库内奥","","Levaldigi (CN)","意大利","EU"],"CUK":["考克島","","","Caye Caulker","伯利兹","NA"],"CUL":["库利亚坎","库利亚坎","","Culiacán","墨西哥","NA","",1],"CUM":["库马纳","库马纳","","Cumaná","委内瑞拉","LA"],"CUN":["坎昆","坎昆","","Cancún","墨西哥","NA","",1],"CUP":["卡鲁帕诺","卡鲁帕诺","","Carúpano","委内瑞拉","LA"],"CUQ":["科恩","科恩","","Coen","澳大利亚","OC"],"CUR":["威廉斯塔德","威廉斯塔德","","Willemstad","库拉索","NA","",1],"CUU":["奇瓦瓦","奇瓦瓦","","Chihuahua","墨西哥","NA","",1],"CUZ":["库斯科","库斯科","","Cusco","秘鲁","LA","",1],"CVG":["辛辛那提辛辛那堤/北肯塔基","辛辛那提","","Cincinnati / Covington","美国","NA","Q43196",1],"CVM":["维多利亚城","维多利亚城","","Ciudad Victoria","墨西哥","NA"],"CVN":["克洛维斯（新墨西哥州）","克洛维斯（新墨西哥州）","","Clovis","美国","NA"],"CVQ":["卡納芬","卡納芬","","Carnarvon","澳大利亚","OC"],"CWA":["沃索","沃索","","Mosinee","美国","NA"],"CWB":["圣若泽杜斯皮尼艾斯","圣若泽杜斯皮尼艾斯","","Curitiba","巴西","LA","",1],"CWJ":["沧源佤族自治县","沧源佤族自治县","","Lincang (Cangyuan)","中国","CN"],"CWL":["加地夫","加地夫","","Cardiff","英国","EU","",1],"CXB":["科克斯巴扎尔","科克斯巴扎尔","","Cox's Bazar","孟加拉国","SA"],"CXI":["圣诞岛","圣诞岛","","Kiritimati","基里巴斯","OC","",1],"CXJ":["南卡希亚斯","南卡希亚斯","","Caxias Do Sul","巴西","LA"],"CXP":["芝拉扎县","芝拉扎县","","Cilacap","印度尼西亚","SEA"],"CXR":["芽庄","芽庄","","Nha Trang/nha Trang aiurportCam Ranh","越南","SEA","",1],"CYA":["莱凯","莱凯","","Les Cayes","海地","NA"],"CYB":["Charles Kirkconnell","","","West End","开曼群岛","NA"],"CYC":["Caye Chapel","","","Caye Chapel","伯利兹","NA"],"CYI":["嘉义","","","Shuishang","中国台湾","HMT"],"CYO":["拉戈島","拉戈島","","Cayo Largo del Sur","古巴","NA"],"CYP":["甲描育","甲描育","","Calbayog City","菲律宾","SEA"],"CYS":["夏延","夏延","","Cheyenne","美国","NA"],"CYX":["切爾斯基","切爾斯基","","Cherskiy","俄罗斯","EU"],"CYZ":["卡瓦延","卡瓦延","","Cauayan City","菲律宾","SEA"],"CZE":["聖安娜德科羅","聖安娜德科羅","","Coro","委内瑞拉","LA"],"CZH":["科羅薩爾","","","Corozal","伯利兹","NA"],"CZL":["君士坦丁","君士坦丁","","Constantine","阿尔及利亚","AF","",1],"CZM":["圣米格尔德科苏梅尔","圣米格尔德科苏梅尔","","Cozumel","墨西哥","NA","",1],"CZS":["南克魯賽羅","南克魯賽羅","","Cruzeiro Do Sul","巴西","LA"],"CZU":["科羅薩爾","科羅薩爾","","Corozal","哥伦比亚","LA"],"CZX":["常州","常州","","Changzhou","中国","CN"],"DAB":["代托纳比奇","代托纳比奇","","Daytona Beach","美国","NA"],"DAC":["达卡","达卡","","Dhaka","孟加拉国","SA","",1],"DAD":["岘港","岘港","","Da Nang","越南","SEA","",1],"DAL":["达拉斯-沃思堡","达拉斯-沃思堡","","Dallas","美国","NA","",1],"DAM":["大马士革","大马士革","","Damascus","叙利亚","ME","",1],"DAR":["达累斯萨拉姆","达累斯萨拉姆","","Dar es Salaam","坦桑尼亚","AF","",1],"DAT":["大同","大同","","Datong","中国","CN","",1],"DAU":["達魯","達魯","","Daru","巴布亚新几内亚","OC"],"DAV":["戴维","戴维","","David","巴拿马","NA"],"DAY":["代顿","代顿","","Dayton","美国","NA"],"DBB":["阿拉曼","阿拉曼","","El Alamein","埃及","AF","",1],"DBC":["白城","白城","","Baicheng","中国","CN"],"DBO":["达博","达博","","Dubbo","澳大利亚","OC"],"DBQ":["迪比克","迪比克","","Dubuque","美国","NA"],"DBR":["Darbhanga","","","Darbhanga","印度","SA"],"DBV":["察夫塔特","察夫塔特","","Dubrovnik","克罗地亚","EU","",1],"DCA":["华盛顿哥伦比亚特区","华盛顿哥伦比亚特区","","Washington","美国","NA","",1],"DCF":["罗索坎菲尔德","罗索","","Canefield","多米尼克","NA","Q36281"],"DCM":["卡斯特尔","卡斯特尔","","Castres","法国","EU"],"DCY":["稻城县","稻城县","","Garzê (Daocheng)","中国","CN"],"DDC":["道奇城","道奇城","","Dodge City","美国","NA"],"DDG":["丹东","丹东","","Dandong (Zhenxing)","中国","CN"],"DDR":["日喀则定日","","","Xigazê (Dingri)","中国","CN"],"DEA":["德拉加齐汗","德拉加齐汗","","Dera Ghazi Khan","巴基斯坦","SA"],"DEB":["德布勒森","德布勒森","","Debrecen","匈牙利","EU","",1],"DEC":["迪凯特","迪凯特","","Decatur","美国","NA"],"DED":["台拉登","台拉登","","Dehradun (Jauligrant)","印度","SA"],"DEF":["迪茲富勒","","","Dezful","伊朗","ME"],"DEL":["德里","德里","","New Delhi","印度","SA","Q1353",1],"DEN":["丹佛","丹佛","","Denver","美国","NA","Q16554",1],"DFW":["达拉斯","曼斯菲","","Dallas-Fort Worth","美国","NA","",1],"DGA":["丹格里加","丹格里加","","Dangriga","伯利兹","NA"],"DGO":["杜兰戈","杜兰戈","","Durango","墨西哥","NA"],"DGT":["朗芒芽地","朗芒芽地","","Dumaguete City","菲律宾","SEA"],"DHM":["冈格拉","冈格拉","","Kangra","印度","SA"],"DHN":["多森","多森","","Dothan","美国","NA"],"DHX":["谏义里","谏义里","","Kediri","印度尼西亚","SEA"],"DIB":["迪布鲁格尔","迪布鲁格尔","","Dibrugarh","印度","SA"],"DIE":["安齐拉纳纳","安齐拉纳纳","","Antisiranana","马达加斯加","AF"],"DIG":["香格里拉","香格里拉","","Diqing (Shangri-La)","中国","CN"],"DIK":["迪金森","迪金森","","Dickinson","美国","NA"],"DIL":["帝力","帝力","","Dili","东帝汶","SEA","",1],"DIN":["奠边府","奠边府","","Dien Bien Phu","越南","SEA"],"DIR":["德雷达瓦","德雷达瓦","","Dire Dawa","埃塞俄比亚","AF","",1],"DIY":["迪亚巴克尔","迪亚巴克尔","","Diyarbakır","土耳其","EU"],"DJE":["豪迈特苏格","豪迈特苏格","","Mellita","突尼斯","AF","",1],"DJG":["贾奈特","贾奈特","","Djanet","阿尔及利亚","AF","",1],"DJJ":["查雅普拉","查雅普拉","","Sentani","印度尼西亚","SEA","",1],"DJT":["West Palm Beach","","","West Palm Beach","美国","NA","",1],"DKA":["卡齐纳","卡齐纳","","Katsina","尼日利亚","AF"],"DLA":["杜阿拉","杜阿拉","","Douala","喀麦隆","AF","",1],"DLC":["大连","大连","","Dalian (Ganjingzi)","中国","CN","",1],"DLE":["輝綠岩","輝綠岩","","Dole","法国","EU"],"DLG":["迪林厄姆","迪林厄姆","","Dillingham","美国","NA"],"DLH":["德卢斯","德卢斯","","Duluth","美国","NA"],"DLI":["大叻","大叻","","Da Lat","越南","SEA"],"DLM":["达拉曼","达拉曼","","Dalaman","土耳其","EU","",1],"DLU":["大理","大理","","Dali (Xiaguan)","中国","CN"],"DLZ":["达兰扎德嘎德","达兰扎德嘎德","","Dalanzadgad","蒙古国","EA"],"DMB":["塔拉兹","塔拉兹","","Taraz","哈萨克斯坦","CA","",1],"DME":["莫斯科多莫杰多沃","莫斯科","","Moscow","俄罗斯","EU","Q649",1],"DMK":["曼谷廊曼","曼谷","","Bangkok","泰国","SEA","Q806484",1],"DMM":["达曼","达曼","","Ad Dammam","沙特阿拉伯","ME","",1],"DMU":["迪马布尔","迪马布尔","","Dimapur","印度","SA"],"DND":["邓迪","邓迪","","Dundee","英国","EU"],"DNH":["敦煌","敦煌","","Dunhuang","中国","CN","",1],"DNZ":["恰爾達克","恰爾達克","","Denizli","土耳其","EU"],"DOD":["多多马","多多马","","Dodoma","坦桑尼亚","AF"],"DOG":["栋古拉","栋古拉","","Dongola","苏丹","AF"],"DOH":["多哈","多哈","","Doha","卡塔尔","ME","",1],"DOL":["多维尔","多维尔","","Deauville","法国","EU"],"DOM":["罗索道格拉斯-查尔斯","罗索","","Marigot","多米尼克","NA","Q36281"],"DOV":["多佛空军基地","","","Dover","美国","NA"],"DOY":["东营","东营","","Dongying (Kenli)","中国","CN"],"DPL":["第波罗","第波罗","","Dipolog","菲律宾","SEA"],"DPO":["德文港","德文港","","Devonport","澳大利亚","OC"],"DPS":["巴厘岛","巴厘省","","Kuta, Badung","印度尼西亚","SEA","",1],"DQM":["杜昆","杜昆","","Duqm","阿曼","ME","",1],"DRG":["迪灵","迪灵","","Deering","美国","NA"],"DRO":["杜兰戈","杜兰戈","","Durango","美国","NA"],"DRP":["黎牙实比","黎牙实比","","Legazpi","菲律宾","SEA","",1],"DRS":["德累斯顿","德累斯顿","","Dresden","德国","EU","",1],"DRW":["达尔文","达尔文","","Darwin","澳大利亚","OC","",1],"DSI":["德斯坦","德斯坦","","Destin","美国","NA"],"DSM":["得梅因","得梅因","","Des Moines","美国","NA","",1],"DSN":["鄂尔多斯","鄂尔多斯","","Ordos","中国","CN","",1],"DSO":["定平郡","定平郡","","Sŏndŏng-ni","朝鲜","EA"],"DSS":["达喀尔","达喀尔","","Dakar","塞内加尔","AF","",1],"DSY":["七星海","","","Ta Noun","柬埔寨","SEA","",1],"DTM":["多特蒙德","多特蒙德","","Dortmund","德国","EU","",1],"DTU":["五大连池","五大连池","","Heihe","中国","CN"],"DTW":["安大略省西南部","安大略省西南部","","Detroit","美国","NA","",1],"DUB":["都柏林","都柏林","","Dublin","爱尔兰","EU","",1],"DUD":["达尼丁","达尼丁","","Dunedin","新西兰","OC"],"DUE":["敦多","敦多","","Chitato","安哥拉","AF"],"DUJ":["杜波伊斯","杜波伊斯","","Dubois","美国","NA"],"DUM":["杜迈","杜迈","","Dumai","印度尼西亚","SEA"],"DUR":["德班","德班","","Durban","南非","AF","",1],"DUS":["杜塞尔多夫国际机场","杜塞尔多夫国际机场","","Düsseldorf","德国","EU","",1],"DUT":["乌纳拉斯卡","乌纳拉斯卡","","Unalaska","美国","NA"],"DVL":["魔鬼湖","魔鬼湖","","Devils Lake","美国","NA"],"DVO":["达沃","达沃","","Davao","菲律宾","SEA","",1],"DWC":["迪拜阿勒马克图姆","迪拜","","Dubai(Jebel Ali)","阿联酋","ME","Q612",1],"DWD":["杜瓦达米","杜瓦达米","","Dawadmi","沙特阿拉伯","ME"],"DXB":["迪拜","迪拜","","Dubai","阿联酋","ME","Q612",1],"DXN":["德里诺伊达","德里","","Gautam Buddha Nagar","印度","SA","Q1353",1],"DYG":["张家界","张家界","","Zhangjiajie (Yongding)","中国","CN","",1],"DYR":["阿纳德尔","阿纳德尔","","Anadyr","俄罗斯","EU"],"DYU":["杜尚别","杜尚别","","Dushanbe","塔吉克斯坦","CA","",1],"DZA":["藻德济","藻德济","","Dzaoudzi","马约特","AF","",1],"DZH":["达州金垭","","","Dazhou (Dachuan)","中国","CN"],"DZN":["杰兹卡兹甘","杰兹卡兹甘","","Zhezkazgan","哈萨克斯坦","CA","",1],"EAM":["奈季兰","奈季兰","","Najran","沙特阿拉伯","ME"],"EAR":["卡尼","卡尼","","Kearney","美国","NA"],"EAS":["圣塞瓦斯蒂安","圣塞瓦斯蒂安","","Hondarribia","西班牙","EU"],"EAT":["韦纳奇","韦纳奇","","Wenatchee","美国","NA"],"EAU":["欧克雷尔","欧克雷尔","","Eau Claire","美国","NA"],"EBA":["坎波内莱尔巴","坎波内莱尔巴","","Campo nell'Elba (LI)","意大利","EU"],"EBB":["恩德培","恩德培","","Entebbe","乌干达","AF","",1],"EBD":["歐拜伊德","","","El-Obeid","苏丹","AF"],"EBJ":["埃斯比约","埃斯比约","","Esbjerg","丹麦","EU"],"EBL":["埃尔比勒","埃尔比勒","","Arbil","伊拉克","ME","",1],"ECN":["北塞浦路斯土耳其共和国","北塞浦路斯土耳其共和国","","Tymbou (Kirklar)","塞浦路斯","EU","",1],"ECP":["巴拿马城","巴拿马城","","Panama City Beach","美国","NA"],"EDI":["爱丁堡","爱丁堡","","Ingliston, Edinburgh","英国","EU","",1],"EDL":["埃尔多雷特","埃尔多雷特","","Eldoret","肯尼亚","AF","",1],"EDO":["埃德雷米特","埃德雷米特","","Edremit","土耳其","EU","",1],"EFL":["凯法利尼亚岛","凯法利尼亚岛","","Kefallinia Island","希腊","EA","",1],"EGC":["贝尔热拉克","贝尔热拉克","","Bergerac","法国","EU"],"EGE":["伊格爾-韋爾","伊格爾-韋爾","","Eagle","美国","NA"],"EGS":["埃伊尔斯塔济","埃伊尔斯塔济","","Egilsstaðir","冰岛","EU"],"EGX":["伊杰吉克","伊杰吉克","","Egegik","美国","NA"],"EHU":["鄂州花湖","","","Ezhou","中国","CN","",1],"EIE":["叶尼塞斯克","叶尼塞斯克","","Yeniseysk","俄罗斯","EU"],"EIN":["埃因霍温","埃因霍温","","Eindhoven","荷兰王国","EU","",1],"EIS":["英属维尔京群岛","英属维尔京群岛","","Beef Island","英属维尔京群岛","NA","",1],"EJA":["巴兰卡韦梅哈","巴兰卡韦梅哈","","Barrancabermeja","哥伦比亚","LA"],"EJH":["沃季赫","沃季赫","","Al Wajh","沙特阿拉伯","ME"],"EKO":["埃尔科","埃尔科","","Elko","美国","NA"],"ELC":["埃爾科島","埃爾科島","","Elcho Island","澳大利亚","OC"],"ELD":["埃尔多拉多","埃尔多拉多","","El Dorado","美国","NA"],"ELF":["法希尔","法希尔","","El Fasher","苏丹","AF"],"ELG":["古莱阿","古莱阿","","El Menia","阿尔及利亚","AF"],"ELH":["北伊柳塞拉","","","North Eleuthera","巴哈马","NA"],"ELM":["埃尔迈拉","埃尔迈拉","","Elmira/Corning","美国","NA"],"ELP":["埃尔帕索","埃尔帕索","","El Paso","美国","NA","",1],"ELQ":["盖西姆省","盖西姆省","","Qassim","沙特阿拉伯","ME","",1],"ELS":["东伦敦","东伦敦","","East London","南非","AF","",1],"ELU":["瓦德","瓦德","","Guemar","阿尔及利亚","AF"],"EMA":["德比","德比","","Nottingham, Leicestershire","英国","EU","",1],"EMD":["埃默拉尔德","埃默拉尔德","","Emerald","澳大利亚","OC"],"EMK":["埃莫纳克","埃莫纳克","","Emmonak","美国","NA"],"ENA":["基奈","基奈","","Kenai","美国","NA"],"ENF":["埃农泰基厄","埃农泰基厄","","Enontekio","芬兰","EU"],"ENH":["恩施","恩施","","Enshi (Enshi)","中国","CN"],"ENO":["伊塔普阿省","伊塔普阿省","","Encarnación","巴拉圭","LA","",1],"ENU":["埃努古","埃努古","","Enegu","尼日利亚","AF","",1],"ENY":["延安","延安","","Yan'an (Baota)","中国","CN"],"EOH":["麦德林埃雷拉","麦德林","","Medellín","哥伦比亚","LA","Q48278"],"EOI":["伊迪島","伊迪島","","Eday","英国","EU"],"EPR":["埃斯佩兰斯 (西澳洲)","埃斯佩兰斯 (西澳洲)","","Esperance","澳大利亚","OC"],"EPU":["派尔努","派尔努","","Pärnu","爱沙尼亚","EU"],"EQS":["埃斯克爾","埃斯克爾","","Esquel","阿根廷","LA"],"ERC":["埃尔津詹","埃尔津詹","","Erzincan","土耳其","EU"],"ERF":["爱尔福特","爱尔福特","","Erfurt","德国","EU","",1],"ERH":["拉希迪耶","拉希迪耶","","Errachidia","摩洛哥","AF"],"ERI":["伊利","伊利","","Erie","美国","NA"],"ERL":["二连浩特","二连浩特","","Erenhot","中国","CN"],"ERS":["温得和克厄洛斯","温得和克","","Windhoek","纳米比亚","AF","Q20618929"],"ERZ":["埃尔祖鲁姆","埃尔祖鲁姆","","Erzurum","土耳其","EU"],"ESB":["安卡拉","安卡拉","","Ankara","土耳其","EU","",1],"ESC":["埃斯卡诺巴","埃斯卡诺巴","","Escanaba","美国","NA"],"ESD":["奧卡斯島","","","Eastsound","美国","NA"],"ESL":["埃利斯塔","埃利斯塔","","Elista","俄罗斯","EU"],"ESM":["埃斯梅拉达斯","埃斯梅拉达斯","","Tachina","厄瓜多尔","LA","",1],"ESR":["埃尔萨尔瓦多","埃尔萨尔瓦多","","El Salvador","智利","LA"],"ESU":["索维拉","索维拉","","Essaouira","摩洛哥","AF"],"ETM":["埃拉特","埃拉特","","Eilat","以色列","ME","",1],"ETR":["马查拉","马查拉","","Santa Rosa","厄瓜多尔","LA"],"ETZ":["梅斯","梅斯","","Goin","法国","EU"],"EUG":["尤金","尤金","","Eugene","美国","NA"],"EUN":["阿尤恩","阿尤恩","","El Aaiún","西撒哈拉","AF","",1],"EUX":["奥腊涅斯塔德","奥腊涅斯塔德","","Oranjestad","荷兰加勒比区","NA"],"EVE":["哈爾斯塔","哈爾斯塔","","Evenes","挪威","EU","",1],"EVN":["埃里温","埃里温","","Yerevan","亚美尼亚","CA","",1],"EVV":["埃文斯维尔","埃文斯维尔","","Evansville","美国","NA"],"EWB":["新貝德福德支線","","","New Bedford","美国","NA"],"EWN":["克雷文縣","克雷文縣","","New Bern","美国","NA"],"EWR":["纽约","纽约","","Newark","美国","NA","",1],"EXT":["埃克塞特","埃克塞特","","Exeter, Devon","英国","EU"],"EYK":["别洛亚尔斯克","别洛亚尔斯克","","","俄罗斯","EU"],"EYP":["约帕尔","约帕尔","","Yopal","哥伦比亚","LA"],"EYW":["基韦斯特","基韦斯特","","Key West","美国","NA"],"EZE":["布宜诺斯艾利斯皮斯塔里尼部长","布宜诺斯艾利斯","","Buenos Aires (Ezeiza)","阿根廷","LA","Q1486",1],"EZS":["埃拉泽","埃拉泽","","Elazığ","土耳其","EU"],"FAE":["沃格岛","沃格岛","","Vágar","法罗群岛","EU","",1],"FAI":["费尔班克斯","费尔班克斯","","Fairbanks","美国","NA"],"FAO":["法鲁","法鲁","","Faro","葡萄牙","EU","",1],"FAR":["法戈","法戈","","Fargo","美国","NA"],"FAT":["弗雷斯诺","弗雷斯诺","","Fresno","美国","NA","",1],"FAV":["法卡拉瓦环礁","法卡拉瓦环礁","","","法属波利尼西亚","OC"],"FAY":["北卡罗来纳州","北卡罗来纳州","","Fayetteville","美国","NA"],"FBM":["卢本巴希","卢本巴希","","Lubumbashi","刚果民主共和国","AF","",1],"FCA":["卡利斯佩尔","卡利斯佩尔","","Kalispell","美国","NA"],"FCN":["库克斯港","库克斯港","","Wurster Nordseeküste","德国","EU"],"FCO":["罗马","罗马","","Rome","意大利","EU","Q220",1],"FDF":["法兰西堡","法兰西堡","","Fort-de-France","马提尼克","NA","",1],"FDH":["腓特烈港","腓特烈港","","Friedrichshafen","德国","EU","",1],"FDU":["班顿杜","班顿杜","","Bandundu","刚果民主共和国","AF"],"FEG":["费尔干纳","费尔干纳","","Fergana","乌兹别克斯坦","CA"],"FEN":["费尔南多·迪诺罗尼亚群岛","费尔南多·迪诺罗尼亚群岛","","Fernando de Noronha","巴西","LA"],"FEZ":["非斯","非斯","","Saïss","摩洛哥","AF","",1],"FGU":["方阿陶环礁","方阿陶环礁","","Fangatau","法属波利尼西亚","OC"],"FIH":["金沙萨","金沙萨","","Kinshasa","刚果民主共和国","AF","",1],"FIZ":["菲茨羅伊路口","","","","澳大利亚","OC","AU:"],"FJR":["富查伊拉 (城市)","富查伊拉 (城市)","","Fujairah","阿联酋","ME","",1],"FKB":["巴登-巴登","巴登-巴登","","Rheinmünster","德国","EU","",1],"FKI":["基桑加尼","基桑加尼","","Kisangani","刚果民主共和国","AF","",1],"FKQ":["法克法克","法克法克","","Fakfak","印度尼西亚","SEA"],"FKS":["须贺川","须贺川","","Sukagawa","日本","EA"],"FLA":["弗洛伦西亚","弗洛伦西亚","","Florencia","哥伦比亚","LA"],"FLG":["弗拉格斯塔夫","弗拉格斯塔夫","","Flagstaff","美国","NA"],"FLL":["劳德代尔堡","劳德代尔堡","","Fort Lauderdale","美国","NA","",1],"FLN":["弗洛里亚诺波利斯","弗洛里亚诺波利斯","","Florianópolis","巴西","LA","",1],"FLO":["弗洛伦斯","弗洛伦斯","","Florence","美国","NA"],"FLR":["佛罗伦萨","佛罗伦萨","","Firenze (FI)","意大利","EU","",1],"FLW":["圣克鲁什-达什弗洛里什","圣克鲁什-达什弗洛里什","","Santa Cruz das Flores","葡萄牙","EU"],"FLZ":["实武牙","实武牙","","Sibolga (Pinangsori)","印度尼西亚","SEA"],"FMA":["福尔摩萨","福尔摩萨","","Formosa","阿根廷","LA"],"FMI":["卡莱米","卡莱米","","Kalemie","刚果民主共和国","AF"],"FMM":["阿尔高","阿尔高","","Memmingen","德国","EU","",1],"FMO":["奥斯纳布吕克","奥斯纳布吕克","","Greven","德国","EU","",1],"FNA":["弗里敦","弗里敦","","Freetown (Lungi-Town)","塞拉利昂","AF","",1],"FNC":["马德拉自治区","马德拉自治区","","Funchal","葡萄牙","EU","",1],"FNI":["尼姆","尼姆","","Nîmes/Garons","法国","EU"],"FNJ":["平壤","平壤","","Pyongyang","朝鲜","EA","",1],"FNT":["弗林特","弗林特","","Flint","美国","NA"],"FOC":["福州","福州","","Fuzhou (Changle)","中国","CN","",1],"FOD":["道奇堡 (艾奧瓦州)","道奇堡 (艾奧瓦州)","","Fort Dodge","美国","NA"],"FOG":["福贾","福贾","","Foggia (FG)","意大利","EU"],"FON":["拉福爾圖納區","拉福爾圖納區","","La Fortuna","哥斯达黎加","NA"],"FOR":["福塔莱萨","福塔莱萨","","Fortaleza","巴西","LA","",1],"FPO":["弗里波特","弗里波特","","Freeport","巴哈马","NA","",1],"FRA":["法兰克福","美因河畔法兰克福","","Frankfurt am Main","德国","EU","",1],"FRD":["星期五港","星期五港","","Friday Harbor","美国","NA"],"FRL":["罗马亚","罗马亚","","Forlì (FC)","意大利","EU"],"FRO":["弗卢勒","弗卢勒","","Florø","挪威","EU"],"FRS":["贝登省","贝登省","","San Benito","危地马拉","NA"],"FRW":["弗朗西斯敦","弗朗西斯敦","","Francistown","博茨瓦纳","AF","",1],"FSC":["韦基奥港","韦基奥港","","Figari","法国","EU","",1],"FSD":["苏瀑","苏瀑","","Sioux Falls","美国","NA"],"FSM":["斯密斯堡","斯密斯堡","","Fort Smith","美国","NA"],"FSP":["圣皮埃尔","圣皮埃尔","","Saint-Pierre","圣皮埃尔和密克隆","NA"],"FSZ":["牧之原","牧之原","","Makinohara / Shimada","日本","EA","",1],"FTE":["埃尔卡拉法特","埃尔卡拉法特","","El Calafate","阿根廷","LA"],"FTU":["陶拉納魯","陶拉納魯","","Tôlanaro","马达加斯加","AF"],"FTW":["沃斯堡Meacham","","","Fort Worth","美国","NA"],"FUE":["富埃特文图拉岛","富埃特文图拉岛","","El Matorral","西班牙","AF","",1],"FUG":["阜阳","阜阳","","Yingzhou, Fuyang","中国","CN"],"FUJ":["五岛","五岛","","Goto","日本","EA"],"FUK":["福冈","福冈","","Fukuoka","日本","EA","",1],"FUN":["富纳富提","富纳富提","","Funafuti","图瓦卢","OC"],"FUO":["佛山","佛山","","Foshan (Nanhai)","中国","CN"],"FWA":["韦恩堡","韦恩堡","","Fort Wayne","美国","NA"],"FYJ":["抚远","抚远","","Fuyuan","中国","CN"],"FYN":["富蕴可可托海","","","Fuyun","中国","CN"],"FYU":["育空堡","育空堡","","Fort Yukon","美国","NA"],"GAJ":["山形","山形","","Higashine","日本","EA"],"GAL":["格利纳","格利纳","","Galena","美国","NA"],"GAM":["甘伯尔","甘伯尔","","Gambell","美国","NA"],"GAN":["阿杜","阿杜","","Gan","马尔代夫","SA","",1],"GAQ":["加奥","加奥","","Gao","马里","AF"],"GAU":["古瓦哈蒂","古瓦哈蒂","","Guwahati","印度","SA","",1],"GAY":["格雅","格雅","","Gaya","印度","SA"],"GBB":["甘巴拉","","","Gabala","阿塞拜疆","CA"],"GBE":["哈博罗内","哈博罗内","","Gaborone","博茨瓦纳","AF","",1],"GBJ":["格朗堡","格朗堡","","Grand-Bourg","瓜德罗普","NA"],"GCC":["吉列","吉列","","Gillette","美国","NA"],"GCH":["加奇萨兰","加奇萨兰","","Gachsaran","伊朗","ME"],"GCI":["根西","根西","","Saint Peter Port","根西","EU"],"GCK":["加登城","加登城","","Garden City","美国","NA"],"GCM":["大开曼","大开曼","","George Town","开曼群岛","NA","",1],"GCN":["科罗拉多大峡谷","科罗拉多大峡谷","","Grand Canyon - Tusayan","美国","NA"],"GDB":["贡迪耶","贡迪耶","","Gondia","印度","SA"],"GDE":["戈德","戈德","","Gode","埃塞俄比亚","AF"],"GDL":["瓜达拉哈拉","瓜达拉哈拉","","Guadalajara","墨西哥","NA","",1],"GDN":["三联","三联","","Gdańsk","波兰","EU","",1],"GDQ":["贡德尔","贡德尔","","Azezo","埃塞俄比亚","AF"],"GDT":["科伯恩城","科伯恩城","","Cockburn Town","特克斯和凯科斯群岛","NA"],"GDV":["格伦代夫","格伦代夫","","Glendive","美国","NA"],"GDX":["马加丹州杜马","马加丹州杜马","","Magadan","俄罗斯","EU"],"GDZ":["格连吉克","格连吉克","","Gelendzhik","俄罗斯","EU"],"GEA":["努美阿洋红","努美阿","","Nouméa","新喀里多尼亚","OC","Q9733"],"GEG":["斯波坎","斯波坎","","Spokane","美国","NA","",1],"GEL":["圣安热卢","圣安热卢","","Santo Ângelo","巴西","LA"],"GEM":["蒙戈莫","蒙戈莫","","Mengomeyén","赤道几内亚","AF"],"GEO":["乔治敦","乔治敦","","Georgetown","圭亚那","LA","Q10717",1],"GER":["新赫罗纳","新赫罗纳","","Nueva Gerona","古巴","NA"],"GES":["桑托斯将军城","桑托斯将军城","","General Santos","菲律宾","SEA","",1],"GET":["杰拉尔顿","杰拉尔顿","","Moonyoonooka","澳大利亚","OC"],"GEV":["耶利瓦勒","耶利瓦勒","","Gällivare","瑞典","EU"],"GFF":["葛瑞菲斯","葛瑞菲斯","","Griffith","澳大利亚","OC"],"GFK":["大福克斯","大福克斯","","Grand Forks","美国","NA"],"GGG":["基尔戈","基尔戈","","Longview","美国","NA"],"GGT":["埃克苏马","埃克苏马","","Moss Town","巴哈马","NA"],"GGW":["格拉斯哥","格拉斯哥","","Glasgow","美国","NA"],"GHA":["盖尔达耶","盖尔达耶","","El Atteuf","阿尔及利亚","AF"],"GHB":["加弗纳港","","","Governor's Harbour","巴哈马","NA"],"GHV":["布拉索夫","布拉索夫","","Brașov (Ghimbav)","罗马尼亚","EU","",1],"GIB":["直布罗陀","直布罗陀","","Gibraltar","直布罗陀","EU","",1],"GID":["基特加","基特加","","Gitega","布隆迪","AF"],"GIG":["里约热内卢/加利昂－安东尼奥·卡洛斯·若宾","里约热内卢","","Rio De Janeiro","巴西","LA","Q8678",1],"GIL":["吉尔吉特","吉尔吉特","","Gilgit","巴基斯坦","SA"],"GIS":["吉斯本","吉斯本","","Gisborne","新西兰","OC"],"GIZ":["吉赞","吉赞","","Jizan","沙特阿拉伯","ME"],"GJA":["瓜納哈","","","Guanaja","洪都拉斯","NA"],"GJL":["吉杰勒","吉杰勒","","Tahir","阿尔及利亚","AF","",1],"GJT":["大章克申支線","","","Grand Junction","美国","NA"],"GKA":["戈罗卡","","","Goronka","巴布亚新几内亚","OC"],"GKN":["格爾卡納","格爾卡納","","Gulkana","美国","NA"],"GLA":["格拉斯哥","格拉斯哥","","Glasgow","英国","EU","",1],"GLF":["戈爾菲托區","戈爾菲托區","","Golfito","哥斯达黎加","NA"],"GLH":["格林威尔","格林威尔","","Greenville","美国","NA"],"GLT":["格拉德斯通","格拉德斯通","","Gladstone","澳大利亚","OC"],"GMA":["蓋梅納","","","Gemena","刚果民主共和国","AF"],"GMB":["甘贝拉","甘贝拉","","Gambela","埃塞俄比亚","AF"],"GME":["戈梅利","戈梅利","","Gomel","白俄罗斯","EU"],"GMO":["阿瑞克航空","阿瑞克航空","","Gombe","尼日利亚","AF"],"GMP":["首尔","首尔","","Seoul","韩国","EA","",1],"GMQ":["果洛藏族自治州","果洛藏族自治州","","Golog (Maqên)","中国","CN"],"GMR":["甘比尔群岛","甘比尔群岛","","","法属波利尼西亚","OC"],"GNB":["格勒诺布尔","格勒诺布尔","","Grenoble","法国","EU"],"GND":["圣乔治","圣乔治","","Saint George's","格林纳达","NA","",1],"GNJ":["占贾","占贾","","Ganja","阿塞拜疆","CA","",1],"GNS":["Binaka","","","Gunungsitoli","印度尼西亚","SEA"],"GNV":["盖恩斯维尔","盖恩斯维尔","","Gainesville","美国","NA"],"GNY":["尚勒乌尔法","尚勒乌尔法","","Şanlıurfa","土耳其","EU","",1],"GOA":["热那亚","热那亚","","Genova (GE)","意大利","EU","",1],"GOH":["努克","努克","","Nuuk","格陵兰","NA","",1],"GOI":["果阿邦","果阿邦","","Vasco da Gama","印度","SA","",1],"GOJ":["下诺夫哥罗德","下诺夫哥罗德","","Nizhny Novgorod","俄罗斯","EU","",1],"GOM":["戈马","戈马","","Goma","刚果民主共和国","AF","",1],"GOP":["戈勒克布尔","戈勒克布尔","","Gorakhpur","印度","SA"],"GOQ":["格尔木","格尔木","","Golmud","中国","CN"],"GOT":["哥德堡","哥德堡","","Göteborg","瑞典","EU","",1],"GOU":["加鲁阿","加鲁阿","","Garoua","喀麦隆","AF","",1],"GOV":["戈夫半岛","戈夫半岛","","Nhulunbuy","澳大利亚","OC"],"GOX":["莫帕","","","Mopa","印度","SA","",1],"GPA":["帕特雷","帕特雷","","Patras","希腊","EU"],"GPI":["瓜比","瓜比","","Guapi","哥伦比亚","LA"],"GPS":["巴爾特拉島","巴爾特拉島","","Isla Baltra","厄瓜多尔","LA"],"GPT":["海灣港-比洛克西都會區","海灣港-比洛克西都會區","","Gulfport","美国","NA"],"GRB":["格林贝","格林贝","","Green Bay","美国","NA"],"GRI":["格兰德艾兰","格兰德艾兰","","Grand Island","美国","NA"],"GRJ":["乔治","乔治","","George","南非","AF","",1],"GRK":["基林-胡德堡区域","","","Fort Cavazos","美国","NA"],"GRO":["赫罗纳","赫罗纳","","Girona","西班牙","EU","",1],"GRQ":["格罗宁根","格罗宁根","","Groningen","荷兰王国","EU","",1],"GRR":["大急流城","大急流城","","Grand Rapids","美国","NA","",1],"GRU":["瓜鲁柳斯","瓜鲁柳斯","","São Paulo","巴西","LA","",1],"GRV":["格罗兹尼","格罗兹尼","","Grozny","俄罗斯","EU","",1],"GRW":["圣克鲁什-达格拉西奥萨","圣克鲁什-达格拉西奥萨","","Santa Cruz da Graciosa","葡萄牙","EU"],"GRX":["格拉纳达","格拉纳达","","Granada","西班牙","EU"],"GRY":["格里姆塞岛","格里姆塞岛","","Grímsey/Sandvík","冰岛","EU"],"GRZ":["格拉茨","格拉茨","","Feldkirchen bei Graz","奥地利","EU","",1],"GSM":["格什姆岛","格什姆岛","","Qeshm(Dayrestan)","伊朗","ME","",1],"GSO":["格林斯伯勒","格林斯伯勒","","Greensboro","美国","NA","",1],"GSP":["格里尔","格里尔","","Greenville/Greer/Spartanburg","美国","NA"],"GST":["古斯塔夫","古斯塔夫","","Gustavus","美国","NA"],"GSV":["萨拉托夫","萨拉托夫","","Saratov","俄罗斯","EU","",1],"GTE":["格鲁特岛","格鲁特岛","","Groote Eylandt","澳大利亚","OC"],"GTF":["大瀑布城","大瀑布城","","Great Falls","美国","NA"],"GTR":["哥伦布","哥伦布","","Columbus/W Point/Starkville","美国","NA"],"GUA":["危地马拉城","危地马拉城","","Guatemala City","危地马拉","NA","",1],"GUC":["吉纳森","吉纳森","","Gunnison","美国","NA"],"GUM":["阿加尼亚","阿加尼亚","","Hagåtña","关岛","OC","",1],"GUP":["蓋洛普","蓋洛普","","Gallup","美国","NA"],"GUR":["阿洛陶","阿洛陶","","Gurney","巴布亚新几内亚","OC"],"GUW":["阿特劳","阿特劳","","Atyrau","哈萨克斯坦","CA","",1],"GVA":["日内瓦","日内瓦","","Geneva","瑞士","EU","",1],"GVR":["瓦拉达里斯州长","瓦拉达里斯州长","","Governador Valadares","巴西","LA"],"GWD":["瓜达尔","瓜达尔","","Gurandani","巴基斯坦","SA","",1],"GWL":["瓜廖尔","瓜廖尔","","Gwalior","印度","SA"],"GWT":["叙尔特岛","叙尔特岛","","Sylt","德国","EU"],"GXF":["塞永","塞永","","Seiyun","也门","ME","",1],"GXG":["內加熱","內加熱","","Negage","安哥拉","AF"],"GXH":["合作","合作","","Gannan (Xiahe)","中国","CN"],"GYA":["瓜亚拉梅林","瓜亚拉梅林","","Guayaramerín","玻利维亚","LA"],"GYD":["巴库","巴库","","Baku","阿塞拜疆","CA","",1],"GYE":["瓜亚基尔","瓜亚基尔","","Guayaquil","厄瓜多尔","LA","",1],"GYM":["瓜伊马斯","瓜伊马斯","","Guaymas","墨西哥","NA"],"GYN":["戈亚尼亚","戈亚尼亚","","Goiânia","巴西","LA","",1],"GYS":["广元","广元","","Guangyuan (Lizhou)","中国","CN"],"GYU":["固原","固原","","Guyuan (Yuanzhou)","中国","CN"],"GYY":["加里","加里","","Gary","美国","NA"],"GZP":["加济帕夏","加济帕夏","","Gazipaşa","土耳其","EU"],"GZT":["加济安泰普","加济安泰普","","Gaziantep","土耳其","EU","",1],"HAC":["八丈町","八丈町","","Hachijojima","日本","EA"],"HAD":["哈尔姆斯塔德","哈尔姆斯塔德","","Halmstad","瑞典","EU"],"HAH":["莫洛尼","莫洛尼","","Moroni","科摩罗","AF"],"HAJ":["汉诺威","汉诺威","","Hannover","德国","EU","",1],"HAK":["海口","海口","","Haikou (Meilan)","中国","CN","",1],"HAM":["汉堡","汉堡","","Hamburg","德国","EU","",1],"HAN":["河内","河内","","Hanoi (Soc Son)","越南","SEA","",1],"HAQ":["Hanimaadhoo","","","Haa Dhaalu Atoll","马尔代夫","SA","",1],"HAS":["哈伊勒","哈伊勒","","Hail","沙特阿拉伯","ME","",1],"HAU":["海于格松","","","Karmøy","挪威","EU"],"HAV":["哈瓦那","哈瓦那","","Havana","古巴","NA","",1],"HBA":["霍巴特","霍巴特","","Hobart (Cambridge)","澳大利亚","OC","",1],"HBE":["Alexandria","","","Alexandria","埃及","AF","",1],"HBX":["胡布利","胡布利","","Hubballi","印度","SA"],"HCJ":["河池","河池","","Hechi (Jinchengjiang)","中国","CN"],"HCR":["Holy Cross","","","Holy Cross","美国","NA"],"HCZ":["郴州","郴州","","Chenzhou","中国","CN"],"HDF":["黑灵斯多夫","黑灵斯多夫","","Zirchow","德国","EU"],"HDG":["邯郸","邯郸","","Handan","中国","CN"],"HDM":["哈马丹","哈马丹","","Hamadan","伊朗","ME"],"HDN":["海登","海登","","Hayden","美国","NA"],"HDS":["胡德斯普雷特空軍基地","","","Hoedspruit","南非","AF"],"HDY":["合艾","合艾","","Hat Yai","泰国","SEA","",1],"HEA":["赫拉特","赫拉特","","Guzara","阿富汗","SA","",1],"HEH":["黑河","黑河","","Heho","缅甸","SEA"],"HEK":["黑河","黑河","","Heihe","中国","CN"],"HEL":["赫尔辛基","赫尔辛基","","Helsinki (Vantaa)","芬兰","EU","",1],"HER":["伊拉克利翁","伊拉克利翁","","Heraklion","希腊","EU","",1],"HET":["呼和浩特","呼和浩特","","Hohhot","中国","CN","",1],"HFA":["海法","海法","","Haifa","以色列","ME"],"HFE":["合肥","合肥","","Hefei","中国","CN","",1],"HFN":["赫本","赫本","","Höfn","冰岛","EU"],"HFT":["哈默弗斯特","哈默弗斯特","","Hammerfest","挪威","EU"],"HGA":["哈尔格萨","哈尔格萨","","Hargeisa","索马里","AF","",1],"HGH":["杭州","杭州","","Hangzhou","中国","CN","",1],"HGI":["伊塔讷格尔","伊塔讷格尔","","Hollongi","印度","SA"],"HGN":["湄宏顺","","","Mae Hong Son","泰国","SEA"],"HGO":["科霍戈","科霍戈","","Korhogo","科特迪瓦","AF"],"HGR":["黑格斯敦","黑格斯敦","","Hagerstown","美国","NA"],"HGU":["芒特哈根","","","Mount Hagen","巴布亚新几内亚","OC"],"HHH":["希尔顿黑德岛","希尔顿黑德岛","","Hilton Head Island","美国","NA"],"HHN":["莱茵兰-普法尔茨州","莱茵兰-普法尔茨州","","Frankfurt am Main (Lautzenhausen)","德国","EU","",1],"HHQ":["華欣","","","Hua Hin","泰国","SEA"],"HHR":["霍桑市際","","","Hawthorne","美国","NA"],"HIA":["淮安","淮安","","Huai'an","中国","CN","",1],"HIB":["希宾","希宾","","Hibbing","美国","NA"],"HID":["霍恩岛","","","Horn","澳大利亚","OC"],"HII":["哈瓦苏湖城","哈瓦苏湖城","","Lake Havasu City","美国","NA"],"HIJ":["广岛","广岛","","Hiroshima","日本","EA","",1],"HIN":["泗川","泗川","","Sacheon","韩国","EA"],"HIR":["霍尼亚拉","霍尼亚拉","","Honiara","所罗门群岛","OC","",1],"HJJ":["怀化","怀化","","Huaihua","中国","CN"],"HJR":["克久拉霍","克久拉霍","","Khajuraho","印度","SA"],"HKD":["函馆","函馆","","Hakodate","日本","EA","",1],"HKG":["香港","香港","","Hong Kong","中国香港","HMT","",1],"HKK":["霍基蒂卡","霍基蒂卡","","","新西兰","OC"],"HKN":["霍斯金斯","","","Kimbe","巴布亚新几内亚","OC"],"HKT":["普吉府","普吉府","","Phuket","泰国","SEA","",1],"HLA":["蘭塞里亞","","","Johannesburg","南非","AF","",1],"HLD":["海拉尔区","海拉尔区","","Hailar","中国","CN","",1],"HLE":["詹姆斯敦","詹姆斯敦","","Jamestown","圣赫勒拿、阿森松和特里斯坦-达库尼亚","AF"],"HLN":["赫勒拿","赫勒拿","","Helena","美国","NA"],"HLP":["雅加达","雅加达","","Jakarta","印度尼西亚","SEA","",1],"HLZ":["哈密尔顿","哈密尔顿","","Hamilton","新西兰","OC"],"HMA":["汉特-曼西斯克","汉特-曼西斯克","","Khanty-Mansiysk","俄罗斯","EU"],"HMB":["索哈杰","索哈杰","","Suhaj","埃及","AF","",1],"HME":["哈西迈萨乌德","哈西迈萨乌德","","Hassi Messaoud","阿尔及利亚","AF"],"HMI":["哈密","哈密","","Hami","中国","CN"],"HMO":["埃莫西约","埃莫西约","","Hermosillo","墨西哥","NA","",1],"HNA":["花卷","花卷","","Hanamaki","日本","EA"],"HND":["东京羽田","东京","","Tokyo","日本","EA","C:TYO",1],"HNL":["火奴鲁鲁","火奴鲁鲁","","Honolulu, Oahu","美国","OC","",1],"HNM":["哈納","哈納","","Hana","美国","OC"],"HNS":["海恩斯","海恩斯","","Haines","美国","NA"],"HNY":["衡阳","衡阳","","Hengyang","中国","CN"],"HOB":["利郡區域","","","Hobbs","美国","NA"],"HOF":["胡富夫","","","Hofuf","沙特阿拉伯","ME","",1],"HOG":["奥尔金","奥尔金","","Holguin","古巴","NA","",1],"HOI":["豪環礁","豪環礁","","Otepa","法属波利尼西亚","OC"],"HOM":["荷马","荷马","","Homer","美国","NA"],"HOR":["奥尔塔","奥尔塔","","Horta","葡萄牙","EU"],"HOT":["温泉城","温泉城","","Hot Springs","美国","NA"],"HOU":["大休斯顿","大休斯顿","","Houston","美国","NA","",1],"HOV":["霍夫登厄什塔-沃尔达","","","Ørsta","挪威","EU"],"HPA":["湯加哈島","","","Lifuka","汤加","OC"],"HPG":["湖北神农架国家公园","湖北神农架国家公园","","Shennongjia (Hongping)","中国","CN"],"HPH":["海防","海防","","Haiphong (Hai An)","越南","SEA","",1],"HPN":["怀特普莱恩斯","怀特普莱恩斯","","White Plains","美国","NA"],"HQL":["塔什库尔干红其拉甫","","","Tashikuergan","中国","CN"],"HRB":["哈尔滨","哈尔滨","","Harbin","中国","CN","",1],"HRE":["哈拉雷","哈拉雷","","Harare","津巴布韦","AF","",1],"HRG":["赫尔格达","赫尔格达","","Hurghada","埃及","AF","",1],"HRI":["汉班托塔","汉班托塔","","Mattala","斯里兰卡","SA"],"HRL":["哈灵根","哈灵根","","Harlingen","美国","NA"],"HRO":["阿肯色州哈里森","阿肯色州哈里森","","Harrison","美国","NA"],"HSA":["图尔克斯坦","图尔克斯坦","","Turkıstan","哈萨克斯坦","CA","",1],"HSC":["韶关","韶关","","Shaoguan","中国","CN"],"HSG":["佐贺","佐贺","","Saga","日本","EA","",1],"HSL":["胡斯利亚","胡斯利亚","","Huslia","美国","NA"],"HSN":["舟山","舟山","","Zhoushan","中国","CN","",1],"HSR":["萨乌拉施特拉","萨乌拉施特拉","","Rajkot","印度","SA","",1],"HSS":["Hisar","","","Hisar","印度","SA","",1],"HSV":["亨茨维尔","亨茨维尔","","Huntsville","美国","NA"],"HTA":["赤塔","赤塔","","Chita","俄罗斯","EU","",1],"HTG":["Khatanga","","","Khatanga","俄罗斯","EU"],"HTI":["聖靈群島","聖靈群島","","Hamilton Island","澳大利亚","OC"],"HTN":["和田","和田","","Hotan","中国","CN"],"HTS":["亨廷顿","亨廷顿","","Huntington","美国","NA"],"HTT":["茫崖","茫崖","","Mengnai","中国","CN"],"HTY":["安条克","安条克","","Antakya","土耳其","EU"],"HUH":["特乌拉伊家族","特乌拉伊家族","","Fare","法属波利尼西亚","OC"],"HUI":["顺化","顺化","","Huế","越南","SEA","",1],"HUN":["花莲","花莲","","Hualien City","中国台湾","HMT","",1],"HUO":["霍林郭勒霍林河","","","Holingol","中国","CN"],"HUU":["瓦努科","瓦努科","","Huánuco","秘鲁","LA"],"HUX":["瓦图尔科","瓦图尔科","","Huatulco","墨西哥","NA","",1],"HUY":["东约克郡","东约克郡","","Grimsby, Lincolnshire","英国","EU"],"HUZ":["惠州","惠州","","Huizhou (Pingtan)","中国","CN"],"HVB":["赫维湾","赫维湾","","Hervey Bay","澳大利亚","OC"],"HVD":["科布多城","","","Khovd","蒙古国","EA"],"HVG":["洪宁斯沃格","洪宁斯沃格","","Honningsvåg","挪威","EU"],"HVN":["聖路易","聖路易","","New Haven","美国","NA"],"HVR":["哈佛","哈佛","","Havre","美国","NA"],"HWR":["Halwara","","","Halwara","印度","SA","",1],"HXD":["德令哈","德令哈","","Delingha","中国","CN"],"HYA":["科德角门户","","","Hyannis","美国","NA"],"HYD":["海得拉巴","海得拉巴","","Hyderabad","印度","SA","",1],"HYN":["台州","台州","","Taizhou (Luqiao)","中国","CN"],"HYS":["海斯","海斯","","Hays","美国","NA"],"HZA":["菏泽","菏泽","","Heze (Dingtao)","中国","CN"],"HZG":["汉中","汉中","","Hanzhong (Chenggu)","中国","CN"],"HZH":["黎平县","黎平县","","Liping","中国","CN"],"IAA":["伊加尔卡","伊加尔卡","","Igarka","俄罗斯","EU"],"IAD":["华盛顿杜勒斯","华盛顿特区都会","","Dulles","美国","NA","",1],"IAG":["尼亚加拉瀑布城","尼亚加拉瀑布城","","Niagara Falls","美国","NA"],"IAH":["休斯敦","休斯敦","","Houston","美国","NA","",1],"IAM":["因阿迈纳斯","因阿迈纳斯","","In Aménas","阿尔及利亚","AF"],"IAN":["基亚娜","基亚娜","","Kiana","美国","NA"],"IAR":["雅罗斯拉夫尔","雅罗斯拉夫尔","","Tunoshna","俄罗斯","EU","",1],"IAS":["雅西","雅西","","Iaşi","罗马尼亚","EU","",1],"IBA":["伊巴丹","伊巴丹","","Ibadan","尼日利亚","AF"],"IBE":["伊瓦格","伊瓦格","","Ibagué","哥伦比亚","LA"],"IBR":["茨木","茨木","","Omitama","日本","EA","",1],"IBZ":["伊维萨岛","伊维萨岛","","Ibiza (Eivissa)","西班牙","EU","",1],"ICN":["首尔仁川","仁川","","Seoul","韩国","EA","",1],"ICT":["威奇托","威奇托","","Wichita","美国","NA"],"IDA":["爱达荷福尔斯","爱达荷福尔斯","","Idaho Falls","美国","NA"],"IDR":["印多尔","印多尔","","Indore","印度","SA","",1],"IEG":["绿山城","绿山城","","Nowe Kramsko","波兰","EU"],"IFJ":["伊萨菲厄泽","伊萨菲厄泽","","Ísafjörður","冰岛","EU"],"IFN":["伊斯法罕","伊斯法罕","","Isfahan","伊朗","ME","",1],"IGA":["馬修鎮","","","Matthew Town","巴哈马","NA"],"IGD":["厄德尔","厄德尔","","Iğdır","土耳其","EU"],"IGR":["伊瓜蘇港","伊瓜蘇港","","Puerto Iguazu","阿根廷","LA"],"IGT":["马加斯","马加斯","","Sunzha","俄罗斯","EU"],"IGU":["伊瓜苏","伊瓜苏","","Foz do Iguaçu","巴西","LA","",1],"IJK":["伊热夫斯克","伊热夫斯克","","Izhevsk","俄罗斯","EU"],"IKA":["德黑兰伊玛目霍梅尼","德黑兰","","Tehran","伊朗","ME","Q3616",1],"IKG":["Karakol","","","Karakol","吉尔吉斯斯坦","CA"],"IKI":["壹岐","壹岐","","Iki","日本","EA"],"IKS":["季克西","季克西","","Tiksi","俄罗斯","EU"],"IKT":["伊尔库茨克","伊尔库茨克","","Irkutsk","俄罗斯","EU","",1],"IKU":["塔姆齊","塔姆齊","","Tamchy","吉尔吉斯斯坦","CA","",1],"ILD":["莱里达","莱里达","","Lleida","西班牙","EU"],"ILG":["威尔明顿","威尔明顿","","Wilmington","美国","NA"],"ILI":["伊利亞姆納","伊利亞姆納","","Iliamna","美国","NA"],"ILM":["开普菲尔","开普菲尔","","Wilmington","美国","NA"],"ILO":["伊洛伊洛","伊洛伊洛","","Cabatuan","菲律宾","SEA","",1],"ILP":["松树岛","松树岛","","Île des Pins","新喀里多尼亚","OC"],"ILQ":["伊洛","伊洛","","Ilo","秘鲁","LA"],"ILR":["伊洛林","伊洛林","","Ilorin/Ogbomosho","尼日利亚","AF","",1],"ILS":["圣萨尔瓦多","圣萨尔瓦多","","San Salvador","萨尔瓦多","NA"],"ILY":["艾拉岛","艾拉岛","","Isle of Islay, Argyll and Bute","英国","EU"],"IMF":["因帕尔","因帕尔","","Imphal","印度","SA","",1],"IMP":["因佩拉特里斯","因佩拉特里斯","","Imperatriz","巴西","LA"],"IMT":["铁岭","铁岭","","Kingsford","美国","NA"],"INC":["银川","银川","","Yinchuan","中国","CN","",1],"IND":["印第安纳波利斯","印第安纳波利斯","","Indianapolis","美国","NA","",1],"INH":["伊尼扬巴内","伊尼扬巴内","","Inhambane","莫桑比克","AF"],"INI":["尼什","尼什","","Niš","塞尔维亚","EU","",1],"INL":["国际瀑布城","国际瀑布城","","International Falls","美国","NA"],"INN":["因斯布鲁克","因斯布鲁克","","Innsbruck","奥地利","EU","",1],"INU":["亚伦区","亚伦区","","Yaren","瑙鲁","OC"],"INV":["因弗内斯","因弗内斯","","Inverness, Highland","英国","EU"],"INZ":["因萨拉赫","因萨拉赫","","In Salah","阿尔及利亚","AF"],"IOA":["约阿尼纳","约阿尼纳","","Ioannina","希腊","EU"],"IOM":["曼島足球總會","曼島足球總會","","Castletown, Rushen","马恩岛","EU","",1],"IOS":["伊列乌斯","伊列乌斯","","Ilhéus","巴西","LA"],"IPC":["安加罗阿","安加罗阿","","Isla De Pascua","智利","LA","",1],"IPH":["怡保","怡保","","Ipoh","马来西亚","SEA","",1],"IPI":["伊皮亚莱斯","伊皮亚莱斯","","Ipiales","哥伦比亚","LA"],"IPL":["因皮里尔","因皮里尔","","Imperial","美国","NA"],"IPN":["伊帕廷加","伊帕廷加","","Ipatinga","巴西","LA"],"IPT":["威廉斯波特","威廉斯波特","","Williamsport","美国","NA"],"IQM":["且末县","且末县","","Qiemo","中国","CN"],"IQN":["庆阳","庆阳","","Qingyang (Xifeng)","中国","CN"],"IQQ":["伊基克","伊基克","","Iquique","智利","LA","",1],"IQT":["伊基托斯","伊基托斯","","Iquitos","秘鲁","LA","",1],"IRG":["洛克哈特河","洛克哈特河","","Lockhart River","澳大利亚","OC"],"IRJ":["拉里奥哈","拉里奥哈","","La Rioja","阿根廷","LA"],"IRK":["柯克斯維爾","柯克斯維爾","","Kirksville","美国","NA"],"IRP":["伊西罗","伊西罗","","Isiro","刚果民主共和国","AF"],"ISA":["伊萨山","伊萨山","","Mount Isa","澳大利亚","OC"],"ISB":["伊斯兰堡首都区","伊斯兰堡首都区","","Attock","巴基斯坦","SA","",1],"ISE":["厄斯帕尔塔","厄斯帕尔塔","","Isparta","土耳其","EU"],"ISG":["石垣","石垣","","Ishigaki","日本","EA"],"ISK":["纳西克","纳西克","","Nashik","印度","SA","",1],"ISP":["長島","長島","","Islip","美国","NA"],"IST":["伊斯坦布尔","伊斯坦布尔","","Istanbul","土耳其","EU","Q406",1],"ISU":["苏莱曼尼亚","苏莱曼尼亚","","Sulaymaniyah","伊拉克","ME"],"ITB":["伊巴雅語","伊巴雅語","","Itaituba","巴西","LA"],"ITH":["伊萨卡","伊萨卡","","Ithaca","美国","NA"],"ITM":["大阪","大阪","","Osaka","日本","EA","",1],"ITO":["希洛","希洛","","Hilo","美国","OC"],"IUE":["纽埃","纽埃","","Alofi","纽埃","OC"],"IVC":["因弗卡吉尔","因弗卡吉尔","","Invercargill","新西兰","OC"],"IVL":["伊納里","伊納里","","Ivalo","芬兰","EU","",1],"IWA":["伊万诺沃","伊万诺沃","","Ivanovo","俄罗斯","EU"],"IWJ":["萩市","萩市","","Masuda","日本","EA"],"IWK":["岩国","岩国","","Iwakuni","日本","EA"],"IXA":["阿加尔塔拉","阿加尔塔拉","","Agartala","印度","SA"],"IXB":["西里古里","西里古里","","Siliguri","印度","SA","",1],"IXC":["昌迪加尔","昌迪加尔","","Chandigarh","印度","SA","",1],"IXD":["巴亚格拉吉区","巴亚格拉吉区","","Allahabad","印度","SA"],"IXE":["门格洛尔","门格洛尔","","Mangaluru","印度","SA","",1],"IXG":["贝尔高姆","贝尔高姆","","Belgaum","印度","SA"],"IXI":["北勒金布尔","北勒金布尔","","Lilabari","印度","SA"],"IXJ":["查谟","查谟","","Jammu","印度","SA"],"IXK":["朱纳格特","朱纳格特","","Keshod","印度","SA"],"IXL":["莱镇","莱镇","","Leh","印度","SA"],"IXM":["马杜赖","马杜赖","","Madurai","印度","SA"],"IXP":["伯坦果德","伯坦果德","","Pathankot","印度","SA"],"IXR":["兰契","兰契","","Ranchi","印度","SA"],"IXS":["锡尔杰尔","锡尔杰尔","","Silchar","印度","SA"],"IXU":["奥兰加巴德","奥兰加巴德","","Aurangabad","印度","SA"],"IXY":["康德拉","康德拉","","Kandla","印度","SA"],"IXZ":["布莱尔港","布莱尔港","","Port Blair","印度","SA","",1],"IZA":["戈亚纳","戈亚纳","","Juiz de Fora","巴西","LA"],"IZO":["出云","出云","","Izumo","日本","EA"],"IZT":["Ixtepec","","","Ixtepec","墨西哥","NA"],"JAC":["杰克逊","杰克逊","","Jackson","美国","NA"],"JAE":["哈恩","哈恩","","Jaén","秘鲁","LA"],"JAF":["贾夫纳","贾夫纳","","Jaffna","斯里兰卡","SA","",1],"JAI":["斋浦尔","斋浦尔","","Jaipur","印度","SA","",1],"JAN":["杰克逊","杰克逊","","Jackson","美国","NA"],"JAU":["豪哈","豪哈","","Jauja","秘鲁","LA"],"JAV":["伊卢利萨特","伊卢利萨特","","Ilulissat","格陵兰","NA","",1],"JAX":["杰克逊维尔城市群","杰克逊维尔城市群","","Jacksonville","美国","NA","",1],"JBQ":["圣多明哥伊莎貝拉","圣多明哥","","La Isabela","多米尼加","NA","Q34820"],"JBR":["琼斯伯勒","琼斯伯勒","","Jonesboro","美国","NA"],"JCL":["捷克布杰约维采","捷克布杰约维采","","České Budějovice","捷克","EU","",1],"JDF":["茹伊斯迪福拉","茹伊斯迪福拉","","Juiz de Fora","巴西","LA"],"JDH":["焦特布尔","焦特布尔","","Jodhpur","印度","SA"],"JDZ":["景德镇","景德镇","","Jingdezhen","中国","CN"],"JED":["吉达","吉达","","Jeddah","沙特阿拉伯","ME","",1],"JEE":["热雷米","热雷米","","Carrefour Sanon","海地","NA"],"JEG":["阿西亚特","阿西亚特","","Aasiaat","格陵兰","NA"],"JER":["泽西","泽西","","St. Peter","泽西","EU"],"JFK":["纽约肯尼迪","纽约","","New York","美国","NA","Q60",1],"JGA":["贾姆讷格尔","贾姆讷格尔","","Jamnagar","印度","SA"],"JGD":["加格达奇区","加格达奇区","","Jiagedaqi","中国","CN"],"JGN":["嘉峪关","嘉峪关","","Jiayuguan","中国","CN","",1],"JGS":["井冈山","井冈山","","Ji'an","中国","CN"],"JHB":["新山","新山","","Johor Bahru","马来西亚","SEA","",1],"JHG":["景洪","景洪","","Jinghong (Gasa)","中国","CN","",1],"JHM":["拉海纳","拉海纳","","Lahaina","美国","OC"],"JHS":["锡西米尤特","锡西米尤特","","Sisimiut","格陵兰","NA"],"JIB":["吉布提","吉布提","","Djibouti City","吉布提","AF","",1],"JIC":["金昌","金昌","","Jinchang","中国","CN"],"JIJ":["吉吉加","吉吉加","","Jijiga","埃塞俄比亚","AF","",1],"JIM":["吉马","吉马","","Jimma","埃塞俄比亚","AF"],"JIQ":["黔江区","黔江区","","Qianjiang","中国","CN"],"JJD":["克鲁斯","克鲁斯","","Cruz","巴西","LA"],"JJN":["泉州","泉州","","Quanzhou","中国","CN","",1],"JJU":["卡科尔托克","卡科尔托克","","Qaqortoq","格陵兰","NA"],"JKG":["延雪平","延雪平","","Jönköping","瑞典","EU"],"JKH":["希俄斯","希俄斯","","Chios Island","希腊","EU"],"JKR":["加德满都札納普爾","加德满都","","Janakpur","尼泊尔","SA","Q3037"],"JLN":["乔普林","乔普林","","Joplin","美国","NA"],"JLR":["贾巴尔普尔","贾巴尔普尔","","Jabalpur","印度","SA"],"JMJ":["澜沧拉祜族自治县","澜沧拉祜族自治县","","Pu'er (Lancang)","中国","CN"],"JMK":["米科诺斯岛","米科诺斯岛","","Mykonos","希腊","EU"],"JMS":["詹姆斯敦","詹姆斯敦","","Jamestown","美国","NA"],"JMU":["佳木斯","佳木斯","","Jiamusi","中国","CN"],"JNB":["约翰内斯堡","约翰内斯堡","","Johannesburg","南非","AF","",1],"JNG":["济宁","济宁","","Jining","中国","CN"],"JNH":["嘉兴","嘉兴","","Xiuzhou, Hangzhou","中国","CN"],"JNU":["朱諾","朱諾","","Juneau","美国","NA"],"JNZ":["锦州","锦州","","Jinzhou (Linghai)","中国","CN"],"JOE":["约恩苏","约恩苏","","Joensuu","芬兰","EU"],"JOG":["日惹","日惹","","Yogyakarta","印度尼西亚","SEA"],"JOI":["若因维利","若因维利","","Joinville","巴西","LA"],"JOL":["霍洛 (蘇祿)","霍洛 (蘇祿)","","Jolo","菲律宾","SEA"],"JOS":["乔斯","乔斯","","Jos","尼日利亚","AF"],"JPA":["若昂佩索阿","若昂佩索阿","","João Pessoa","巴西","LA","",1],"JRH":["焦尔哈德","焦尔哈德","","Jorhat","印度","SA"],"JRO":["乞力马扎罗山","乞力马扎罗山","","Arusha","坦桑尼亚","AF","",1],"JSA":["杰伊瑟尔梅尔","杰伊瑟尔梅尔","","","印度","SA"],"JSH":["锡蒂亚","锡蒂亚","","Crete Island","希腊","EU"],"JSI":["斯基亞索斯島","斯基亞索斯島","","Skiathos","希腊","EU"],"JSJ":["同江","同江","","Jiansanjiang","中国","CN"],"JSR":["杰索尔县","杰索尔县","","Jashore (Jessore)","孟加拉国","SA"],"JST":["约翰斯敦","约翰斯敦","","Johnstown","美国","NA"],"JTC":["阿雷阿尔瓦","阿雷阿尔瓦","","Bauru","巴西","LA"],"JTR":["圣托里尼","圣托里尼","","Santorini Island","希腊","EU","",1],"JUB":["朱巴","朱巴","","Juba","南苏丹","AF","",1],"JUJ":["佩里科","佩里科","","San Salvador de Jujuy","阿根廷","LA","",1],"JUL":["胡利亚卡","胡利亚卡","","Juliaca","秘鲁","LA","",1],"JUZ":["衢州","衢州","","Quzhou (Kezheng)","中国","CN"],"JXA":["鸡西","鸡西","","Jixi","中国","CN"],"JYV":["于韦斯屈莱","于韦斯屈莱","","Jyväskylän Maalaiskunta","芬兰","EU"],"JZH":["九寨镇","九寨镇","","Ngawa (Songpan)","中国","CN"],"KAB":["卡里巴","","","Kariba","津巴布韦","AF"],"KAC":["卡米什利","卡米什利","","Qamishli","叙利亚","ME"],"KAD":["卡杜纳","卡杜纳","","Kaduna","尼日利亚","AF","",1],"KAI":["凱厄圖爾國家公園","凱厄圖爾國家公園","","Kaieteur Falls","圭亚那","LA"],"KAJ":["卡亚尼","卡亚尼","","Kajaani","芬兰","EU"],"KAN":["卡诺","卡诺","","Kano","尼日利亚","AF","",1],"KAO":["库萨莫","库萨莫","","Kuusamo","芬兰","EU"],"KAT":["Awanui","","","Awanui","新西兰","OC"],"KAW":["高當","高當","","Kawthoung","缅甸","SEA"],"KBL":["喀布尔","喀布尔","","Kabul","阿富汗","SA","",1],"KBR":["哥打巴鲁县","哥打巴鲁县","","Kota Baharu","马来西亚","SEA"],"KBV":["甲米","甲米","","Krabi","泰国","SEA","",1],"KCH":["古晋省","古晋省","","Kuching","马来西亚","SEA","",1],"KCM":["卡赫拉曼马拉什","卡赫拉曼马拉什","","Kahramanmaraş","土耳其","EU"],"KCT":["Galle","","","Galle","斯里兰卡","SA"],"KCY":["Krasnoyarsk","","","Krasnoyarsk","俄罗斯","EU"],"KCZ":["高知","高知","","Nankoku","日本","EA","",1],"KDH":["坎大哈","坎大哈","","Kandahar","阿富汗","SA","",1],"KDL":["凯尔德拉","凯尔德拉","","Kärdla","爱沙尼亚","EU"],"KDM":["胡瓦杜环礁","胡瓦杜环礁","","Huvadhu Atoll","马尔代夫","SA"],"KDO":["拉穆环礁","拉穆环礁","","Kadhdhoo","马尔代夫","SA"],"KDU":["斯卡都要塞","斯卡都要塞","","Skardu","巴基斯坦","SA","",1],"KEF":["凯夫拉维克","凯夫拉维克","","Reykjavík","冰岛","EU","",1],"KEJ":["克麦罗沃","克麦罗沃","","Kemerovo","俄罗斯","EU","",1],"KEM":["凯米-托尔尼奥次区","凯米-托尔尼奥次区","","Kemi / Tornio","芬兰","EU"],"KEP":["尼泊尔根杰","尼泊尔根杰","","Nepalgunj","尼泊尔","SA"],"KER":["克尔曼","克尔曼","","Kerman","伊朗","ME","",1],"KET":["景栋","","","Kengtung","缅甸","SEA"],"KFS":["卡斯塔莫努","卡斯塔莫努","","Kastamonu","土耳其","EU"],"KGA":["卡南加","卡南加","","Kananga","刚果民主共和国","AF"],"KGC":["金斯科特 (南澳洲)","金斯科特 (南澳洲)","","","澳大利亚","OC"],"KGD":["波罗的斯克","波罗的斯克","","Kaliningrad","俄罗斯","EU","",1],"KGF":["卡拉干达","卡拉干达","","Karaganda","哈萨克斯坦","CA","",1],"KGI":["卡尔古利","卡尔古利","","Broadwood","澳大利亚","OC"],"KGL":["基加利","基加利","","Kigali","卢旺达","AF","",1],"KGP":["科加雷姆","科加雷姆","","Kogalym","俄罗斯","EU"],"KGS":["科斯岛","科斯岛","","Kos Island","希腊","EA","",1],"KGT":["甘孜藏族自治州","甘孜藏族自治州","","Garzê (Kangding)","中国","CN"],"KHD":["霍拉马巴德","霍拉马巴德","","","伊朗","ME"],"KHG":["喀什","喀什","","Kashgar","中国","CN","",1],"KHH":["高雄","高雄","","Kaohsiung (Xiaogang)","中国台湾","HMT","",1],"KHI":["卡拉奇","卡拉奇","","Karachi","巴基斯坦","SA","",1],"KHK":["哈尔克","哈尔克","","Khark","伊朗","ME"],"KHN":["南昌","南昌","","Nanchang","中国","CN","",1],"KHS":["海塞卜","海塞卜","","Khasab","阿曼","ME"],"KHT":["霍斯特省","霍斯特省","","Khost","阿富汗","SA"],"KHV":["伯力","伯力","","Khabarovsk","俄罗斯","EU"],"KHX":["Kihihi","","","Kihihi","乌干达","AF"],"KIH":["基什岛","基什岛","","Kish Island","伊朗","ME","",1],"KIJ":["新潟","新潟","","Niigata","日本","EA","",1],"KIK":["基尔库克","基尔库克","","Kirkuk","伊拉克","ME","",1],"KIM":["金伯利","金伯利","","Kimberley","南非","AF","",1],"KIN":["金斯敦","金斯敦","","Kingston","牙买加","NA","Q34692",1],"KIR":["特拉利","特拉利","","Farranfore","爱尔兰","EU"],"KIS":["基苏木","基苏木","","Kisumu","肯尼亚","AF","",1],"KIX":["大阪关西","京阪神","","Osaka","日本","EA","",1],"KJA":["克拉斯诺亚尔斯克","克拉斯诺亚尔斯克","","Krasnoyarsk","俄罗斯","EU","",1],"KJB":["卡努尔","卡努尔","","Orvakal","印度","SA"],"KJH":["凯里","凯里","","Kaili  (Huangping)","中国","CN"],"KJI":["布尔津县","布尔津县","","Burqin","中国","CN"],"KJT":["西爪哇省","西爪哇省","","Kertajati","印度尼西亚","SEA"],"KKC":["坤敬","","","Khon Kaen","泰国","SEA"],"KKE":["凯里凯里","凯里凯里","","Kerikeri","新西兰","OC"],"KKJ":["北九州","北九州","","Kitakyushu","日本","EA","",1],"KKN":["希尔克内斯","希尔克内斯","","Kirkenes","挪威","EU"],"KKR":["考库拉环礁","考库拉环礁","","Raitahiti","法属波利尼西亚","OC"],"KKS":["卡尚","卡尚","","Kashan","伊朗","ME"],"KKW":["Kikwit","","","Kikwit","刚果民主共和国","AF"],"KKX":["喜界","","","Kikai","日本","EA"],"KLH":["戈尔哈布尔","戈尔哈布尔","","Kolhapur","印度","SA"],"KLO":["卡利博","卡利博","","Kalibo","菲律宾","SEA","",1],"KLR":["卡尔马","卡尔马","","Kalmar","瑞典","EU"],"KLU":["克拉根福","克拉根福","","Klagenfurt am Wörthersee","奥地利","EU","",1],"KLV":["卡罗维发利","卡罗维发利","","Karlovy Vary","捷克","EU","",1],"KLW":["克拉瓦克","克拉瓦克","","Klawock","美国","NA"],"KLX":["卡拉马塔","卡拉马塔","","Kalamata","希腊","EU"],"KMA":["Kerema","","","Kerema","巴布亚新几内亚","OC"],"KMC":["哈费尔巴廷","哈费尔巴廷","","King Khaled Military City","沙特阿拉伯","ME"],"KME":["尚古古","尚古古","","Kamembe","卢旺达","AF"],"KMG":["昆明","昆明","","Kunming","中国","CN","",1],"KMI":["宫崎","宫崎","","Miyazaki","日本","EA","",1],"KMJ":["熊本","熊本","","Kumamoto","日本","EA","",1],"KMQ":["小松","小松","","Kanazawa","日本","EA","",1],"KMS":["库马西","库马西","","Kumasi","加纳","AF","",1],"KMW":["科斯特罗马","科斯特罗马","","Kostroma","俄罗斯","EU"],"KND":["Kindu","","","Kindu","刚果民主共和国","AF"],"KNG":["凱馬那","凱馬那","","Kaimana","印度尼西亚","SEA"],"KNH":["金门县","金门县","","Shang-I","中国台湾","HMT"],"KNO":["棉兰","棉兰","","Beringin","印度尼西亚","SEA","",1],"KNQ":["科内","科内","","Koné","新喀里多尼亚","OC"],"KNS":["柯里","柯里","","","澳大利亚","OC"],"KNU":["坎普尔","坎普尔","","Kanpur","印度","SA"],"KNX":["库努纳拉","库努纳拉","","Kununurra","澳大利亚","OC"],"KOA":["凯卢阿","凯卢阿","","Kailua-Kona","美国","OC","",1],"KOE":["古邦","古邦","","Kupang","印度尼西亚","SEA"],"KOI":["梅恩兰岛","梅恩兰岛","","Kirkwall, Orkney Islands","英国","EU"],"KOJ":["鹿兒島","鹿兒島","","Kagoshima","日本","EA","",1],"KOK":["雅各布斯塔德","雅各布斯塔德","","Kokkola / Kruunupyy","芬兰","EU"],"KOP":["那空拍儂","","","Nakhon Phanom","泰国","SEA"],"KOS":["西哈努克","西哈努克","","Preah Sihanouk","柬埔寨","SEA","",1],"KOV":["科克舍套","科克舍套","","Kokshetau","哈萨克斯坦","CA","",1],"KPO":["浦项","浦项","","Pohang","韩国","EA"],"KPW":["克佩爾韋耶姆","克佩爾韋耶姆","","Keperveem","俄罗斯","EU"],"KQH":["阿杰梅尔","阿杰梅尔","","Ajmer (Kishangarh)","印度","SA"],"KQT":["博赫塔尔","博赫塔尔","","Bokhtar","塔吉克斯坦","CA","",1],"KRF":["克拉姆福什","克拉姆福什","","Nyland","瑞典","EU"],"KRK":["克拉科夫","克拉科夫","","Balice","波兰","EU","",1],"KRL":["库尔勒","库尔勒","","Korla","中国","CN"],"KRN":["基律纳","基律纳","","Kiruna","瑞典","EU","",1],"KRO":["库尔干","库尔干","","Kurgan","俄罗斯","EU"],"KRP":["中日德兰","","","Karup","丹麦","EU"],"KRR":["索契克拉斯诺达尔","索契","","Krasnodar","俄罗斯","EU","Q39420",1],"KRS":["克里斯蒂安桑","克里斯蒂安桑","","Kristiansand(Kjevik)","挪威","EU","",1],"KRT":["喀土穆","喀土穆","","Khartoum","苏丹","AF","",1],"KRW":["土库曼巴希","土库曼巴希","","Turkmenbaşy","土库曼斯坦","CA"],"KSA":["科斯雷","","","Okat","密克罗尼西亚联邦","OC","",1],"KSC":["科希策","科希策","","Košice","斯洛伐克","EU"],"KSD":["卡尔斯塔德市镇","卡尔斯塔德市镇","","Karlstad","瑞典","EU"],"KSF":["卡塞尔","卡塞尔","","Calden","德国","EU","",1],"KSH":["克尔曼沙阿","克尔曼沙阿","","Kermanshah","伊朗","ME"],"KSL":["卡薩拉","卡薩拉","","Kassala","苏丹","AF"],"KSN":["库斯塔奈","库斯塔奈","","Kostanay","哈萨克斯坦","CA","",1],"KSU":["克里斯蒂安松","克里斯蒂安松","","Kvernberget","挪威","EU"],"KSY":["卡尔斯","卡尔斯","","Kars","土耳其","EU"],"KSZ":["科特拉斯","科特拉斯","","Kotlas","俄罗斯","EU"],"KTA":["卡拉萨 (西澳洲)","卡拉萨 (西澳洲)","","Karratha","澳大利亚","OC"],"KTD":["北大东","","","Kitadaitōjima","日本","EA"],"KTG":["吉打邦（頭彭）","吉打邦（頭彭）","","Ketapang","印度尼西亚","SEA"],"KTI":["德崇","","","Phnom Penh (Boeng Khyang)","柬埔寨","SEA","",1],"KTM":["加德满都特里布万","加德满都","","Kathmandu","尼泊尔","SA","Q3037",1],"KTN":["凯奇坎","凯奇坎","","Ketchikan","美国","NA"],"KTP":["金斯敦","金斯敦","","Tinson Pen","牙买加","NA","Q34692"],"KTT":["基蒂莱","基蒂莱","","Kittilä","芬兰","EU","",1],"KTW":["卡托维兹","卡托维兹","","Katowice","波兰","EU","",1],"KUA":["关丹县","关丹县","","Kuantan","马来西亚","SEA"],"KUF":["萨马拉","萨马拉","","Samara","俄罗斯","EU","",1],"KUH":["钏路","钏路","","Kushiro","日本","EA"],"KUL":["吉隆坡","吉隆坡","","Sepang","马来西亚","SEA","",1],"KUM":["屋久岛","屋久岛","","Yakushima","日本","EA"],"KUN":["考纳斯","考纳斯","","Kaunas","立陶宛","EU","",1],"KUO":["库奥皮奥","库奥皮奥","","Kuopio / Siilinjärvi","芬兰","EU","",1],"KUS":["庫盧蘇克","庫盧蘇克","","Kulusuk","格陵兰","NA"],"KUT":["库塔伊西","库塔伊西","","Kopitnari","格鲁吉亚","CA","",1],"KUU":["古卢","古卢","","Bhuntar","印度","SA"],"KUV":["群山","群山","","Gunsan","韩国","EA"],"KVA":["卡瓦拉","卡瓦拉","","Kavala","希腊","EU","",1],"KVG":["Kavieng","","","Kavieng","巴布亚新几内亚","OC"],"KVO":["克拉列沃","克拉列沃","","Kraljevo","塞尔维亚","EU"],"KVX":["基洛夫","基洛夫","","Kirov","俄罗斯","EU"],"KWA":["布裘兹空军基地","","","Kwajalein","马绍尔群岛","OC"],"KWE":["贵阳","贵阳","","Guiyang (Nanming)","中国","CN","",1],"KWI":["科威特","科威特城","","Kuwait City","科威特","ME","",1],"KWJ":["光州","光州","","Gwangju","韩国","EA","Q41283"],"KWL":["桂林","桂林","","Guilin (Lingui)","中国","CN","",1],"KWM":["Kowanyama","","","Kowanyama","澳大利亚","OC"],"KWZ":["科卢韦齐","科卢韦齐","","Kolwezi","刚果民主共和国","AF"],"KXB":["Kolaka","","","Kolaka","印度尼西亚","SEA"],"KXK":["阿穆尔河畔共青城","阿穆尔河畔共青城","","Komsomolsk-on-Amur","俄罗斯","EU"],"KYA":["科尼亚","科尼亚","","Konya","土耳其","EU","",1],"KYD":["兰屿","兰屿","","Orchid Island","中国台湾","HMT"],"KYP":["皎漂","","","Kyaukpyu","缅甸","SEA"],"KYS":["卡伊","卡伊","","Kayes","马里","AF"],"KYZ":["克孜勒","克孜勒","","Kyzyl","俄罗斯","EU"],"KZI":["科扎尼","科扎尼","","Kozani","希腊","EU"],"KZN":["喀山","喀山","","Kazan","俄罗斯","EU","",1],"KZO":["克孜勒奥尔达","克孜勒奥尔达","","Kyzylorda","哈萨克斯坦","CA","",1],"KZR":["屈塔希亚","屈塔希亚","","Altıntaş","土耳其","EU"],"LAE":["莱城","","","Lae","巴布亚新几内亚","OC","",1],"LAF":["拉斐特","拉斐特","","West Lafayette","美国","NA"],"LAJ":["拉热斯","拉热斯","","Lages","巴西","LA"],"LAL":["莱克兰","莱克兰","","Lakeland","美国","NA"],"LAN":["兰辛","兰辛","","Lansing","美国","NA"],"LAO":["拉瓦格","拉瓦格","","Laoag City","菲律宾","SEA","",1],"LAP":["拉巴斯","拉巴斯","","La Paz","墨西哥","NA"],"LAQ":["贝达","贝达","","Al Albraq","利比亚","AF","",1],"LAR":["拉勒米","拉勒米","","Laramie","美国","NA"],"LAS":["拉斯维加斯","拉斯维加斯","","Las Vegas","美国","NA","",1],"LAU":["拉穆镇","拉穆镇","","Lamu","肯尼亚","AF"],"LAW":["劳顿","劳顿","","Lawton","美国","NA"],"LAX":["洛杉矶","洛杉矶","","Los Angeles","美国","NA","",1],"LBA":["利兹","利兹","","Leeds, West Yorkshire","英国","EU","",1],"LBB":["拉伯克","拉伯克","","Lubbock","美国","NA"],"LBC":["吕贝克","吕贝克","","Lübeck","德国","EU"],"LBD":["苦盏","苦盏","","Khujand","塔吉克斯坦","CA","",1],"LBE":["拉特罗布","拉特罗布","","Latrobe","美国","NA"],"LBF":["北普拉特","北普拉特","","North Platte","美国","NA"],"LBL":["利伯勒尔","利伯勒尔","","Liberal","美国","NA"],"LBS":["兰巴萨","兰巴萨","","Labasa","斐济","OC"],"LBU":["纳闽国会议席","纳闽国会议席","","Labuan","马来西亚","SEA"],"LBV":["利伯维尔","利伯维尔","","Libreville","加蓬","AF","",1],"LCA":["拉纳卡","拉纳卡","","Larnaca","塞浦路斯","EU","",1],"LCE":["拉塞瓦","拉塞瓦","","La Ceiba","洪都拉斯","NA"],"LCG":["拉科鲁尼亚","拉科鲁尼亚","","Culleredo","西班牙","EU"],"LCH":["莱克查尔斯","莱克查尔斯","","Lake Charles","美国","NA"],"LCJ":["罗兹","罗兹","","Łódź","波兰","EU","",1],"LCK":["哥伦布里肯巴克","哥伦布","","Columbus","美国","NA","Q16567"],"LCX":["连城县","连城县","","Longyan (Liancheng)","中国","CN"],"LCY":["伦敦倫敦城市","伦敦","","London","英国","EU","Q84"],"LDB":["隆德里纳","隆德里纳","","Londrina","巴西","LA"],"LDE":["塔布","塔布","","Tarbes/Lourdes/Pyrénées","法国","EU"],"LDS":["伊春","伊春","","Yichun","中国","CN"],"LDU":["拿笃","","","Lahad Datu","马来西亚","SEA"],"LDX":["马罗尼河畔圣洛朗","马罗尼河畔圣洛朗","","Saint-Laurent-du-Maroni","法属圭亚那","LA"],"LDY":["德里","德里","","Derry, Derry and Strabane","英国","EU"],"LEA":["埃斯茅斯","埃斯茅斯","","Exmouth","澳大利亚","OC"],"LEB":["莱巴嫩","莱巴嫩","","Lebanon","美国","NA"],"LED":["圣彼得堡","圣彼得堡","","St. Petersburg","俄罗斯","EU","",1],"LEI":["阿尔梅里亚","阿尔梅里亚","","Almería","西班牙","EU"],"LEJ":["萨勒河畔哈雷","萨勒河畔哈雷","","Schkeuditz","德国","EU","",1],"LEN":["莱昂","莱昂","","La Virgen del Camino","西班牙","EU"],"LER":["Leinster Airport","","","","澳大利亚","OC"],"LET":["莱蒂西亚","莱蒂西亚","","Leticia","哥伦比亚","LA"],"LEU":["安道尔","安道尔","","La Seu d'Urgell Pyrenees and Andorra","西班牙","EU"],"LEX":["列克星敦","列克星敦","","Lexington","美国","NA"],"LFM":["拉默爾德","拉默爾德","","Lamerd","伊朗","ME"],"LFQ":["临汾","临汾","","Linfen (Yaodu)","中国","CN"],"LFT":["拉法叶","拉法叶","","Lafayette","美国","NA"],"LFW":["洛美","洛美","","Lomé","多哥","AF","",1],"LGA":["纽约拉瓜迪亚","纽约","","New York","美国","NA","Q60",1],"LGB":["长滩","长滩","","Long Beach","美国","NA","",1],"LGG":["列日","列日","","Grâce-Hollogne","比利时","EU"],"LGI":["长岛亡者礁","长岛","","Deadman's Cay","巴哈马","NA","Q890879"],"LGK":["浮罗交怡国会议席","浮罗交怡国会议席","","Langkawi","马来西亚","SEA","",1],"LGW":["伦敦盖特威克","伦敦","","London","英国","EU","Q84",1],"LHE":["拉合尔","拉合尔","","Lahore","巴基斯坦","SA","",1],"LHG":["Lightning Ridge Airport","","","","澳大利亚","OC","AU:"],"LHL":["拉欽","","","Lachin","阿塞拜疆","CA"],"LHR":["伦敦希思罗","伦敦","","London","英国","EU","Q84",1],"LHS":["科洛尼亞拉斯赫拉斯","","","Las Heras","阿根廷","LA"],"LHW":["兰州","兰州","","Lanzhou (Yongdeng)","中国","CN","",1],"LIF":["利富","利富","","Lifou","新喀里多尼亚","OC"],"LIG":["利摩日","利摩日","","Limoges/Bellegarde","法国","EU"],"LIH":["利胡埃","利胡埃","","Lihue, Kauai","美国","OC","",1],"LIL":["里尔","里尔","","Lesquin","法国","EU","",1],"LIM":["利马","利马","","Lima","秘鲁","LA","",1],"LIN":["米兰","米兰","","Segrate (MI)","意大利","EU","",1],"LIO":["利蒙","利蒙","","Limón","哥斯达黎加","NA"],"LIR":["利韦里亚","利韦里亚","","Liberia","哥斯达黎加","NA","",1],"LIS":["里斯本","里斯本","","Lisbon","葡萄牙","EU","",1],"LIT":["小石城","小石城","","Little Rock","美国","NA"],"LIW":["壘固","","","Loikaw","缅甸","SEA"],"LJG":["丽江","丽江","","Lijiang","中国","CN","",1],"LJU":["卢布尔雅那","卢布尔雅那","","Zgornji Brnik","斯洛文尼亚","EU","",1],"LKL":["拉克塞爾夫","拉克塞爾夫","","Lakselv","挪威","EU"],"LKN":["莱克内斯","莱克内斯","","Leknes","挪威","EU"],"LKO":["勒克瑙","勒克瑙","","Lucknow","印度","SA","",1],"LLA":["吕勒奥","吕勒奥","","Luleå","瑞典","EU","",1],"LLF":["零陵区","零陵区","","Yongzhou","中国","CN"],"LLV":["吕梁","吕梁","","Lüliang","中国","CN"],"LLW":["利隆圭","利隆圭","","Lumbadzi","马拉维","AF","",1],"LMM":["洛斯莫奇斯","洛斯莫奇斯","","Los Mochis","墨西哥","NA"],"LMN":["林梦国会议席","林梦国会议席","","Limbang","马来西亚","SEA"],"LMP":["兰佩杜萨岛","兰佩杜萨岛","","Lampedusa","意大利","EU"],"LNJ":["临沧","临沧","","Lincang","中国","CN"],"LNK":["林肯","林肯","","Lincoln","美国","NA"],"LNL":["陇南","陇南","","Longnan (Cheng)","中国","CN"],"LNO":["Leonora","","","Leonora","澳大利亚","OC"],"LNS":["兰开斯特","兰开斯特","","Lancaster","美国","NA"],"LNY":["拉奈城","拉奈城","","Lanai City","美国","OC"],"LNZ":["林茨","林茨","","Linz","奥地利","EU","",1],"LOE":["黎市","","","","泰国","SEA","TH:"],"LOO":["艾格瓦特","艾格瓦特","","Laghouat","阿尔及利亚","AF"],"LOP":["馬塔蘭","馬塔蘭","","Mataram (Pujut, Lombok Tengah)","印度尼西亚","SEA","",1],"LOS":["伊凯贾","伊凯贾","","Lagos","尼日利亚","AF","",1],"LPA":["拉斯帕尔马斯","拉斯帕尔马斯","","Gran Canaria Island","西班牙","AF","",1],"LPB":["拉巴斯","拉巴斯","","La Paz / El Alto","玻利维亚","LA","",1],"LPF":["六盘水","六盘水","","Liupanshui (Zhongshan)","中国","CN"],"LPI":["林雪平","林雪平","","Linköping","瑞典","EU","",1],"LPL":["利物浦","利物浦","","Liverpool","英国","EU","",1],"LPP":["拉彭兰塔","拉彭兰塔","","Lappeenranta","芬兰","EU","",1],"LPQ":["琅勃拉邦","琅勃拉邦","","Luang Phabang","老挝","SEA","",1],"LPT":["林邦","","","","泰国","SEA"],"LRD":["拉雷多","拉雷多","","Laredo","美国","NA"],"LRE":["朗芮区政府","朗芮区政府","","Longreach","澳大利亚","OC"],"LRH":["拉罗谢尔","拉罗谢尔","","La Rochelle","法国","EU"],"LRM":["拉罗马纳","拉罗马纳","","La Romana","多米尼加","NA","",1],"LRR":["拉尔","拉尔","","Lar","伊朗","ME"],"LRU":["拉斯克鲁塞斯","拉斯克鲁塞斯","","Las Cruces","美国","NA"],"LSC":["拉塞雷纳","拉塞雷纳","","La Serena-Coquimbo","智利","LA"],"LSE":["拉克罗斯","拉克罗斯","","La Crosse","美国","NA"],"LSG":["Leshan (Wutongqiao)","","","Leshan (Wutongqiao)","中国","CN"],"LSH":["臘戍","","","Lashio","缅甸","SEA"],"LSI":["设得兰","设得兰","","Lerwick, Shetland","英国","EU"],"LSP":["蓬托菲霍","蓬托菲霍","","Paraguaná","委内瑞拉","LA"],"LSR":["東南亞齊縣","東南亞齊縣","","Kutacane","印度尼西亚","SEA"],"LST":["朗塞斯顿","朗塞斯顿","","Launceston (Western Junction)","澳大利亚","OC"],"LSY":["利斯莫尔","利斯莫尔","","Lismore","澳大利亚","OC"],"LTD":["Ghadames","","","Ghadames","利比亚","AF"],"LTI":["阿爾泰","阿爾泰","","Altai","蒙古国","EA"],"LTK":["拉塔基亚","拉塔基亚","","Latakia","叙利亚","ME"],"LTM":["莱瑟姆","莱瑟姆","","Lethem","圭亚那","LA"],"LTN":["伦敦卢顿","伦敦","","Luton, Luton","英国","EU","Q84",1],"LTO":["洛雷托","洛雷托","","Loreto","墨西哥","NA","",1],"LTU":["拉杜尔","拉杜尔","","Latur","印度","SA"],"LTX":["拉塔昆加","拉塔昆加","","Latacunga","厄瓜多尔","LA"],"LUA":["卢克拉","卢克拉","","Lukla","尼泊尔","SA"],"LUD":["吕德里茨","吕德里茨","","Luderitz","纳米比亚","AF"],"LUG":["卢加诺","卢加诺","","Agno","瑞士","EU"],"LUK":["辛辛那提","辛辛那提","","Cincinnati","美国","NA","Q43196"],"LUM":["德宏傣族景颇族自治州","德宏傣族景颇族自治州","","Dehong (Mangshi)","中国","CN"],"LUN":["卢萨卡","卢萨卡","","Lusaka","赞比亚","AF","",1],"LUQ":["圣路易斯","圣路易斯","","San Luis","阿根廷","LA"],"LUR":["Cape Lisburne","","","Cape Lisburne","美国","NA"],"LUV":["杜马图本","","","Langgur","印度尼西亚","SEA"],"LUX":["卢森堡","卢森堡","","Luxembourg","卢森堡","EU","",1],"LUZ":["卢布林","卢布林","","Lublin","波兰","EU","",1],"LVI":["利文斯敦","利文斯敦","","Livingstone","赞比亚","AF","",1],"LWB":["路易斯堡","路易斯堡","","Lewisburg","美国","NA"],"LWN":["久姆里","久姆里","","Gyumri","亚美尼亚","CA","",1],"LWS":["刘易斯顿","刘易斯顿","","Lewiston","美国","NA"],"LXA":["拉萨","拉萨","","Shannan (Gonggar)","中国","CN","",1],"LXR":["卢克索","卢克索","","Luxor","埃及","AF","",1],"LYA":["洛阳","洛阳","","Luoyang (Laocheng)","中国","CN","",1],"LYC":["吕克瑟勒","","","Lycksele","瑞典","EU"],"LYG":["连云港","连云港","","Lianyungang","中国","CN","",1],"LYH":["林奇堡","林奇堡","","Lynchburg","美国","NA"],"LYI":["临沂","临沂","","Linyi (Hedong)","中国","CN"],"LYP":["费萨拉巴德","费萨拉巴德","","Faisalabad","巴基斯坦","SA","",1],"LYR":["朗伊尔城","朗伊尔城","","Longyearbyen","挪威","EU"],"LYS":["里昂","里昂","","Colombier-Saugnieu, Rhône","法国","EU","",1],"LZG":["阆中","阆中","","Nanchong (Langzhong)","中国","CN"],"LZH":["柳州","柳州","","Liuzhou (Liujiang)","中国","CN"],"LZN":["南竿乡","南竿乡","","Matsu (Nangan)","中国台湾","HMT"],"LZO":["泸州","泸州","","Luzhou (Yunlong)","中国","CN"],"LZY":["林芝","林芝","","Nyingchi (Mainling)","中国","CN"],"MAA":["清奈大都會區","清奈大都會區","","Chennai","印度","SA","",1],"MAB":["马拉巴","马拉巴","","Marabá","巴西","LA"],"MAD":["马德里","马德里","","Madrid","西班牙","EU","",1],"MAF":["米德蘭","","","Midland","美国","NA"],"MAG":["马当","","","Madang","巴布亚新几内亚","OC"],"MAH":["马翁","马翁","","Mahón (Maó)","西班牙","EU","",1],"MAJ":["马朱罗","马朱罗","","Majuro Atoll","马绍尔群岛","OC","",1],"MAK":["马拉卡勒","马拉卡勒","","Malakal","南苏丹","AF"],"MAM":["马塔莫罗斯","马塔莫罗斯","","Matamoros","墨西哥","NA"],"MAN":["大曼徹斯特郡","大曼徹斯特郡","","Manchester, Greater Manchester","英国","EU","",1],"MAO":["马瑙斯","马瑙斯","","Manaus","巴西","LA","",1],"MAQ":["湄索县","湄索县","","","泰国","SEA"],"MAR":["马拉开波","马拉开波","","Maracaibo","委内瑞拉","LA","",1],"MAS":["莫莫特","","","Manus Island","巴布亚新几内亚","OC"],"MAU":["莫皮蒂岛","莫皮蒂岛","","","法属波利尼西亚","OC"],"MAZ":["马亚圭斯","马亚圭斯","","Mayaguez","波多黎各","NA"],"MBA":["蒙巴萨","蒙巴萨","","Mombasa","肯尼亚","AF","",1],"MBD":["梅富根","梅富根","","Mafeking","南非","AF"],"MBE":["纹别","纹别","","Monbetsu","日本","EA"],"MBI":["Mbeya","","","Mbeya","坦桑尼亚","AF"],"MBJ":["蒙特哥貝","蒙特哥貝","","Montego Bay","牙买加","NA","",1],"MBS":["米德兰","米德兰","","Freeland","美国","NA"],"MBT":["马斯巴特","马斯巴特","","Masbate","菲律宾","SEA"],"MBW":["墨尔本","墨尔本","","Melbourne","澳大利亚","OC","Q3141"],"MBX":["马里博尔","马里博尔","","Maribor","斯洛文尼亚","EU"],"MCE":["美熹德","美熹德","","Merced","美国","NA"],"MCG":["麦格拉思","麦格拉思","","McGrath","美国","NA"],"MCI":["堪萨斯城","堪萨斯城","","Kansas City","美国","NA","",1],"MCK":["麥庫克","麥庫克","","McCook","美国","NA"],"MCN":["梅肯","梅肯","","Macon","美国","NA"],"MCO":["奥兰多","奥兰多","","Orlando","美国","NA","",1],"MCP":["马卡帕","马卡帕","","Macapá","巴西","LA"],"MCT":["马斯喀特","马斯喀特","","Muscat/Seeb","阿曼","ME","",1],"MCW":["梅森城","梅森城","","Mason City","美国","NA"],"MCX":["马哈奇卡拉","马哈奇卡拉","","Makhachkala","俄罗斯","EU","",1],"MCY":["阳光海岸","阳光海岸","","Maroochydore","澳大利亚","OC","",1],"MCZ":["马塞约","马塞约","","Maceió","巴西","LA","",1],"MDC":["万鸦老","万鸦老","","Manado","印度尼西亚","SEA","",1],"MDE":["麦德林何塞·玛丽亚·科尔多瓦","麦德林","","Medellín","哥伦比亚","LA","Q48278",1],"MDG":["牡丹江","牡丹江","","Mudanjiang","中国","CN"],"MDI":["马库尔迪","马库尔迪","","Makurdi","尼日利亚","AF"],"MDK":["姆班达卡","姆班达卡","","Mbandaka","刚果民主共和国","AF"],"MDL":["曼德勒","曼德勒","","Mandalay","缅甸","SEA","",1],"MDQ":["马德普拉塔","马德普拉塔","","Mar del Plata","阿根廷","LA"],"MDT":["哈里斯堡","哈里斯堡","","Harrisburg","美国","NA"],"MDU":["Mendi","","","Mendi","巴布亚新几内亚","OC"],"MDW":["西芝加哥 (伊利諾伊州)","西芝加哥 (伊利諾伊州)","","Chicago","美国","NA","",1],"MDZ":["门多萨","门多萨","","Mendoza","阿根廷","LA","",1],"MEB":["墨尔本埃森登","墨尔本","","Essendon Fields","澳大利亚","OC","Q3141"],"MEC":["曼塔","曼塔","","Manta","厄瓜多尔","LA"],"MED":["麦地那","麦地那","","Medina","沙特阿拉伯","ME","",1],"MEE":["马雷岛","马雷岛","","Maré","新喀里多尼亚","OC"],"MEG":["Malanje","","","Malanje","安哥拉","AF"],"MEH":["加姆维克","加姆维克","","Mehamn","挪威","EU"],"MEI":["默里迪恩","默里迪恩","","Meridian","美国","NA"],"MEL":["墨尔本","墨尔本","","Melbourne","澳大利亚","OC","Q3141",1],"MEM":["孟菲斯","孟菲斯","","Memphis","美国","NA","",1],"MEQ":["朱月婷","","","Kuala Pesisir","印度尼西亚","SEA"],"MEX":["墨西哥城","墨西哥城","","Mexico City","墨西哥","NA","",1],"MFE":["麦卡伦","麦卡伦","","McAllen","美国","NA"],"MFK":["北竿乡","北竿乡","","Matsu (Beigan)","中国台湾","HMT"],"MFM":["澳门","澳门","","Nossa Senhora do Carmo","中国澳门","HMT","",1],"MFR":["梅德福","梅德福","","Medford","美国","NA"],"MFU":["姆富韋","姆富韋","","Mfuwe","赞比亚","AF","",1],"MGA":["马那瓜","马那瓜","","Managua","尼加拉瓜","NA","",1],"MGB":["石灰岩海岸","石灰岩海岸","","Mount Gambier","澳大利亚","OC"],"MGC":["密西根市 (印地安納州)","密西根市 (印地安納州)","","Michigan City","美国","NA"],"MGF":["马林加","马林加","","Maringá","巴西","LA"],"MGH":["马盖特（夸祖鲁-纳塔尔）","马盖特（夸祖鲁-纳塔尔）","","Margate","南非","AF"],"MGM":["蒙哥马利","蒙哥马利","","Montgomery","美国","NA"],"MGQ":["摩加迪休","摩加迪休","","Mogadishu","索马里","AF","",1],"MGW":["摩根敦","摩根敦","","Morgantown","美国","NA"],"MGZ":["丹老","丹老","","Mkeik","缅甸","SEA"],"MHD":["马什哈德","马什哈德","","Mashhad","伊朗","ME","",1],"MHG":["曼海姆","曼海姆","","Mannheim","德国","EU"],"MHH":["沼泽港","沼泽港","","Marsh Harbour","巴哈马","NA"],"MHK":["曼哈顿","曼哈顿","","Manhattan","美国","NA"],"MHQ":["玛丽港","玛丽港","","Mariehamn","芬兰","EU"],"MHT":["曼彻斯特","曼彻斯特","","Manchester","美国","NA"],"MHU":["Mount Hotham","","","Mount Hotham","澳大利亚","OC"],"MIA":["迈阿密","迈阿密","","Miami","美国","NA","Q8652",1],"MID":["梅里达","梅里达","","Mérida","墨西哥","NA","",1],"MIG":["绵阳","绵阳","","Mianyang (Fucheng)","中国","CN"],"MII":["马里利亚","马里利亚","","Marília","巴西","LA"],"MIM":["梅林布拉","梅林布拉","","Merimbula","澳大利亚","OC"],"MIR":["莫纳斯提尔","莫纳斯提尔","","Monastir","突尼斯","AF"],"MIU":["迈杜古里","迈杜古里","","Maiduguri","尼日利亚","AF","",1],"MJF":["莫舍恩","莫舍恩","","Mosjøen","挪威","EU"],"MJI":["的黎波里-米提加","","","Tripoli","利比亚","AF","",1],"MJK":["Denham","","","Denham","澳大利亚","OC"],"MJM":["姆布吉马伊","姆布吉马伊","","Mbuji Mayi","刚果民主共和国","AF"],"MJN":["马哈赞加","马哈赞加","","Mahajanga","马达加斯加","AF","",1],"MJT":["米蒂利尼","米蒂利尼","","Mytilene","希腊","EU"],"MJZ":["米尔内","米尔内","","Mirny","俄罗斯","EU"],"MKE":["密尔沃基","密尔沃基","","Milwaukee","美国","NA","",1],"MKG":["馬斯基根","馬斯基根","","Muskegon","美国","NA"],"MKK":["科納卡凱","科納卡凱","","Kaunakakai","美国","OC"],"MKL":["杰克逊","杰克逊","","Jackson","美国","NA"],"MKM":["沐胶省","沐胶省","","Mukah","马来西亚","SEA"],"MKP":["马凯莫","","","Makemo","法属波利尼西亚","OC"],"MKQ":["馬老奇","馬老奇","","Merauke","印度尼西亚","SEA"],"MKR":["Meekatharra Airport","","","","澳大利亚","OC","AU:"],"MKU":["Makokou","","","Makokou","加蓬","AF"],"MKW":["马诺夸里","马诺夸里","","Manokwari","印度尼西亚","SEA"],"MKY":["麦凯","麦凯","","Mackay","澳大利亚","OC"],"MKZ":["马六甲","马六甲","","Malacca","马来西亚","SEA"],"MLA":["瓦莱塔","瓦莱塔","","Valletta","马耳他","EU","",1],"MLB":["墨尔本","墨尔本","","Melbourne","美国","NA"],"MLE":["马累","马累","","Malé","马尔代夫","SA","",1],"MLG":["玛琅","玛琅","","Malang","印度尼西亚","SEA"],"MLI":["莫林","莫林","","Moline","美国","NA"],"MLM":["莫雷利亚","莫雷利亚","","Morelia","墨西哥","NA","",1],"MLN":["梅利利亚","梅利利亚","","Melilla","西班牙","AF"],"MLU":["门罗","门罗","","Monroe","美国","NA"],"MLW":["蒙罗维亚","蒙罗维亚","","Monrovia","利比里亚","AF","Q3748"],"MLX":["马拉蒂亚","马拉蒂亚","","Malatya","土耳其","EU"],"MMB":["大空町","大空町","","Ōzora","日本","EA"],"MMD":["南大东","","","Minamidaito","日本","EA"],"MME":["东北英格兰","东北英格兰","","Darlington, Durham","英国","EU"],"MMG":["Mount Magnet Airport","","","","澳大利亚","OC","AU:"],"MMH":["马麦斯湖","马麦斯湖","","Mammoth Lakes","美国","NA"],"MMJ":["松本","松本","","Matsumoto","日本","EA"],"MMK":["摩尔曼斯克","摩尔曼斯克","","Murmansk","俄罗斯","EU","",1],"MMO":["马尤城","马尤城","","Vila do Maio","佛得角","AF"],"MMX":["马尔默","马尔默","","Malmö","瑞典","EU","",1],"MMY":["宫古岛","宫古岛","","Miyakojima","日本","EA"],"MNC":["纳卡拉","纳卡拉","","Nacala","莫桑比克","AF"],"MNG":["马宁格里达","马宁格里达","","Maningrida","澳大利亚","OC"],"MNI":["普利茅斯","普利茅斯","","Gerald's Park","蒙特塞拉特","NA","",1],"MNJ":["马南扎里","马南扎里","","Mananjary","马达加斯加","AF"],"MNL":["马尼拉","马尼拉大都会","","Manila (Pasay)","菲律宾","SEA","",1],"MNX":["马尼科雷","马尼科雷","","Manicoré","巴西","LA"],"MOB":["莫比尔","莫比尔","","Mobile","美国","NA"],"MOC":["蒙蒂斯克拉鲁斯","蒙蒂斯克拉鲁斯","","Montes Claros","巴西","LA"],"MOG":["孟萨","孟萨","","Mong Hsat","缅甸","SEA"],"MOL":["莫尔德","莫尔德","","Årø","挪威","EU"],"MOQ":["穆龙达瓦","穆龙达瓦","","Morondava","马达加斯加","AF"],"MOT":["迈诺特","迈诺特","","Minot","美国","NA"],"MOV":["莫兰巴","莫兰巴","","Moranbah","澳大利亚","OC"],"MOZ":["摩丽雅岛","摩丽雅岛","","Moorea-Maiao","法属波利尼西亚","OC"],"MPA":["卡蒂马穆利洛","卡蒂马穆利洛","","Mpacha","纳米比亚","AF"],"MPH":["长滩","长滩","","Caticlan","菲律宾","SEA"],"MPL":["蒙彼利埃","蒙彼利埃","","Montpellier/Méditerranée","法国","EU","",1],"MPM":["马普托","马普托","","Maputo","莫桑比克","AF","",1],"MPN":["快活岭空军基地","","","Mount Pleasant","福克兰群岛","LA"],"MPY":["马里帕苏拉","马里帕苏拉","","Maripasoula","法属圭亚那","LA"],"MQF":["马格尼托哥尔斯克","马格尼托哥尔斯克","","Magnitogorsk","俄罗斯","EU","",1],"MQJ":["Khonuu","","","Khonuu","俄罗斯","EU"],"MQL":["米尔杜拉","米尔杜拉","","Mildura","澳大利亚","OC"],"MQM":["马尔丁","马尔丁","","Mardin","土耳其","EU"],"MQN":["摩城","摩城","","Mo i Rana","挪威","EU"],"MQP":["内尔斯普雷特","内尔斯普雷特","","Mbombela","南非","AF","",1],"MQS":["Lovell","","","Lovell","圣文森特和格林纳丁斯","NA"],"MQT":["马凯特","马凯特","","Gwinn","美国","NA"],"MQX":["默格莱","默格莱","","Mekele","埃塞俄比亚","AF"],"MRE":["马赛马拉","马赛马拉","","Serena","肯尼亚","AF"],"MRI":["安克雷奇","安克雷奇","","Anchorage","美国","NA","Q39450"],"MRS":["马赛","马赛","","Marignane, Bouches-du-Rhône","法国","EU","",1],"MRU":["马尼安平原","马尼安平原","","Plaine Magnien","毛里求斯","AF","",1],"MRV":["矿水城","矿水城","","Mineralnyye Vody","俄罗斯","EU","",1],"MRX":["马赫沙赫尔港","马赫沙赫尔港","","Mahshahr","伊朗","ME"],"MRY":["蒙特雷","蒙特雷","","Monterey","美国","NA"],"MRZ":["冰碛","冰碛","","Moree","澳大利亚","OC"],"MSJ":["三泽","三泽","","Misawa","日本","EA"],"MSL":["马斯尔肖尔斯","马斯尔肖尔斯","","Muscle Shoals","美国","NA"],"MSN":["麦迪逊","麦迪逊","","Madison","美国","NA"],"MSO":["米苏拉","米苏拉","","Missoula","美国","NA"],"MSP":["明尼阿波利斯","明尼阿波利斯","","Minneapolis","美国","NA","",1],"MSQ":["明斯克","明斯克","","Minsk","白俄罗斯","EU","",1],"MSR":["穆什","穆什","","Muş","土耳其","EU"],"MSS":["馬塞納 (紐約州村)","馬塞納 (紐約州村)","","Massena","美国","NA"],"MST":["马斯特里赫特","马斯特里赫特","","Maastricht","荷兰王国","EU","",1],"MSU":["马塞卢","马塞卢","","Maseru(Mazenod)","莱索托","AF","",1],"MSY":["新奥尔良","新奥尔良","","New Orleans","美国","NA","",1],"MSZ":["木萨米迪什","木萨米迪什","","Moçâmedes","安哥拉","AF"],"MTJ":["蒙特罗斯","蒙特罗斯","","Montrose","美国","NA"],"MTR":["蒙特里亚","蒙特里亚","","Montería","哥伦比亚","LA"],"MTT":["米纳蒂特兰","米纳蒂特兰","","Cosoleacaque","墨西哥","NA"],"MTY":["蒙特雷","蒙特雷","","Monterrey","墨西哥","NA","",1],"MUA":["蒙达","","","Munda","所罗门群岛","OC"],"MUB":["马翁","马翁","","Maun","博茨瓦纳","AF","",1],"MUC":["慕尼黑","慕尼黑","","Munich","德国","EU","",1],"MUE":["怀梅阿","怀梅阿","","Waimea (Kamuela)","美国","OC"],"MUH":["马特鲁港","马特鲁港","","Marsa Matruh","埃及","AF","",1],"MUN":["马图林","马图林","","Maturín","委内瑞拉","LA"],"MUR":["马鲁帝","马鲁帝","","Marudi","马来西亚","SEA"],"MUX":["木尔坦","木尔坦","","Multan","巴基斯坦","SA","",1],"MVB":["弗朗斯维尔","弗朗斯维尔","","Franceville","加蓬","AF"],"MVD":["蒙得维的亚","蒙得维的亚","","Ciudad de la Costa","乌拉圭","LA","",1],"MVF":["莫索罗","莫索罗","","Mossoró","巴西","LA"],"MVP":["米图","米图","","Mitú","哥伦比亚","LA"],"MVQ":["莫吉廖夫州","莫吉廖夫州","","Mogilev","白俄罗斯","EU"],"MVR":["马鲁阿","马鲁阿","","Maroua","喀麦隆","AF"],"MVT":["马塔伊瓦环礁","马塔伊瓦环礁","","","法属波利尼西亚","OC"],"MWA":["馬里昂 (伊利諾伊州)","馬里昂 (伊利諾伊州)","","Marion","美国","NA"],"MWL":["矿泉井城","矿泉井城","","Mineral Wells","美国","NA"],"MWX":["光州务安","光州","","Muan (Piseo-ri)","韩国","EA","Q41283",1],"MWZ":["姆万扎","姆万扎","","Mwanza","坦桑尼亚","AF","",1],"MXL":["墨西卡利","墨西卡利","","Mexicali","墨西哥","NA"],"MXP":["伦巴第","伦巴第","","Ferno (VA)","意大利","EU","",1],"MXV":["木伦","木伦","","Mörön","蒙古国","EA"],"MXX":["穆拉","穆拉","","Mora","瑞典","EU"],"MYA":["莫鲁亚","莫鲁亚","","Moruya","澳大利亚","OC"],"MYD":["马林迪","马林迪","","Malindi","肯尼亚","AF"],"MYE":["三宅岛","三宅岛","","Miyakejima","日本","EA"],"MYG":["Abraham Bay Settlement","","","Abraham Bay Settlement","巴哈马","NA"],"MYJ":["松山","松山","","Matsuyama","日本","EA","",1],"MYL":["麦考尔","麦考尔","","McCall","美国","NA"],"MYP":["马雷","马雷","","Mary","土库曼斯坦","CA"],"MYQ":["迈索尔","迈索尔","","Mysore","印度","SA"],"MYR":["默特尔比奇","默特尔比奇","","Myrtle Beach","美国","NA","",1],"MYT":["密支那","密支那","","Myitkyina","缅甸","SEA"],"MYU":["梅科尤克","梅科尤克","","Mekoryuk","美国","NA"],"MYW":["姆特瓦拉","姆特瓦拉","","Mtwara","坦桑尼亚","AF"],"MYY":["美里","美里","","Miri","马来西亚","SEA"],"MZG":["澎湖县","澎湖县","","Huxi","中国台湾","HMT","",1],"MZH":["阿马西亚","阿马西亚","","Amasya","土耳其","EU"],"MZI":["莫普提","莫普提","","Sévaré","马里","AF"],"MZL":["马尼萨莱斯","马尼萨莱斯","","Manizales","哥伦比亚","LA"],"MZO":["曼萨尼约","曼萨尼约","","Manzanillo","古巴","NA"],"MZQ":["Mkuze","","","Mkuze","南非","AF"],"MZR":["马扎里沙里夫","马扎里沙里夫","","Mazar-i-Sharif","阿富汗","SA","",1],"MZS":["Moradabad","","","Moradabad","印度","SA"],"MZT":["马萨特兰","马萨特兰","","Mazatlàn","墨西哥","NA","",1],"MZV":["姆禄山国家公园","姆禄山国家公园","","Mulu","马来西亚","SEA"],"MZW":["麥克里亞","麥克里亞","","Mecheria","阿尔及利亚","AF"],"NAA":["纳拉布赖","纳拉布赖","","Narrabri","澳大利亚","OC"],"NAG":["那格浦尔","那格浦尔","","Nagpur","印度","SA","",1],"NAH":["纳哈","","","Tabukan Utara, Sangihe Islands","印度尼西亚","SEA"],"NAJ":["纳希切万","","","Nakhchivan","阿塞拜疆","CA","",1],"NAL":["纳利奇克","纳利奇克","","Nalchik","俄罗斯","EU"],"NAM":["楠勒阿","","","Namniwel","印度尼西亚","SEA"],"NAN":["楠迪","楠迪","","Nadi","斐济","OC","",1],"NAP":["那不勒斯","那不勒斯","","Napoli","意大利","EU","",1],"NAQ":["卡纳克","卡纳克","","Qaanaaq","格陵兰","NA"],"NAS":["拿骚","拿骚","","Nassau","巴哈马","NA","",1],"NAT":["聖貢薩洛杜阿馬蘭特","聖貢薩洛杜阿馬蘭特","","Natal","巴西","LA","",1],"NAV":["内夫谢希尔","内夫谢希尔","","Nevşehir","土耳其","EU","",1],"NAW":["那拉提瓦","","","","泰国","SEA","TH:"],"NBC":["下卡姆斯克","下卡姆斯克","","Nizhnekamsk","俄罗斯","EU"],"NBE":["恩菲達維爾防線","恩菲達維爾防線","","Enfidha","突尼斯","AF"],"NBJ":["罗安达","罗安达","","Luanda (Ícolo e Bengo)","安哥拉","AF","",1],"NBO":["内罗毕","内罗毕","","Nairobi","肯尼亚","AF","Q3870",1],"NBS":["长白朝鲜族自治县","长白朝鲜族自治县","","Baishan","中国","CN"],"NCA":["新河海軍陸戰隊航空基地","","","North Caicos","特克斯和凯科斯群岛","NA"],"NCE":["尼斯","尼斯","","Nice, Alpes-Maritimes","法国","EU","",1],"NCL":["泰恩河畔纽卡斯尔","泰恩河畔纽卡斯尔","","Newcastle upon Tyne, Tyne and Wear","英国","EU","",1],"NCU":["努库斯","努库斯","","Nukus","乌兹别克斯坦","CA","",1],"NCY":["中阿讷西县","中阿讷西县","","Annecy","法国","EU"],"NDB":["努瓦迪布","努瓦迪布","","Nouadhibou","毛里塔尼亚","AF","",1],"NDC":["楠代德","楠代德","","Nanded","印度","SA"],"NDG":["齐齐哈尔","齐齐哈尔","","Qiqihar","中国","CN","",1],"NDJ":["恩贾梅纳","恩贾梅纳","","N'Djamena","乍得","AF","",1],"NDR":["纳祖尔","纳祖尔","","Al Aaroui","摩洛哥","AF","",1],"NDU":["龙杜","龙杜","","Rundu","纳米比亚","AF"],"NEC":["内科切阿","内科切阿","","Necochea","阿根廷","LA"],"NER":["丘利曼","丘利曼","","Neryungri","俄罗斯","EU"],"NEV":["万斯·艾默里","","","Charlestown","圣基茨和尼维斯","NA"],"NGB":["宁波","宁波","","Ningbo","中国","CN","",1],"NGE":["恩冈代雷","恩冈代雷","","N'Gaoundéré","喀麦隆","AF"],"NGO":["名古屋","名古屋","","Tokoname","日本","EA","",1],"NGQ":["狮泉河镇","狮泉河镇","","Shiquanhe","中国","CN"],"NGS":["长崎","长崎","","Nagasaki","日本","EA","",1],"NHV":["泰奧哈埃","泰奧哈埃","","Nuku Hiva","法属波利尼西亚","OC"],"NIM":["尼亚美","尼亚美","","Niamey","尼日尔","AF","",1],"NJC":["下瓦尔托夫斯克","下瓦尔托夫斯克","","Nizhnevartovsk","俄罗斯","EU","",1],"NJF":["纳杰夫","纳杰夫","","Najaf","伊拉克","ME","",1],"NKC":["努瓦克肖特","努瓦克肖特","","Nouakchott","毛里塔尼亚","AF","",1],"NKG":["南京","南京","","Nanjing","中国","CN","",1],"NKM":["小牧","小牧","","Nagoya","日本","EA"],"NKT":["舍尔纳克省","舍尔纳克省","","Şırnak","土耳其","EU"],"NLA":["恩多拉","恩多拉","","Ndola","赞比亚","AF","",1],"NLD":["新拉雷多","新拉雷多","","Nuevo Laredo","墨西哥","NA"],"NLH":["宁蒗彝族自治县","宁蒗彝族自治县","","Ninglang","中国","CN"],"NLI":["庙街","庙街","","Nikolayevsk-na-Amure Airport","俄罗斯","EU"],"NLK":["诺福克岛","诺福克岛","","Burnt Pine","诺福克岛","OC"],"NLT":["那拉提镇","那拉提镇","","Xinyuan","中国","CN"],"NLU":["孙潘戈","孙潘戈","","Mexico City","墨西哥","NA","",1],"NMA":["納曼干","","","Namangan","乌兹别克斯坦","CA","",1],"NMF":["馬法盧","","","Noonu Atoll","马尔代夫","SA"],"NMI":["新孟買","新孟買","","Navi Mumbai","印度","SA","",1],"NNG":["南宁","南宁","","Nanning (Jiangnan)","中国","CN","",1],"NNM":["纳里扬马尔","纳里扬马尔","","Naryan Mar","俄罗斯","EU"],"NNT":["难府府治县","难府府治县","","","泰国","SEA"],"NOB":["諾薩拉區","諾薩拉區","","Nicoya","哥斯达黎加","NA"],"NOC":["康诺特省","康诺特省","","Charlestown","爱尔兰","EU","",1],"NOJ":["诺亚布里斯克","诺亚布里斯克","","Noyabrsk","俄罗斯","EU"],"NOP":["锡诺普","锡诺普","","Sinop","土耳其","EU"],"NOS":["法先","","","Nosy Be","马达加斯加","AF","",1],"NOU":["努美阿","努美阿","","Nouméa (La Tontouta)","新喀里多尼亚","OC","Q9733",1],"NOV":["万博","万博","","Huambo","安哥拉","AF"],"NOZ":["新庫茲涅茨基區","新庫茲涅茨基區","","Novokuznetsk","俄罗斯","EU"],"NPE":["哈斯丁 (紐西蘭)","哈斯丁 (紐西蘭)","","Napier","新西兰","OC"],"NPL":["新普利茅斯","新普利茅斯","","New Plymouth","新西兰","OC"],"NPO":["Nanga Pinoh-Borneo Island","","","Nanga Pinoh-Borneo Island","印度尼西亚","SEA"],"NPT":["纽波特","纽波特","","Newport","美国","NA"],"NQN":["内乌肯","内乌肯","","Neuquén","阿根廷","LA","",1],"NQY":["纽基","纽基","","Newquay","英国","EU"],"NQZ":["阿斯塔纳","阿斯塔纳","","Astana","哈萨克斯坦","CA","",1],"NRA":["納蘭德拉","納蘭德拉","","Narrandera","澳大利亚","OC"],"NRK":["北雪平","北雪平","","Norrköping","瑞典","EU"],"NRN":["克莱沃县","克莱沃县","","Weeze","德国","EU","",1],"NRR":["塞瓦","塞瓦","","Ceiba","波多黎各","NA"],"NRT":["东京成田","东京","","Narita","日本","EA","C:TYO",1],"NSH":["瑙沙赫尔","瑙沙赫尔","","Nowshahr","伊朗","ME"],"NSI":["雅温得","雅温得","","Yaoundé","喀麦隆","AF","",1],"NSK":["诺里尔斯克","诺里尔斯克","","Norilsk","俄罗斯","EU","",1],"NSN":["纳尔逊","纳尔逊","","Nelson","新西兰","OC"],"NST":["那空是贪玛叻","那空是贪玛叻","","Nakhon Si Thammarat","泰国","SEA"],"NTE":["南特","南特","","Nantes","法国","EU","",1],"NTG":["南通","南通","","Nantong (Tongzhou)","中国","CN"],"NTL":["獵人谷","獵人谷","","Williamtown","澳大利亚","OC","",1],"NTN":["Normanton","","","Normanton","澳大利亚","OC"],"NTQ":["轮岛","轮岛","","Wajima","日本","EA"],"NTX":["拉奈","","","Ranai-Natuna Besar Island","印度尼西亚","SEA"],"NUE":["纽伦堡","纽伦堡","","Nuremberg","德国","EU","",1],"NUI":["诺伊克索特","诺伊克索特","","Nuiqsut","美国","NA"],"NUM":["尼奧","","","Sharma","沙特阿拉伯","ME","",1],"NUX":["新乌连戈伊","新乌连戈伊","","Novy Urengoy","俄罗斯","EU"],"NVA":["内瓦","内瓦","","Neiva","哥伦比亚","LA"],"NVI":["纳沃伊","纳沃伊","","Navoi","乌兹别克斯坦","CA"],"NVT":["纳韦甘蒂斯","纳韦甘蒂斯","","Navegantes","巴西","LA","",1],"NWI":["诺里奇","诺里奇","","Norwich, Norfolk","英国","EU"],"NYA":["尼亚甘","尼亚甘","","Nyagan","俄罗斯","EU"],"NYI":["苏尼亚尼","苏尼亚尼","","Sunyani","加纳","AF"],"NYK":["Gathiuru","","","Gathiuru","肯尼亚","AF"],"NYM":["納德姆","納德姆","","Nadym","俄罗斯","EU"],"NYO":["斯德哥尔摩斯德哥爾摩斯卡夫斯塔","斯德哥尔摩","","Nyköping","瑞典","EU","Q1754",1],"NYT":["奈比多","奈比多","","Naypyitaw","缅甸","SEA","",1],"NZC":["纳斯卡","纳斯卡","","Nazca","秘鲁","LA"],"NZH":["满洲里","满洲里","","Manzhouli","中国","CN"],"NZL":["扎兰屯","扎兰屯","","Zhalantun","中国","CN"],"OAJ":["杰克逊维尔","杰克逊维尔","","Richlands","美国","NA"],"OAK":["旧金山湾区","旧金山湾区","","Oakland","美国","NA","",1],"OAX":["瓦哈卡","瓦哈卡","","Oaxaca","墨西哥","NA","",1],"OBO":["带广","带广","","Obihiro","日本","EA"],"OCC":["奥雷亚纳省弗朗西斯科港","奥雷亚纳省弗朗西斯科港","","Coca","厄瓜多尔","LA"],"OCE":["大洋城","大洋城","","Ocean City","美国","NA"],"OCJ":["欧丘里欧","欧丘里欧","","Boscobel","牙买加","NA"],"OCS":["科里斯科岛","科里斯科岛","","Corisco Island","赤道几内亚","AF","",1],"ODB":["科尔多瓦","科尔多瓦","","Córdoba","西班牙","EU"],"ODE":["欧登塞","欧登塞","","Odense","丹麦","EU","",1],"OEC":["Oecussi-Ambeno","","","Oecussi-Ambeno","东帝汶","SEA","",1],"OER":["恩舍尔兹维克","恩舍尔兹维克","","Örnsköldsvik","瑞典","EU"],"OGD":["Ogden","","","Ogden","美国","NA"],"OGG":["卡胡卢伊","卡胡卢伊","","Kahului","美国","OC","",1],"OGL":["乔治敦德梅拉拉-馬海卡","乔治敦","","Ogle","圭亚那","LA","Q10717"],"OGN":["与那国町","与那国町","","Yonaguni","日本","EA"],"OGS":["奥格登斯堡","奥格登斯堡","","Ogdensburg","美国","NA"],"OGU":["奥尔杜","奥尔杜","","Ordu","土耳其","EU"],"OGX":["瓦尔格拉","瓦尔格拉","","Ouargla","阿尔及利亚","AF"],"OGZ":["弗拉季高加索","弗拉季高加索","","Beslan","俄罗斯","EU"],"OHD":["奥赫里德","奥赫里德","","Ohrid","北马其顿","EU","",1],"OHE":["漠河","漠河","","Mohe","中国","CN"],"OHO":["鄂霍次克","鄂霍次克","","Okhotsk","俄罗斯","EU"],"OHS":["苏哈尔","苏哈尔","","Suhar","阿曼","ME","",1],"OIM":["大岛支厅","大岛支厅","","Izu Oshima","日本","EA"],"OIR":["奧尻","","","Okushiri Island","日本","EA"],"OIT":["大分","大分","","Oita","日本","EA"],"OKA":["那霸","那霸","","Naha","日本","EA","",1],"OKC":["俄克拉何马城","俄克拉何马城","","Oklahoma City","美国","NA","",1],"OKD":["札幌飞行场","札幌","","Sapporo","日本","EA","Q37951"],"OKE":["冲永良部","","","Wadomari","日本","EA"],"OKI":["隐岐之岛町","隐岐之岛町","","Okinoshima","日本","EA"],"OKJ":["冈山","冈山","","Okayama","日本","EA","",1],"OKL":["奥克西比尔","","","Oksibil","印度尼西亚","SEA"],"OKY":["Oakey Army Aviation Centre","","","","澳大利亚","OC","AU:"],"OLA":["欧兰","欧兰","","Ørland","挪威","EU"],"OLB":["奥尔比亚","奥尔比亚","","Olbia (SS)","意大利","EU","",1],"OLF":["沃尔夫波因特","沃尔夫波因特","","Wolf Point","美国","NA"],"OLM":["奥林匹亚","奥林匹亚","","Olympia","美国","NA"],"OLZ":["奥廖克明斯克","奥廖克明斯克","","Olyokminsk","俄罗斯","EU"],"OMA":["奥马哈","奥马哈","","Omaha","美国","NA","",1],"OMD":["奥兰治蒙德","奥兰治蒙德","","Oranjemund","纳米比亚","AF"],"OME":["诺姆","诺姆","","Nome","美国","NA"],"OMH":["乌尔米耶","乌尔米耶","","Urmia","伊朗","ME"],"OMN":["Zomin","","","Zomin","乌兹别克斯坦","CA"],"OMO":["莫斯塔尔","莫斯塔尔","","Mostar","波斯尼亚和黑塞哥维那","EU","",1],"OMR":["奥拉迪亚","奥拉迪亚","","Oradea","罗马尼亚","EU","",1],"OMS":["鄂木斯克","鄂木斯克","","Omsk","俄罗斯","EU","",1],"OND":["翁丹瓜","翁丹瓜","","Ondangwa","纳米比亚","AF"],"ONJ":["能代","能代","","Kitaakita","日本","EA"],"ONQ":["卡拉代尼兹埃雷利","卡拉代尼兹埃雷利","","Zonguldak","土耳其","EU"],"ONT":["安大略","安大略","","Ontario","美国","NA","",1],"ONX":["科隆","","","Colón","巴拿马","NA"],"OOL":["黄金海岸","黄金海岸","","Gold Coast","澳大利亚","OC","",1],"OOM":["Cooma","","","Cooma","澳大利亚","OC"],"OPF":["迈阿密邁阿密-奧帕克洛克行政","迈阿密","","Miami","美国","NA","Q8652"],"OPO":["波尔图","波尔图","","Porto","葡萄牙","EU","",1],"OPU":["Balimo","","","Balimo","巴布亚新几内亚","OC"],"ORB":["厄勒布鲁","厄勒布鲁","","Örebro","瑞典","EU"],"ORD":["芝加哥奥黑尔","芝加哥大都市區","","Chicago","美国","NA","",1],"ORF":["汉普顿锚地","汉普顿锚地","","Norfolk","美国","NA","",1],"ORH":["伍斯特","","","Worcester","美国","NA"],"ORK":["科克","科克","","Cork","爱尔兰","EU","",1],"ORN":["瓦赫兰","瓦赫兰","","Es-Sénia","阿尔及利亚","AF","",1],"ORT":["諾斯韋","諾斯韋","","Northway","美国","NA"],"ORU":["奥鲁罗","奥鲁罗","","Oruro","玻利维亚","LA","",1],"ORY":["巴黎－奥利","巴黎","","Paris (Orly, Val-de-Marne)","法国","EU","Q90",1],"OSD":["厄斯特松德","厄斯特松德","","Östersund","瑞典","EU"],"OSI":["奥西耶克","奥西耶克","","Osijek(Klisa)","克罗地亚","EU"],"OSL":["东挪威","东挪威","","Oslo (Gardermoen)","挪威","EU","",1],"OSR":["俄斯特拉发","俄斯特拉发","","Mošnov","捷克","EU","",1],"OSS":["奥什","奥什","","Osh","吉尔吉斯斯坦","CA","",1],"OST":["奥斯坦德","奥斯坦德","","Oostende","比利时","EU","",1],"OSW":["奥尔斯克","奥尔斯克","","Orsk","俄罗斯","EU"],"OTH":["西南俄勒冈区域","","","North Bend","美国","NA"],"OTP":["布加勒斯特","布加勒斯特","","Otopeni","罗马尼亚","EU","",1],"OTZ":["科策布","科策布","","Kotzebue","美国","NA"],"OUA":["瓦加杜古","瓦加杜古","","Ouagadougou","布基纳法索","AF","",1],"OUD":["乌季达","乌季达","","Ahl Angad","摩洛哥","AF","",1],"OUL":["奥卢","奥卢","","Oulu / Oulunsalo","芬兰","EU","",1],"OUZ":["祖埃拉特","祖埃拉特","","Zouérate","毛里塔尼亚","AF"],"OVB":["新西伯利亚","新西伯利亚","","Novosibirsk","俄罗斯","EU","",1],"OVD":["奥维耶多","奥维耶多","","Ranón","西班牙","EU","",1],"OVS":["苏维埃茨基","苏维埃茨基","","Sovetskiy","俄罗斯","EU"],"OWB":["欧文斯伯勒","欧文斯伯勒","","Owensboro","美国","NA"],"OXB":["比绍","比绍","","Bissau","几内亚比绍","AF","",1],"OYE":["奧耶姆","","","Oyem","加蓬","AF"],"OZC":["奥三棉示","奥三棉示","","Ozamiz","菲律宾","SEA"],"OZG":["札戈拉","札戈拉","","Zagora","摩洛哥","AF","",1],"OZZ":["瓦尔扎扎特","瓦尔扎扎特","","Ouarzazate","摩洛哥","AF","",1],"PAB":["Bilaspur","","","Bilaspur","印度","SA"],"PAC":["巴拿马城阿爾布魯克“Marcos A. Gelabert”","巴拿马城","","Albrook","巴拿马","NA","Q3306"],"PAD":["利普施塔特","利普施塔特","","Büren","德国","EU","",1],"PAE":["埃弗里特","埃弗里特","","Everett","美国","NA"],"PAG":["帕嘎蒂安","帕嘎蒂安","","Pagadian","菲律宾","SEA"],"PAH":["帕迪尤卡","帕迪尤卡","","Paducah","美国","NA"],"PAP":["太子港","太子港","","Port-au-Prince","海地","NA","",1],"PAT":["巴特那","巴特那","","Patna","印度","SA"],"PAV":["保罗·阿方索城","保罗·阿方索城","","Paulo Afonso","巴西","LA"],"PAZ":["波萨里卡","波萨里卡","","Poza Rica","墨西哥","NA"],"PBC":["普埃布拉","普埃布拉","","Puebla","墨西哥","NA","",1],"PBD":["坡尔班达尔","坡尔班达尔","","Porbandar","印度","SA"],"PBG":["普拉茨堡","普拉茨堡","","Plattsburgh","美国","NA"],"PBH":["廷布","廷布","","Paro","不丹","SA","",1],"PBM":["帕拉马里博","帕拉马里博","","Paramaribo","苏里南","LA","",1],"PBO":["Paraburdoo","","","Paraburdoo","澳大利亚","OC"],"PBR":["巴里奥斯港","巴里奥斯港","","Puerto Barrios","危地马拉","NA"],"PBU":["葡萄","","","Putao","缅甸","SEA"],"PCL":["普兰尔帕","普兰尔帕","","Pucallpa","秘鲁","LA","",1],"PCP":["普林西比岛","普林西比岛","","São Tomé & Príncipe","圣多美和普林西比","AF"],"PCR":["卡雷尼奥港","卡雷尼奥港","","Puerto Carreño","哥伦比亚","LA"],"PDA":["伊尼里达","伊尼里达","","Puerto Inírida","哥伦比亚","LA"],"PDG":["巴东","巴东","","Padang (Katapiang)","印度尼西亚","SEA","",1],"PDK":["亚特兰大","亚特兰大","","Atlanta","美国","NA","Q23556"],"PDL":["蓬塔德尔加达","蓬塔德尔加达","","Ponta Delgada","葡萄牙","EU","",1],"PDO":["Talang Gudang-Sumatra Island","","","Talang Gudang-Sumatra Island","印度尼西亚","SEA"],"PDP":["埃斯特角城","埃斯特角城","","Punta del Este","乌拉圭","LA"],"PDS":["彼德拉斯内格拉斯","彼德拉斯内格拉斯","","Piedras Negras","墨西哥","NA"],"PDT":["彭德尔顿","彭德尔顿","","Pendleton","美国","NA"],"PDV":["普罗夫迪夫市镇","普罗夫迪夫市镇","","Plovdiv","保加利亚","EU","",1],"PDX":["波特兰","波特兰","","Portland","美国","NA","",1],"PED":["帕尔杜比采","帕尔杜比采","","Pardubice","捷克","EU","",1],"PEE":["彼尔姆","彼尔姆","","Perm","俄罗斯","EU","",1],"PEG":["佩鲁贾","佩鲁贾","","Perugia (PG)","意大利","EU","",1],"PEI":["佩雷拉","佩雷拉","","Pereira","哥伦比亚","LA"],"PEK":["北京首都","北京","","Beijing","中国","CN","C:BJS",1],"PEM":["馬爾多納多港","馬爾多納多港","","Puerto Maldonado","秘鲁","LA"],"PEN":["槟城","槟城","","Penang","马来西亚","SEA","",1],"PER":["珀斯","珀斯","","Perth","澳大利亚","OC","",1],"PES":["彼得罗扎沃茨克","彼得罗扎沃茨克","","Petrozavodsk","俄罗斯","EU"],"PET":["佩洛塔斯","佩洛塔斯","","Pelotas","巴西","LA"],"PEV":["佩奇","佩奇","","Pécs","匈牙利","EU","",1],"PEW":["白沙瓦","白沙瓦","","Peshawar","巴基斯坦","SA","",1],"PEX":["伯朝拉","伯朝拉","","Pechora","俄罗斯","EU"],"PEZ":["奔萨","奔萨","","Penza","俄罗斯","EU"],"PFB":["帕索丰多","帕索丰多","","Passo Fundo","巴西","LA"],"PFO":["帕福斯","帕福斯","","Paphos","塞浦路斯","EU","",1],"PGA":["佩吉","佩吉","","Page","美国","NA"],"PGD":["蓬塔戈尔达","蓬塔戈尔达","","Punta Gorda","美国","NA"],"PGF":["佩皮尼昂","佩皮尼昂","","Perpignan/Rivesaltes","法国","EU"],"PGH":["Pantnagar","","","Pantnagar","印度","SA"],"PGK":["邦加檳港","邦加檳港","","Pangkal Pinang","印度尼西亚","SEA"],"PGU":["阿萨卢耶","阿萨卢耶","","Khiyaroo","伊朗","ME"],"PGV":["Greenville","","","Greenville","美国","NA"],"PGZ":["蓬塔格罗萨","蓬塔格罗萨","","Ponta Grossa","巴西","LA"],"PHB":["巴纳伊巴","巴纳伊巴","","Parnaíba","巴西","LA"],"PHC":["哈科特港","哈科特港","","Port Harcourt","尼日利亚","AF","",1],"PHE":["黑德兰港","黑德兰港","","Port Hedland","澳大利亚","OC","",1],"PHF":["维吉尼亚半岛","维吉尼亚半岛","","Newport News","美国","NA"],"PHG":["Port Harcourt","","","Port Harcourt","尼日利亚","AF"],"PHH":["博卡拉","博卡拉","","Pokhara","尼泊尔","SA","Q6640",1],"PHL":["费城","费城","","Philadelphia","美国","NA","",1],"PHS":["彭世洛","彭世洛","","Phitsanulok","泰国","SEA"],"PHW":["帕拉博鲁瓦","帕拉博鲁瓦","","Phalaborwa","南非","AF"],"PHX":["菲尼克斯","菲尼克斯","","Phoenix","美国","NA","",1],"PHY":["Phetchabun Airport","","","","泰国","SEA"],"PIA":["東皮奧里亞","東皮奧里亞","","Peoria","美国","NA"],"PIB":["哈蒂斯堡","哈蒂斯堡","","Moselle","美国","NA"],"PIE":["圣彼得斯堡","圣彼得斯堡","","Pinellas Park","美国","NA","",1],"PIH":["波卡特洛","波卡特洛","","Pocatello","美国","NA"],"PIK":["格拉斯哥","格拉斯哥","","Prestwick, South Ayrshire","英国","EU","",1],"PIR":["皮尔","皮尔","","Pierre","美国","NA"],"PIS":["普瓦捷","普瓦捷","","Poitiers/Biard","法国","EU"],"PIT":["匹兹堡","匹兹堡","","Pittsburgh","美国","NA","",1],"PIU":["皮乌拉","皮乌拉","","Piura","秘鲁","LA"],"PIX":["拉日什-杜皮庫","拉日什-杜皮庫","","Pico Island","葡萄牙","EU"],"PIZ":["Point Lay","","","Point Lay","美国","NA"],"PJM":["希门尼斯港","希门尼斯港","","Puerto Jimenez","哥斯达黎加","NA"],"PKB":["帕克斯堡","帕克斯堡","","Parkersburg (Williamstown)","美国","NA"],"PKC":["堪察加彼得罗巴甫洛夫斯克","堪察加彼得罗巴甫洛夫斯克","","Petropavlovsk-Kamchatsky","俄罗斯","EU","",1],"PKE":["帕克斯","帕克斯","","Parkes","澳大利亚","OC"],"PKR":["博卡拉","博卡拉","","Pokhara","尼泊尔","SA","Q6640"],"PKU":["北干巴鲁","北干巴鲁","","Pekanbaru","印度尼西亚","SEA"],"PKV":["普斯科夫","普斯科夫","","Pskov","俄罗斯","EU"],"PKX":["北京大兴","北京","","Beijing","中国","CN","C:BJS",1],"PKY":["帕朗卡拉亚","帕朗卡拉亚","","Palangkaraya","印度尼西亚","SEA"],"PKZ":["巴色","巴色","","Pakse","老挝","SEA","",1],"PLJ":["普拉森舍","","","Placencia","伯利兹","NA"],"PLM":["巨港","巨港","","Palembang","印度尼西亚","SEA"],"PLN":["佩爾斯頓","佩爾斯頓","","Pellston","美国","NA"],"PLO":["林肯港","林肯港","","Port Lincoln","澳大利亚","OC"],"PLQ":["帕兰加","帕兰加","","Palanga","立陶宛","EU","",1],"PLS":["普罗维登西亚莱斯岛","普罗维登西亚莱斯岛","","Providenciales","特克斯和凯科斯群岛","NA","",1],"PLW":["帕卢","帕卢","","Palu","印度尼西亚","SEA"],"PLX":["塞米伊","塞米伊","","Semey","哈萨克斯坦","CA","",1],"PLZ":["吉科巴哈","吉科巴哈","","Gqeberha (Port Elizabeth)","南非","AF","",1],"PMC":["特珀","","","Puerto Montt","智利","LA","",1],"PMF":["帕尔马","帕尔马","","Parma (PR)","意大利","EU"],"PMG":["蓬塔波朗","蓬塔波朗","","Ponta Porã","巴西","LA"],"PMI":["马略卡岛","马略卡岛","","Palma de Mallorca","西班牙","EU","",1],"PMO":["巴勒莫","巴勒莫","","Palermo","意大利","EU","",1],"PMQ":["佩里托莫雷諾 (聖克魯斯省)","佩里托莫雷諾 (聖克魯斯省)","","Perito Moreno","阿根廷","LA"],"PMR":["北帕默斯顿","北帕默斯顿","","Palmerston North","新西兰","OC"],"PMV":["波拉马尔","波拉马尔","","Isla Margarita","委内瑞拉","NA","",1],"PMW":["帕尔马斯","帕尔马斯","","Palmas","巴西","LA"],"PMY":["馬德林港","馬德林港","","Puerto Madryn","阿根廷","LA"],"PNA":["潘普洛纳","潘普洛纳","","Pamplona","西班牙","EU"],"PNI":["波纳佩","波纳佩","","Pohnpei Island","密克罗尼西亚联邦","OC"],"PNK":["坤甸","坤甸","","Pontianak","印度尼西亚","SEA","",1],"PNL":["潘泰莱里亚","潘泰莱里亚","","Pantelleria (TP)","意大利","EU"],"PNP":["波蓬德塔","波蓬德塔","","Popondetta","巴布亚新几内亚","OC"],"PNQ":["浦那","浦那","","Pune","印度","SA","",1],"PNR":["黑角","黑角","","Pointe Noire","刚果共和国","AF","",1],"PNS":["彭萨科拉","彭萨科拉","","Pensacola","美国","NA","",1],"PNT":["納塔萊斯港","納塔萊斯港","","Puerto Natales","智利","LA"],"PNY":["本地治里","本地治里","","Puducherry (Pondicherry)","印度","SA"],"PNZ":["彼得罗利纳","彼得罗利纳","","Petrolina","巴西","LA"],"POA":["阿雷格里港","阿雷格里港","","Porto Alegre","巴西","LA","",1],"POG":["让蒂尔港","让蒂尔港","","Port Gentil","加蓬","AF","",1],"POL":["彭巴","彭巴","","Pemba","莫桑比克","AF"],"POM":["莫尔兹比港","莫尔兹比港","","Port Moresby","巴布亚新几内亚","OC","",1],"POP":["圣斐利-银港","圣斐利-银港","","Puerto Plata","多米尼加","NA"],"POR":["波里","波里","","Pori","芬兰","EU"],"POS":["西班牙港","西班牙港","","Port of Spain","特立尼达和多巴哥","NA","",1],"POZ":["波茲南","波茲南","","Poznań","波兰","EU","",1],"PPB":["普鲁登特总统城","普鲁登特总统城","","Presidente Prudente","巴西","LA"],"PPG":["帕果帕果","帕果帕果","","Pago Pago","美属萨摩亚","OC","",1],"PPK":["彼得罗巴甫尔","彼得罗巴甫尔","","Petropavl","哈萨克斯坦","CA","",1],"PPN":["波帕扬","波帕扬","","Popayán","哥伦比亚","LA"],"PPP":["普拉瑟潘","普拉瑟潘","","Proserpine","澳大利亚","OC"],"PPS":["普林塞萨港","普林塞萨港","","Puerto Princesa","菲律宾","SEA","",1],"PPT":["塔希提岛","塔希提岛","","Papeete","法属波利尼西亚","OC","",1],"PQC":["富国岛","富国岛","","Phu Quoc Island","越南","SEA","",1],"PQI":["普雷斯克艾尔","普雷斯克艾尔","","Presque Isle","美国","NA"],"PQQ":["麦觉理港","麦觉理港","","Port Macquarie","澳大利亚","OC"],"PRA":["巴拉那","巴拉那","","Parana","阿根廷","LA"],"PRC":["普雷斯科特","普雷斯科特","","Prescott","美国","NA"],"PRG":["布拉格","布拉格","","Prague","捷克","EU","",1],"PRI":["普拉兰岛","普拉兰岛","","Praslin Island","塞舌尔","AF"],"PRM":["波尔蒂芒","波尔蒂芒","","Portimão","葡萄牙","EU"],"PRN":["普里什蒂纳","普里什蒂纳","","Prishtina","科索沃","EU","",1],"PSA":["比萨","比萨","","Pisa (PI)","意大利","EU","",1],"PSC":["三城","三城","","Pasco","美国","NA"],"PSD":["塞得港","塞得港","","Port Said","埃及","AF","",1],"PSE":["庞塞","庞塞","","Ponce","波多黎各","NA"],"PSG":["彼得斯堡","彼得斯堡","","Petersburg","美国","NA"],"PSM":["朴次茅斯","朴次茅斯","","Portsmouth","美国","NA"],"PSO":["帕斯托","帕斯托","","Chachagüí","哥伦比亚","LA"],"PSP":["科切拉山谷","科切拉山谷","","Palm Springs","美国","NA","",1],"PSR":["佩斯卡拉","佩斯卡拉","","Pescara","意大利","EU","",1],"PSS":["波萨达斯","波萨达斯","","Posadas","阿根廷","LA"],"PSU":["庞苏马","","","Putussibau-Borneo Island","印度尼西亚","SEA"],"PSZ":["苏亚雷斯港","苏亚雷斯港","","Puerto Suárez","玻利维亚","LA"],"PTG":["波洛夸内","波洛夸内","","Polokwane","南非","AF","",1],"PTH":["波特海登","波特海登","","Port Heiden","美国","NA"],"PTJ":["维多利亚州","维多利亚州","","","澳大利亚","OC"],"PTP":["皮特尔角城","皮特尔角城","","Pointe-à-Pitre","瓜德罗普","NA","",1],"PTU":["普拉蒂纳姆","普拉蒂纳姆","","Platinum","美国","NA"],"PTY":["巴拿马城托库门","巴拿马城","","Tocumen","巴拿马","NA","Q3306",1],"PUB":["普韦布洛","普韦布洛","","Pueblo","美国","NA"],"PUD":["德塞阿多港","德塞阿多港","","Puerto Deseado","阿根廷","LA"],"PUF":["波城","波城","","Pau/Pyrénées (Uzein)","法国","EU"],"PUG":["奥古斯塔港","奥古斯塔港","","","澳大利亚","OC"],"PUJ":["蓬塔卡納","蓬塔卡納","","Punta Cana","多米尼加","NA","",1],"PUQ":["蓬塔阿雷纳斯","蓬塔阿雷纳斯","","Punta Arenas","智利","LA","",1],"PUS":["釜山挑戰賽","釜山挑戰賽","","Busan","韩国","EA","",1],"PUU":["阿西斯港","阿西斯港","","Puerto Asís","哥伦比亚","LA"],"PUW":["普尔曼","普尔曼","","Pullman","美国","NA"],"PUY":["普拉","普拉","","Pula","克罗地亚","EU","",1],"PUZ":["Puerto Cabezas","","","Puerto Cabezas","尼加拉瓜","NA"],"PVA":["Providencia","","","Providencia","哥伦比亚","NA"],"PVD":["沃威克","沃威克","","Providence/Warwick","美国","NA","",1],"PVG":["上海浦东","上海","","Shanghai (Pudong)","中国","CN","C:SHA",1],"PVH":["波多韦柳","波多韦柳","","Porto Velho","巴西","LA","",1],"PVK":["普雷韦扎","普雷韦扎","","Preveza","希腊","EU"],"PVR":["巴亚尔塔港","巴亚尔塔港","","Puerto Vallarta","墨西哥","NA","",1],"PVU":["普罗沃","普罗沃","","Provo","美国","NA"],"PWE":["佩韦克","佩韦克","","Apapelgino","俄罗斯","EU"],"PWM":["波特兰","波特兰","","Portland","美国","NA","",1],"PWQ":["巴甫洛达尔","巴甫洛达尔","","Pavlodar","哈萨克斯坦","CA","",1],"PXM":["埃斯孔迪多港","埃斯孔迪多港","","Puerto Escondido","墨西哥","NA"],"PXO":["巴莱拉镇","巴莱拉镇","","Vila Baleira","葡萄牙","EU"],"PXR":["Surin","","","Surin","泰国","SEA"],"PXU":["波來古","波來古","","Pleiku","越南","SEA"],"PYJ":["乌达奇内","乌达奇内","","Yakutia","俄罗斯","EU"],"PYK":["帕亚姆","","","Karaj","伊朗","ME","",1],"PZB":["彼得马里茨堡","彼得马里茨堡","","Pietermaritzburg","南非","AF"],"PZH":["佐布","","","Fort Sandeman","巴基斯坦","SA"],"PZI":["攀枝花","攀枝花","","Panzhihua (Renhe)","中国","CN"],"PZO":["圭亚那城","圭亚那城","","Guyana City","委内瑞拉","LA","",1],"PZU":["苏丹港","苏丹港","","Port Sudan","苏丹","AF","",1],"QBC":["贝拉库拉","","","Bella Coola","加拿大","NA"],"QOW":["奥韦里","奥韦里","","Owerri","尼日利亚","AF"],"QRO":["克雷塔罗州","克雷塔罗州","","Querétaro","墨西哥","NA","",1],"QRW":["瓦里","","","Okpe","尼日利亚","AF"],"QSF":["塞提夫","塞提夫","","Sétif","阿尔及利亚","AF"],"QSR":["萨莱诺","萨莱诺","","Salerno","意大利","EU"],"QSZ":["莎车县","莎车县","","Shache","中国","CN"],"QUO":["乌约","乌约","","Uyo","尼日利亚","AF"],"RAB":["拉包尔","拉包尔","","Kokopo","巴布亚新几内亚","OC"],"RAE":["阿尔阿尔","阿尔阿尔","","Arar","沙特阿拉伯","ME"],"RAH":["拉夫哈","拉夫哈","","Rafha","沙特阿拉伯","ME"],"RAI":["普拉亚","普拉亚","","Praia","佛得角","AF","",1],"RAK":["马拉喀什","马拉喀什","","Marrakesh","摩洛哥","AF","",1],"RAO":["里贝朗普雷图","里贝朗普雷图","","Ribeirão Preto","巴西","LA"],"RAP":["拉皮德城","拉皮德城","","Rapid City","美国","NA"],"RAR":["阿瓦鲁阿","阿瓦鲁阿","","Avarua","库克群岛","OC","",1],"RAS":["拉什特","拉什特","","Rasht","伊朗","ME"],"RBA":["塞拉","塞拉","","Rabat","摩洛哥","AF","",1],"RBR":["里奥布朗库","里奥布朗库","","Rio Branco","巴西","LA","",1],"RBY":["鲁比","鲁比","","Ruby","美国","NA"],"RCB":["里查茲貝","","","Richards Bay","南非","AF"],"RCH":["里奥阿查","里奥阿查","","Riohacha","哥伦比亚","LA"],"RDD":["雷丁","雷丁","","Redding","美国","NA"],"RDM":["俄勒冈州","俄勒冈州","","Redmond","美国","NA"],"RDO":["拉多姆","拉多姆","","Radom","波兰","EU"],"RDP":["杜尔加布尔","杜尔加布尔","","Durgapur","印度","SA"],"RDU":["罗利","罗利","","Raleigh/Durham","美国","NA","",1],"RDZ":["罗德兹","罗德兹","","Rodez/Marcillac","法国","EU"],"REC":["累西腓","累西腓","","Recife","巴西","LA","",1],"REG":["雷焦卡拉布里亚","雷焦卡拉布里亚","","Reggio Calabria","意大利","EU"],"REL":["特雷利乌","特雷利乌","","Rawson","阿根廷","LA"],"REN":["奥伦堡","奥伦堡","","Orenburg","俄罗斯","EU"],"RER":["Retalhuleu","","","Retalhuleu","危地马拉","NA"],"RES":["雷西斯滕西亚","雷西斯滕西亚","","Resistencia","阿根廷","LA","",1],"REU":["雷乌斯","雷乌斯","","Reus","西班牙","EU","",1],"REW":["雷瓦","","","Rewa","印度","SA"],"REX":["雷诺萨","雷诺萨","","Reynosa","墨西哥","NA"],"RFD":["罗克福德","罗克福德","","Chicago/Rockford","美国","NA"],"RFP":["赖阿特阿岛","赖阿特阿岛","","Uturoa","法属波利尼西亚","OC"],"RGA":["里奧格蘭德","里奧格蘭德","","Rio Grande","阿根廷","LA"],"RGI":["朗伊罗阿环礁","朗伊罗阿环礁","","","法属波利尼西亚","OC"],"RGL":["里奥加耶戈斯","里奥加耶戈斯","","Rio Gallegos","阿根廷","LA","",1],"RGN":["仰光","仰光","","Yangon","缅甸","SEA","",1],"RGO":["清津","清津","","Hoemun-ri","朝鲜","EA"],"RHD":["特馬斯德里奧翁多","特馬斯德里奧翁多","","Termas de Río Hondo","阿根廷","LA"],"RHI":["萊茵蘭德","萊茵蘭德","","Rhinelander","美国","NA"],"RHO":["罗得岛","罗得岛","","Rhodes","希腊","EA","",1],"RIA":["圣玛丽亚","圣玛丽亚","","Santa Maria","巴西","LA"],"RIB":["里韦拉尔塔","里韦拉尔塔","","Riberalta","玻利维亚","LA"],"RIC":["里士满","里士满","","Richmond","美国","NA","",1],"RIS":["利尻町","利尻町","","Rishiri","日本","EA"],"RIW":["里弗顿","里弗顿","","Riverton","美国","NA"],"RIX":["里加","里加","","Riga","拉脱维亚","EU","",1],"RIY":["穆卡拉","穆卡拉","","Mukalla(Riyan)","也门","ME","",1],"RIZ":["日照","日照","","Rizhao (Donggang)","中国","CN"],"RJA":["拉贾赫穆恩德尔伊","拉贾赫穆恩德尔伊","","Madhurapudi","印度","SA"],"RJH":["拉杰沙希","拉杰沙希","","Rajshahi","孟加拉国","SA"],"RJK":["里耶卡","里耶卡","","Rijeka(Omišalj)","克罗地亚","EU","",1],"RJL":["洛格罗尼奥","洛格罗尼奥","","Logroño","西班牙","EU"],"RJN":["拉夫桑詹","拉夫桑詹","","Rafsanjan","伊朗","ME"],"RKD":["罗克兰","罗克兰","","Rockland","美国","NA"],"RKE":["罗斯基勒","罗斯基勒","","Roskilde","丹麦","EU"],"RKS":["罗克斯普林","罗克斯普林","","Rock Springs","美国","NA"],"RKT":["哈伊马角","","","Ras Al Khaimah","阿联酋","ME","",1],"RKV":["雷克雅未克","雷克雅未克","","Reykjavík","冰岛","EU"],"RKZ":["日喀则","日喀则","","Xigazê (Samzhubzê)","中国","CN","",1],"RLG":["罗斯托克","罗斯托克","","Laage","德国","EU"],"RLK":["巴彦淖尔","巴彦淖尔","","Bayannur","中国","CN"],"RMA":["罗马","罗马","","Roma","澳大利亚","OC"],"RMF":["马萨阿拉姆","马萨阿拉姆","","Marsa Alam","埃及","AF","",1],"RMI":["里米尼","里米尼","","Rimini (RN)","意大利","EU","",1],"RML":["科伦坡拉特馬拉納","科伦坡","","Colombo","斯里兰卡","SA","Q35381",1],"RMO":["基希讷乌","基希讷乌","","Chişinău","摩尔多瓦","EU","",1],"RMQ":["台中","台中","","Taichung (Qingshui)","中国台湾","HMT","",1],"RMU":["穆尔西亚自治区","穆尔西亚自治区","","Corvera","西班牙","EU","",1],"RMZ":["Tobolsk","","","Tobolsk","俄罗斯","EU"],"RNB":["龙讷比","龙讷比","","Ronneby","瑞典","EU"],"RNJ":["与论","","","Yoron","日本","EA"],"RNN":["博恩霍尔姆岛","博恩霍尔姆岛","","Rønne","丹麦","EU"],"RNO":["雷諾","雷諾","","Reno","美国","NA","",1],"RNS":["雷恩","雷恩","","Saint-Jacques-de-la-Lande, Ille-et-Vilaine","法国","EU"],"ROA":["罗亚诺克","罗亚诺克","","Roanoke","美国","NA"],"ROB":["蒙罗维亚罗伯茨","蒙罗维亚","","Monrovia","利比里亚","AF","Q3748",1],"ROC":["罗切斯特","罗切斯特","","Rochester","美国","NA","",1],"ROI":["单兵单王对阵单王残局","单兵单王对阵单王残局","","Roi Et","泰国","SEA"],"ROK":["洛坎普顿","洛坎普顿","","Rockhampton","澳大利亚","OC"],"ROO":["龙多诺波利斯","龙多诺波利斯","","Rondonópolis","巴西","LA"],"ROP":["罗塔","","","Rota Island","北马里亚纳群岛","OC","",1],"ROR":["罗曼·莫图","","","Babelthuap Island","帕劳","OC","",1],"ROS":["罗萨里奥","罗萨里奥","","Rosario","阿根廷","LA","",1],"ROT":["罗托鲁瓦","罗托鲁瓦","","Rotorua","新西兰","OC"],"ROW":["罗斯韦尔","罗斯韦尔","","Roswell","美国","NA"],"RPR":["赖布尔","赖布尔","","Raipur","印度","SA"],"RQA":["若羌县","若羌县","","Ruoqiang Town","中国","CN"],"RRG":["伽堂·杜瓦尔爵士","","","Port Mathurin","毛里求斯","AF"],"RRS":["勒罗斯","勒罗斯","","Røros","挪威","EU"],"RSA":["圣罗莎","圣罗莎","","Santa Rosa","阿根廷","LA"],"RSD":["羅克桑德","","","Rock Sound","巴哈马","NA"],"RSI":["Hanak","","","Hanak","沙特阿拉伯","ME","",1],"RST":["罗切斯特","","","Rochester","美国","NA"],"RSU":["丽水","丽水","","Yeosu","韩国","EA"],"RSW":["迈尔斯堡","迈尔斯堡","","Fort Myers","美国","NA","",1],"RTB":["罗阿坦岛","罗阿坦岛","","Coxen Hole","洪都拉斯","NA","",1],"RTM":["鹿特丹","鹿特丹","","Rotterdam","荷兰王国","EU","",1],"RUA":["阿鲁阿","阿鲁阿","","Arua","乌干达","AF"],"RUH":["利雅得","利雅得","","Riyadh","沙特阿拉伯","ME","",1],"RUN":["圣但尼","圣但尼","","Sainte-Marie","留尼汪","AF","",1],"RUR":["魯魯圖島","魯魯圖島","","","法属波利尼西亚","OC"],"RUT":["拉特兰","拉特兰","","Rutland","美国","NA"],"RVK":["勒尔维克","勒尔维克","","Rørvik","挪威","EU"],"RVN":["罗瓦涅米","罗瓦涅米","","Rovaniemi","芬兰","EU","",1],"RVY":["里韦拉","里韦拉","","Rivera/Santana do Livramento","乌拉圭","LA"],"RXS":["卡皮兹","卡皮兹","","Roxas City","菲律宾","SEA"],"RYK":["拉希姆亚尔汗","拉希姆亚尔汗","","Rahim Yar Khan","巴基斯坦","SA"],"RZE":["热舒夫","热舒夫","","Jasionka","波兰","EU","",1],"RZR":["拉姆萨尔","拉姆萨尔","","Ramsar","伊朗","ME"],"RZV":["里泽省","里泽省","","Rize","土耳其","EU"],"SAB":["博坦","博坦","","Zion's Hill","荷兰加勒比区","NA"],"SAF":["圣菲","圣菲","","Santa Fe","美国","NA"],"SAG":["舍地","舍地","","Kakadi","印度","SA","",1],"SAH":["萨那","萨那","","Sanaa","也门","ME","",1],"SAI":["暹粒吴哥","","","Siem Reap","柬埔寨","SEA","",1],"SAL":["萨尔瓦多","萨尔瓦多","","San Salvador (San Luis Talpa)","萨尔瓦多","NA","",1],"SAN":["圣迭戈县","圣迭戈县","","San Diego","美国","NA","",1],"SAP":["圣佩德罗苏拉","圣佩德罗苏拉","","San Pedro Sula","洪都拉斯","NA","",1],"SAQ":["尼科尔斯镇","尼科尔斯镇","","Andros Island","巴哈马","NA"],"SAT":["圣安东尼奥","圣安东尼奥","","San Antonio","美国","NA","",1],"SAV":["萨凡纳","萨凡纳","","Savannah","美国","NA","",1],"SAW":["伊斯坦布尔萨比哈·格克琴","伊斯坦布尔","","Pendik, Istanbul","土耳其","EU","Q406",1],"SBA":["圣巴巴拉","圣巴巴拉","","Santa Barbara","美国","NA"],"SBD":["圣贝纳迪诺","圣贝纳迪诺","","San Bernardino","美国","NA","",1],"SBH":["圣巴泰勒米","圣巴泰勒米","","Gustavia","圣巴泰勒米","NA"],"SBN":["南本德","南本德","","South Bend","美国","NA"],"SBP":["圣路易斯-奥比斯波","圣路易斯-奥比斯波","","San Luis Obispo","美国","NA"],"SBT":["薩別塔","","","Sabetta","俄罗斯","EU"],"SBW":["民丹莪","民丹莪","","Sibu","马来西亚","SEA"],"SBY":["索尔兹伯里","索尔兹伯里","","Salisbury","美国","NA"],"SBZ":["锡比乌","锡比乌","","Sibiu","罗马尼亚","EU","",1],"SCC":["戴德霍斯","","","Deadhorse","美国","NA"],"SCE":["斯泰特科利奇","斯泰特科利奇","","State College","美国","NA"],"SCK":["斯托克顿","斯托克顿","","Stockton","美国","NA"],"SCL":["圣地亚哥","圣地亚哥","","Santiago","智利","LA","",1],"SCN":["萨尔布吕肯","萨尔布吕肯","","Saarbrücken","德国","EU"],"SCO":["阿克套","阿克套","","Aktau","哈萨克斯坦","CA","",1],"SCQ":["加利西亚自治区","加利西亚自治区","","Santiago de Compostela","西班牙","EU","",1],"SCR":["特吕西尔","特吕西尔","","Malung-Sälen","瑞典","EU","",1],"SCT":["索科特拉岛","索科特拉岛","","Mori","也门","ME"],"SCU":["圣地亚哥","圣地亚哥","","Santiago","古巴","NA","",1],"SCV":["蘇恰瓦","蘇恰瓦","","Suceava","罗马尼亚","EU","",1],"SCW":["瑟克特夫卡尔","瑟克特夫卡尔","","Syktyvkar","俄罗斯","EU"],"SDD":["卢班戈","卢班戈","","Lubango","安哥拉","AF"],"SDE":["圣地亚哥-德尔埃斯特罗","圣地亚哥-德尔埃斯特罗","","Santiago del Estero","阿根廷","LA"],"SDF":["路易斯维尔","路易斯维尔","","Louisville","美国","NA","",1],"SDG":["萨南达季","萨南达季","","","伊朗","ME"],"SDJ":["仙台","仙台","","Natori","日本","EA","",1],"SDK":["山打根省","山打根省","","Sandakan","马来西亚","SEA"],"SDL":["蒂姆罗市镇","蒂姆罗市镇","","Sundsvall/ Härnösand","瑞典","EU"],"SDP":["桑德波因特","桑德波因特","","Sand Point","美国","NA"],"SDQ":["圣多明哥圣多明各","圣多明哥","","Santo Domingo","多米尼加","NA","Q34820",1],"SDR":["桑坦德","桑坦德","","Santander","西班牙","EU"],"SDS":["佐渡","佐渡","","Sado","日本","EA"],"SDU":["里约热内卢圣杜蒙特","里约热内卢","","Rio de Janeiro","巴西","LA","Q8678",1],"SDW":["Chipi","","","Chipi","印度","SA"],"SDY":["西德尼","西德尼","","Sidney","美国","NA"],"SEA":["西雅图","西雅图","","Seattle","美国","NA","Q5083",1],"SEB":["塞卜哈","塞卜哈","","Sabha","利比亚","AF"],"SEK":["中科雷姆斯克","中科雷姆斯克","","Srednekolymsk","俄罗斯","EU"],"SEN":["滨海绍森德","滨海绍森德","","Southend-on-Sea, Essex","英国","EU"],"SEZ":["维多利亚","维多利亚","","Victoria","塞舌尔","AF","",1],"SFA":["斯法克斯","斯法克斯","","Sfax","突尼斯","AF"],"SFB":["桑福德","桑福德","","Orlando","美国","NA","",1],"SFG":["圣马丁岛","圣马丁岛","","Grand Case","法属圣马丁","NA"],"SFJ":["康埃卢苏阿克","康埃卢苏阿克","","Kangerlussuaq","格陵兰","NA"],"SFN":["圣菲","圣菲","","Santa Fe","阿根廷","LA"],"SFO":["旧金山","旧金山","","San Francisco","美国","NA","",1],"SFS":["苏比克湾自由港区","苏比克湾自由港区","","Olongapo","菲律宾","SEA","",1],"SFT":["謝萊夫特奧","謝萊夫特奧","","Skellefteå","瑞典","EU"],"SGC":["苏尔古特","苏尔古特","","Surgut","俄罗斯","EU","",1],"SGD":["森讷堡","森讷堡","","Sønderborg","丹麦","EU"],"SGF":["斯普林菲尔德","斯普林菲尔德","","Springfield","美国","NA"],"SGN":["胡志明","胡志明","","Ho Chi Minh City","越南","SEA","",1],"SGU":["圣乔治","圣乔治","","St George","美国","NA"],"SHA":["上海虹桥","上海","","Shanghai (Minhang)","中国","CN","C:SHA",1],"SHB":["中標津町","中標津町","","Nakashibetsu","日本","EA"],"SHD":["斯汤顿","斯汤顿","","Weyers Cave","美国","NA"],"SHE":["沈阳","沈阳","","Shenyang","中国","CN","",1],"SHI":["下地島","","","Miyakojima","日本","EA"],"SHJ":["沙迦","沙迦","","Sharjah","阿联酋","ME","",1],"SHL":["西隆","西隆","","Shillong","印度","SA"],"SHM":["南紀","南紀","","Shirahama","日本","EA"],"SHO":["曼齐尼","曼齐尼","","Mpaka","斯威士兰","AF","",1],"SHR":["谢里登","谢里登","","Sheridan","美国","NA"],"SHS":["荆州","荆州","","Jingzhou (Shashi)","中国","CN"],"SHV":["什里夫波特","什里夫波特","","Shreveport","美国","NA"],"SHW":["Sharurah","","","Sharurah","沙特阿拉伯","ME"],"SID":["埃斯帕戈斯","埃斯帕戈斯","","Espargos","佛得角","AF","",1],"SIG":["圣胡安Isla Grande ","圣胡安","","San Juan","波多黎各","NA","Q41211"],"SIN":["新加坡","新加坡","","Singapore","新加坡","SEA","Q334",1],"SIS":["Sishen","","","Sishen","南非","AF"],"SIT":["锡特卡","锡特卡","","Sitka","美国","NA"],"SJC":["旧金山湾区","旧金山湾区","","San Jose","美国","NA","",1],"SJD":["卡波圣卢卡","卡波圣卢卡","","San José del Cabo","墨西哥","NA","",1],"SJE":["瓜维亚雷河畔圣何塞","瓜维亚雷河畔圣何塞","","San José Del Guaviare","哥伦比亚","LA"],"SJI":["圣何塞","圣何塞","","San Jose","菲律宾","SEA"],"SJJ":["东萨拉热窝","东萨拉热窝","","Sarajevo","波斯尼亚和黑塞哥维那","EU","",1],"SJK":["圣若泽多斯坎波斯","圣若泽多斯坎波斯","","São José Dos Campos","巴西","LA"],"SJL":["圣加布里埃尔达卡绍埃拉","圣加布里埃尔达卡绍埃拉","","São Gabriel da Cachoeira","巴西","LA"],"SJO":["圣何塞胡安·圣玛丽亚","圣何塞","","San José (Alajuela)","哥斯达黎加","NA","Q3070",1],"SJP":["普雷图河畔圣若泽","普雷图河畔圣若泽","","São José do Rio Preto","巴西","LA"],"SJT":["聖安吉洛地區","","","San Angelo","美国","NA"],"SJU":["圣胡安路易斯·穆尼奥斯·马林","圣胡安","","San Juan","波多黎各","NA","Q41211",1],"SJW":["石家庄","石家庄","","Shijiazhuang","中国","CN","",1],"SJZ":["韦拉什","韦拉什","","Velas","葡萄牙","EU"],"SKB":["巴斯特尔","巴斯特尔","","Basseterre","圣基茨和尼维斯","NA","",1],"SKD":["撒马尔罕","撒马尔罕","","Samarkand","乌兹别克斯坦","CA","",1],"SKG":["塞萨洛尼基","塞萨洛尼基","","Thessaloniki","希腊","EU","",1],"SKN":["斯托克馬克內斯","斯托克馬克內斯","","Hadsel","挪威","EU"],"SKO":["索科托","索科托","","Sokoto","尼日利亚","AF","",1],"SKP":["斯科普里","斯科普里","","Ilinden","北马其顿","EU","",1],"SKT":["锡亚尔科特","锡亚尔科特","","Sialkot","巴基斯坦","SA","",1],"SKX":["萨兰斯克","萨兰斯克","","Saransk","俄罗斯","EU","",1],"SKZ":["苏库尔","苏库尔","","Sukkur","巴基斯坦","SA"],"SLA":["萨尔塔","萨尔塔","","Salta","阿根廷","LA","",1],"SLC":["盐湖城","盐湖城","","Salt Lake City","美国","NA","",1],"SLD":["斯利亚奇","斯利亚奇","","Sliač","斯洛伐克","EU"],"SLE":["塞勒姆","塞勒姆","","Salem","美国","NA"],"SLK":["萨拉纳克湖","萨拉纳克湖","","Saranac Lake","美国","NA"],"SLL":["佐法尔省","佐法尔省","","Salalah","阿曼","ME","",1],"SLM":["萨拉曼卡","萨拉曼卡","","Salamanca","西班牙","EU"],"SLN":["萨利纳","萨利纳","","Salina","美国","NA"],"SLP":["圣路易斯波托西","圣路易斯波托西","","San Luis Potosí","墨西哥","NA"],"SLU":["圣卢西亚行政区划","圣卢西亚行政区划","","Castries","圣卢西亚","NA"],"SLW":["萨尔蒂约","萨尔蒂约","","Saltillo","墨西哥","NA"],"SLY":["萨列哈尔德","萨列哈尔德","","Salekhard","俄罗斯","EU"],"SLZ":["圣路易斯","圣路易斯","","São Luís","巴西","LA","",1],"SMA":["波尔图镇","波尔图镇","","Vila do Porto","葡萄牙","EU"],"SMF":["萨克拉门托","萨克拉门托","","Sacramento","美国","NA","",1],"SMI":["瓦西","瓦西","","Samos Island","希腊","EU"],"SML":["长岛長島","长岛","","Stella Maris","巴哈马","NA","Q890879"],"SMN":["Salmon","","","Salmon","美国","NA"],"SMR":["圣玛尔塔","圣玛尔塔","","Santa Marta","哥伦比亚","LA"],"SMS":["布拉哈岛","布拉哈岛","","Vohilava","马达加斯加","AF"],"SMW":["斯马拉","斯马拉","","Smara","西撒哈拉","AF"],"SMX":["圣玛丽亚","圣玛丽亚","","Santa Maria","美国","NA"],"SNA":["圣安娜","圣安娜","","Santa Ana","美国","NA","",1],"SNB":["梅尔维尔岛","梅尔维尔岛","","Milikapiti","澳大利亚","OC"],"SNC":["萨利纳斯","萨利纳斯","","Salinas/La Libertad","厄瓜多尔","LA","",1],"SNE":["里贝拉布拉瓦","里贝拉布拉瓦","","Preguiça","佛得角","AF"],"SNN":["利默里克","利默里克","","Shannon","爱尔兰","EU","",1],"SNO":["沙功那空","","","","泰国","SEA","TH:"],"SNP":["聖保羅島 (阿拉斯加)","聖保羅島 (阿拉斯加)","","St Paul Island","美国","NA"],"SNU":["圣克拉拉","圣克拉拉","","Santa Clara","古巴","NA","",1],"SNV":["聖埃倫娜德瓦伊倫","聖埃倫娜德瓦伊倫","","Santa Elena de Uairén","委内瑞拉","LA"],"SNW":["丹兑","丹兑","","Thandwe","缅甸","SEA"],"SOB":["沙尔迈尔莱克","沙尔迈尔莱克","","Sármellék","匈牙利","EU"],"SOC":["梭罗","梭罗","","Surakarta","印度尼西亚","SEA","",1],"SOF":["索非亚市镇","索非亚市镇","","Sofia","保加利亚","EU","",1],"SOJ":["瑟休森","瑟休森","","Sørkjosen","挪威","EU"],"SOM":["埃尔蒂格雷","埃尔蒂格雷","","El Tigre","委内瑞拉","LA"],"SON":["卢甘维尔","卢甘维尔","","Luganville","瓦努阿图","OC"],"SOQ":["索龙","索龙","","Sorong","印度尼西亚","SEA"],"SOU":["南安普敦","南安普敦","","Southampton","英国","EU"],"SOW":["肖洛","肖洛","","Show Low","美国","NA"],"SPC":["圣克鲁斯-德拉帕尔马","圣克鲁斯-德拉帕尔马","","Sta Cruz de la Palma, La Palma Island","西班牙","AF"],"SPD":["赛德普尔乌帕齐拉","赛德普尔乌帕齐拉","","Saidpur","孟加拉国","SA"],"SPI":["斯普林菲尔德","斯普林菲尔德","","Springfield","美国","NA"],"SPN":["塞班","","","I Fadang, Saipan","北马里亚纳群岛","OC"],"SPP":["梅农盖","梅农盖","","Menongue","安哥拉","AF"],"SPR":["聖佩德羅","聖佩德羅","","San Pedro","伯利兹","NA"],"SPS":["威奇托福尔斯","威奇托福尔斯","","Wichita Falls","美国","NA"],"SPU":["斯普利特","斯普利特","","Split","克罗地亚","EU","",1],"SPX":["谢赫扎耶德城","谢赫扎耶德城","","Al Jiza","埃及","AF","",1],"SPY":["圣佩德罗","圣佩德罗","","","科特迪瓦","AF"],"SQD":["上饶","上饶","","Shangrao (Hengfeng)","中国","CN"],"SQG":["德柏利安","","","Sintang","印度尼西亚","SEA"],"SQJ":["三明","三明","","Sanming (Sha)","中国","CN"],"SQL":["圣卡洛斯","圣卡洛斯","","San Carlos","美国","NA"],"SRE":["苏克雷","苏克雷","","Sucre","玻利维亚","LA","",1],"SRG":["三宝垄","三宝垄","","Semarang","印度尼西亚","SEA","",1],"SRP":["斯图尔","斯图尔","","Leirvik","挪威","EU"],"SRQ":["萨拉索塔","萨拉索塔","","Sarasota/Bradenton","美国","NA","",1],"SRT":["索羅提","索羅提","","Soroti","乌干达","AF"],"SRY":["薩里","","","Sari","伊朗","ME"],"SRZ":["圣克鲁斯-德拉谢拉","圣克鲁斯-德拉谢拉","","Santa Cruz","玻利维亚","LA","Q170688"],"SSA":["萨尔瓦多","萨尔瓦多","","Salvador","巴西","LA","",1],"SSG":["马拉博","马拉博","","Malabo","赤道几内亚","AF","",1],"SSH":["沙姆沙伊赫","沙姆沙伊赫","","Sharm El Sheikh","埃及","AF","",1],"SSJ":["桑内舍恩","桑内舍恩","","Alstahaug","挪威","EU"],"SST":["聖泰蕾西塔","聖泰蕾西塔","","Santa Teresita","阿根廷","LA"],"SSY":["Mbanza Congo","","","Mbanza Congo","安哥拉","AF"],"STC":["圣云","圣云","","Saint Cloud","美国","NA"],"STD":["圣克里斯托瓦尔","圣克里斯托瓦尔","","Santo Domingo","委内瑞拉","LA"],"STG":["圣乔治","圣乔治","","St George","美国","NA"],"STI":["圣地亚哥","圣地亚哥","","Santiago","多米尼加","NA","",1],"STL":["大聖路易都會區","大聖路易都會區","","St Louis","美国","NA","",1],"STM":["圣塔伦","圣塔伦","","Santarém","巴西","LA"],"STN":["伦敦斯坦斯特德","伦敦","","London, Essex","英国","EU","Q84",1],"STR":["斯图加特","斯图加特","","Stuttgart","德国","EU","",1],"STS":["圣罗莎","圣罗莎","","Santa Rosa","美国","NA"],"STT":["夏洛特阿马利亚","夏洛特阿马利亚","","Charlotte Amalie","美属维尔京群岛","NA","",1],"STV":["苏拉特","","","Surat","印度","SA","",1],"STW":["斯塔夫罗波尔","斯塔夫罗波尔","","Stavropol","俄罗斯","EU"],"STX":["圣克洛伊岛","圣克洛伊岛","","Christiansted","美属维尔京群岛","NA"],"SUB":["泗水","泗水","","Surabaya","印度尼西亚","SEA","",1],"SUF":["拉梅齐亚泰尔梅","拉梅齐亚泰尔梅","","Lamezia Terme (CZ)","意大利","EU","",1],"SUG":["苏里高","苏里高","","Surigao City","菲律宾","SEA"],"SUI":["苏呼米","苏呼米","","Sukhumi","格鲁吉亚","CA","",1],"SUJ":["萨图马雷","萨图马雷","","Satu Mare","罗马尼亚","EU"],"SUN":["凯彻姆","凯彻姆","","Hailey","美国","NA"],"SUV":["苏瓦","苏瓦","","Nausori","斐济","OC","",1],"SUX":["苏城","苏城","","Sioux City","美国","NA"],"SVA":["萨文格","萨文格","","Savoonga","美国","NA"],"SVB":["桑巴瓦","桑巴瓦","","Sambava","马达加斯加","AF"],"SVC":["银城","银城","","Silver City","美国","NA"],"SVD":["金斯敦","金斯敦","","Kingstown","圣文森特和格林纳丁斯","NA","",1],"SVG":["斯塔万格","斯塔万格","","Stavanger","挪威","EU","",1],"SVI":["圣维森特德尔卡古安","圣维森特德尔卡古安","","San Vicente Del Caguán","哥伦比亚","LA"],"SVJ":["斯沃尔韦尔","斯沃尔韦尔","","Svolvær","挪威","EU"],"SVL":["萨翁林纳","萨翁林纳","","Savonlinna","芬兰","EU"],"SVO":["莫斯科谢列梅捷沃","莫斯科","","Moscow","俄罗斯","EU","Q649",1],"SVQ":["塞维利亚","塞维利亚","","Seville","西班牙","EU","",1],"SVX":["叶卡捷琳堡","叶卡捷琳堡","","Yekaterinburg","俄罗斯","EU","",1],"SVZ":["西普里亚诺·卡斯特罗将军","","","San Antonio del Tachira","委内瑞拉","LA"],"SWA":["汕头","汕头","","Jieyang (Rongcheng)","中国","CN","",1],"SWF":["哈得遜河谷","哈得遜河谷","","Newburgh","美国","NA"],"SWO":["斯蒂尔沃特","斯蒂尔沃特","","Stillwater","美国","NA"],"SXB":["斯特拉斯堡","斯特拉斯堡","","Strasbourg","法国","EU","",1],"SXM":["菲利普斯堡","菲利普斯堡","","Sint Maarten","荷属圣马丁","NA","",1],"SXR":["斯利那加","斯利那加","","Srinagar","印度","SA","",1],"SYD":["悉尼","悉尼","","Sydney (Mascot)","澳大利亚","OC","",1],"SYO":["庄内町","庄内町","","Shonai","日本","EA"],"SYQ":["圣何塞托维亚斯·博拉尼奥斯","圣何塞","","San Jose","哥斯达黎加","NA","Q3070"],"SYR":["锡拉丘兹","锡拉丘兹","","Syracuse","美国","NA","",1],"SYS":["萨斯克拉赫","萨斯克拉赫","","Saskylakh","俄罗斯","EU"],"SYX":["三亚","三亚","","Sanya (Tianya)","中国","CN","",1],"SYY":["斯多诺威","斯多诺威","","Stornoway, Western Isles","英国","EU"],"SYZ":["设拉子","设拉子","","Shiraz","伊朗","ME","",1],"SZA":["索约","索约","","Soyo","安哥拉","AF"],"SZB":["梳邦国会议席","梳邦国会议席","","Subang","马来西亚","SEA","",1],"SZF":["萨姆松","萨姆松","","Samsun","土耳其","EU"],"SZG":["萨尔茨堡","萨尔茨堡","","Salzburg","奥地利","EU","",1],"SZH":["朔州滋润","","","Shuozhou","中国","CN"],"SZK":["克鲁格国家公园","克鲁格国家公园","","Skukuza","南非","AF"],"SZX":["深圳","深圳","","Shenzhen","中国","CN","",1],"SZY":["什奇特诺","什奇特诺","","Szymany","波兰","EU"],"SZZ":["戈莱纽夫","戈莱纽夫","","Szczecin(Glewice)","波兰","EU","",1],"TAB":["查瓜纳斯","查瓜纳斯","","Scarborough","特立尼达和多巴哥","NA","",1],"TAC":["塔克洛班","塔克洛班","","Tacloban City","菲律宾","SEA"],"TAE":["大邱","大邱","","Daegu","韩国","EA","",1],"TAG":["塔比拉兰","塔比拉兰","","Panglao","菲律宾","SEA","",1],"TAH":["塔納島","塔納島","","Tanna Island","瓦努阿图","OC"],"TAI":["塔伊兹","塔伊兹","","Taiz","也门","ME"],"TAK":["高松","高松","","Takamatsu","日本","EA","",1],"TAM":["坦皮科","坦皮科","","Ciudad Madero","墨西哥","NA"],"TAO":["青岛","青岛","","Qingdao (Jiaozhou)","中国","CN","",1],"TAP":["塔帕丘拉","塔帕丘拉","","Tapachula","墨西哥","NA"],"TAS":["塔什干","塔什干","","Tashkent","乌兹别克斯坦","CA","",1],"TAT":["波普拉德","波普拉德","","Poprad","斯洛伐克","EU"],"TAY":["塔尔图","塔尔图","","Tartu","爱沙尼亚","EU"],"TAZ":["达沙古兹","达沙古兹","","Daşoguz","土库曼斯坦","CA","",1],"TBB":["綏和","綏和","","Tuy Hoa","越南","SEA"],"TBH":["塔布拉斯","塔布拉斯","","Tablas Island","菲律宾","SEA"],"TBI":["卡特島","","","Cat Island","巴哈马","NA"],"TBJ":["泰拜尔盖","泰拜尔盖","","Tabarka","突尼斯","AF"],"TBN":["韋恩斯維爾","韋恩斯維爾","","Fort Leonard Wood","美国","NA"],"TBP":["通贝斯","通贝斯","","Tumbes","秘鲁","LA"],"TBS":["第比利斯","第比利斯","","Tbilisi","格鲁吉亚","CA","",1],"TBT":["塔巴廷加","塔巴廷加","","Tabatinga","巴西","LA"],"TBU":["努库阿洛法","努库阿洛法","","Nuku'alofa","汤加","OC","",1],"TBZ":["大不里士","大不里士","","Tabriz","伊朗","ME","",1],"TCA":["滕南特克里克","","","Tennant Creek","澳大利亚","OC"],"TCB":["阿巴科","","","Treasure Cay","巴哈马","NA"],"TCO":["图马科","图马科","","Tumaco","哥伦比亚","LA"],"TCP":["塔巴","塔巴","","Taba","埃及","AF"],"TCQ":["塔克纳","塔克纳","","Tacna","秘鲁","LA"],"TCZ":["腾冲","腾冲","","Baoshan (Tengchong)","中国","CN"],"TDD":["特立尼达","特立尼达","","Trinidad","玻利维亚","LA"],"TDK":["塔尔迪库尔干","塔尔迪库尔干","","Taldykorgan","哈萨克斯坦","CA"],"TDX":["达叻府","达叻府","","Laem Ngop","泰国","SEA"],"TEB":["泰特伯勒","泰特伯勒","","Teterboro","美国","NA"],"TEE":["泰贝萨","泰贝萨","","Tébessi","阿尔及利亚","AF"],"TEN":["铜仁","铜仁","","Tongren (Daxing)","中国","CN"],"TEQ":["乔尔卢","乔尔卢","","Çorlu","土耳其","EU"],"TER":["普拉亚-达维多利亚","普拉亚-达维多利亚","","Praia da Vitória","葡萄牙","EU"],"TET":["太特","太特","","Tete","莫桑比克","AF","",1],"TEX":["特柳赖德","特柳赖德","","Telluride","美国","NA"],"TEZ":["泰茲普爾","","","","印度","SA"],"TFF":["特费","特费","","Tefé","巴西","LA"],"TFN":["特内里费岛特内里费北部-拉拉古纳市","特内里费岛","","Tenerife","西班牙","AF","Q40846",1],"TFS":["特内里费岛特内里费南部","特内里费岛","","Tenerife","西班牙","AF","Q40846",1],"TFU":["成都天府","成都","","Chengdu (Jianyang)","中国","CN","C:CTU",1],"TGD":["波德戈里察","波德戈里察","","Podgorica","黑山","EU","",1],"TGG":["瓜拉登嘉楼","瓜拉登嘉楼","","Kuala Terengganu","马来西亚","SEA"],"TGJ":["Tiga","","","Tiga","新喀里多尼亚","OC"],"TGM":["特尔古穆列什","特尔古穆列什","","Recea","罗马尼亚","EU"],"TGO":["通辽","通辽","","Tongliao","中国","CN"],"TGR":["图古尔特","图古尔特","","Touggourt","阿尔及利亚","AF"],"TGT":["坦噶","坦噶","","Tanga","坦桑尼亚","AF"],"TGU":["特古西加尔巴","特古西加尔巴","","Tegucigalpa","洪都拉斯","NA"],"TGZ":["图斯特拉－古铁雷斯","图斯特拉－古铁雷斯","","Tuxtla Gutiérrez","墨西哥","NA"],"THE":["特雷西纳","特雷西纳","","Teresina","巴西","LA"],"THG":["比洛威拉","","","Biloela","澳大利亚","OC"],"THL":["大其力","大其力","","Tachileik","缅甸","SEA"],"THN":["特罗尔海坦","特罗尔海坦","","Trollhättan","瑞典","EU"],"THQ":["天水","天水","","Tianshui (Maiji)","中国","CN"],"THR":["德黑兰梅赫拉巴德","德黑兰","","Tehran","伊朗","ME","Q3616",1],"THS":["素可泰府","素可泰府","","","泰国","SEA"],"TIA":["地拉那","地拉那","","Rinas","阿尔巴尼亚","EU","",1],"TIF":["塔伊夫","塔伊夫","","Taif","沙特阿拉伯","ME","",1],"TIH":["蒂凯豪环礁","蒂凯豪环礁","","Tuherahera","法属波利尼西亚","OC"],"TIJ":["蒂华纳","蒂华纳","","Tijuana","墨西哥","NA","",1],"TIM":["蒂米卡","蒂米卡","","Timika","印度尼西亚","SEA"],"TIN":["廷杜夫","廷杜夫","","Tindouf","阿尔及利亚","AF"],"TIQ":["天宁","","","Tinian Island","北马里亚纳群岛","OC"],"TIR":["蒂鲁伯蒂","蒂鲁伯蒂","","Tirupati","印度","SA","",1],"TIU":["蒂马鲁","蒂马鲁","","","新西兰","OC"],"TIV":["蒂瓦特","蒂瓦特","","Tivat","黑山","EU"],"TIW":["塔科马","塔科马","","Tacoma","美国","NA"],"TJA":["塔里哈","塔里哈","","Tarija","玻利维亚","LA"],"TJG":["Tanta-Tabalong","","","Tanta-Tabalong","印度尼西亚","SEA"],"TJH":["丰冈","丰冈","","Toyooka","日本","EA"],"TJK":["托卡特","托卡特","","Tokat","土耳其","EU"],"TJM":["秋明","秋明","","Tyumen","俄罗斯","EU","",1],"TJU":["库洛布","库洛布","","Kulob","塔吉克斯坦","CA","",1],"TKD":["塞康第-塔科拉迪","塞康第-塔科拉迪","","Sekondi-Takoradi","加纳","AF"],"TKF":["特拉基","特拉基","","Truckee","美国","NA"],"TKG":["楠榜省","楠榜省","","Bandar Lampung","印度尼西亚","SEA"],"TKK":["维诺","维诺","","Weno Island","密克罗尼西亚联邦","OC","",1],"TKN":["德之岛","德之岛","","Amagi","日本","EA"],"TKP":["塔卡波托环礁","塔卡波托环礁","","","法属波利尼西亚","OC"],"TKS":["德岛","德岛","","Tokushima","日本","EA","",1],"TKU":["图尔库","图尔库","","Turku","芬兰","EU","",1],"TKX":["塔卡羅阿環礁","塔卡羅阿環礁","","","法属波利尼西亚","OC"],"TLC":["托卢卡","托卢卡","","Toluca","墨西哥","NA","",1],"TLE":["图利亚拉","图利亚拉","","Toliara","马达加斯加","AF"],"TLH":["塔拉赫西","塔拉赫西","","Tallahassee","美国","NA"],"TLL":["塔林","塔林","","Tallinn","爱沙尼亚","EU","",1],"TLM":["特莱姆森","特莱姆森","","Zenata","阿尔及利亚","AF","",1],"TLN":["土伦","土伦","","Hyères, Var","法国","EU"],"TLQ":["吐鲁番","吐鲁番","","Turpan","中国","CN"],"TLS":["图卢兹","图卢兹","","Toulouse/Blagnac","法国","EU","",1],"TLV":["特拉维夫","特拉维夫","","Tel Aviv","以色列","ME","",1],"TME":["塔梅","塔梅","","Tame","哥伦比亚","LA"],"TMH":["塔纳默拉","","","Tanah Merah","印度尼西亚","SEA"],"TMJ":["铁尔米兹","铁尔米兹","","Termez","乌兹别克斯坦","CA"],"TML":["塔马利","塔马利","","Tamale","加纳","AF","",1],"TMM":["图阿马西纳","图阿马西纳","","Toamasina","马达加斯加","AF","",1],"TMP":["坦佩雷","坦佩雷","","Tampere / Pirkkala","芬兰","EU","",1],"TMR":["塔曼拉塞特","塔曼拉塞特","","Tamanrasset","阿尔及利亚","AF","",1],"TMS":["圣多美","圣多美","","São Tomé","圣多美和普林西比","AF","",1],"TMT":["奥里希米纳","奥里希米纳","","Oriximiná","巴西","LA"],"TMW":["塔姆沃思","塔姆沃思","","Tamworth","澳大利亚","OC"],"TMX":["提米蒙","提米蒙","","Timimoun","阿尔及利亚","AF"],"TNA":["济南","济南","","Jinan (Licheng)","中国","CN","",1],"TND":["特立尼达","特立尼达","","Trinidad","古巴","NA"],"TNE":["種子島","","","Tanegashima","日本","EA"],"TNG":["丹吉尔","丹吉尔","","Tangier","摩洛哥","AF","",1],"TNH":["通化","通化","","Tonghua","中国","CN"],"TNJ":["丹戎槟榔","丹戎槟榔","","Tanjung Pinang-Bintan Island","印度尼西亚","SEA"],"TNN":["台南","台南","","Tainan (Rende)","中国台湾","HMT","",1],"TNR":["塔那那利佛省","塔那那利佛省","","Antananarivo","马达加斯加","AF","",1],"TOD":["装药","装药","","Tioman Island","马来西亚","SEA"],"TOE":["内夫塔","内夫塔","","Tozeur","突尼斯","AF"],"TOF":["托木斯克","托木斯克","","Tomsk","俄罗斯","EU","",1],"TOL":["托莱多","托莱多","","Toledo","美国","NA"],"TOM":["通布图","通布图","","Timbuktu","马里","AF","",1],"TOS":["特罗姆瑟","特罗姆瑟","","Tromsø","挪威","EU","",1],"TOU":["图奥","图奥","","Touho","新喀里多尼亚","OC"],"TOY":["富山","富山","","Toyama","日本","EA"],"TPA":["坦帕","坦帕","","Tampa","美国","NA","",1],"TPE":["台湾桃园","","","Taoyuan","中国台湾","HMT","",1],"TPJ":["塔普勒瓊縣","塔普勒瓊縣","","Taplejung","尼泊尔","SA"],"TPP":["塔拉波托","塔拉波托","","Tarapoto","秘鲁","LA"],"TPQ":["特皮克","特皮克","","Tepic","墨西哥","NA"],"TPS":["特拉帕尼","特拉帕尼","","Trapani (TP)","意大利","EU"],"TQO":["图卢姆","","","Tulum","墨西哥","NA","",1],"TRA":["多良间村","多良间村","","Tarama","日本","EA"],"TRC":["托雷翁","托雷翁","","Torreón","墨西哥","NA"],"TRD":["特伦德拉格郡","特伦德拉格郡","","Trondheim","挪威","EU","",1],"TRE":["泰里岛","泰里岛","","Balemartine, Argyll and Bute","英国","EU"],"TRF":["桑讷菲尤尔","桑讷菲尤尔","","Sandefjord(Torp)","挪威","EU","",1],"TRG":["陶朗加","陶朗加","","Tauranga","新西兰","OC"],"TRI":["三城","三城","","Blountville","美国","NA"],"TRK":["打拉根","打拉根","","Tarakan","印度尼西亚","SEA"],"TRN":["都灵","都灵","","Caselle Torinese (TO)","意大利","EU","",1],"TRR":["亭可马里","亭可马里","","Trincomalee","斯里兰卡","SA"],"TRS":["的里雅斯特","的里雅斯特","","Ronchi dei Legionari/Trieste","意大利","EU","",1],"TRT":["Toraja","","","Toraja","印度尼西亚","SEA"],"TRU":["特鲁希略","特鲁希略","","Trujillo","秘鲁","LA","",1],"TRV":["特里凡得琅","特里凡得琅","","Thiruvananthapuram","印度","SA","",1],"TRW":["南塔拉瓦","南塔拉瓦","","South Tarawa","基里巴斯","OC","",1],"TRZ":["蒂鲁吉拉帕利","蒂鲁吉拉帕利","","Tiruchirappalli","印度","SA","",1],"TSA":["台北","台北","","Taipei (Songshan)","中国台湾","HMT","",1],"TSF":["特雷維索","特雷維索","","Treviso (TV)","意大利","EU","",1],"TSJ":["对马","对马","","Tsushima","日本","EA"],"TSM":["陶斯","陶斯","","Taos","美国","NA"],"TSN":["天津","天津","","Tianjin","中国","CN","",1],"TSR":["蒂米什县","蒂米什县","","Timişoara","罗马尼亚","EU","",1],"TST":["董里","董里","","Trang","泰国","SEA"],"TSV":["汤斯维尔","汤斯维尔","","Townsville","澳大利亚","OC"],"TTA":["谭谭","谭谭","","Tan Tan","摩洛哥","AF"],"TTE":["德那第","德那第","","Ternate","印度尼西亚","SEA"],"TTJ":["鸟取","鸟取","","Tottori","日本","EA"],"TTN":["特伦顿","特伦顿","","Ewing Township","美国","NA"],"TTT":["台东","台东","","Taitung City","中国台湾","HMT"],"TTU":["得土安","得土安","","Tétouan","摩洛哥","AF","",1],"TUA":["路易斯·曼蒂利亚中校","","","Tulcán","厄瓜多尔","LA"],"TUB":["土布艾群岛","土布艾群岛","","","法属波利尼西亚","OC"],"TUC":["图库曼省","图库曼省","","San Miguel de Tucumán","阿根廷","LA","",1],"TUF":["图尔","图尔","","Tours, Indre-et-Loire","法国","EU"],"TUG":["土格加劳","土格加劳","","Tuguegarao City","菲律宾","SEA"],"TUI":["圖賴夫","圖賴夫","","Turaif","沙特阿拉伯","ME"],"TUK":["土爾巴特","土爾巴特","","Turbat","巴基斯坦","SA","",1],"TUL":["塔尔萨","塔尔萨","","Tulsa","美国","NA","",1],"TUN":["突尼斯","突尼斯","","Tunis","突尼斯","AF","",1],"TUO":["陶波","陶波","","Taupo","新西兰","OC"],"TUP":["图珀洛","图珀洛","","Tupelo","美国","NA"],"TUR":["图库鲁伊","图库鲁伊","","Tucuruí","巴西","LA"],"TUS":["图森","图森","","Tucson","美国","NA","",1],"TUU":["塔布克","塔布克","","Tabuk","沙特阿拉伯","ME","",1],"TVC":["特拉弗斯城","特拉弗斯城","","Traverse City","美国","NA"],"TVF":["锡夫里弗福尔斯","锡夫里弗福尔斯","","Thief River Falls","美国","NA"],"TVT":["Tashkent","","","Tashkent","乌兹别克斯坦","CA"],"TVY":["土瓦","土瓦","","Dawei","缅甸","SEA"],"TWF":["特温福尔斯","特温福尔斯","","Twin Falls","美国","NA"],"TWT":["邦奥岛","邦奥岛","","Bongao","菲律宾","SEA"],"TWU":["斗湖省","斗湖省","","Tawau","马来西亚","SEA"],"TXE":["打京岸","打京岸","","Takengon","印度尼西亚","SEA"],"TXK":["特克薩卡納地方","","","Texarkana","美国","NA"],"TXN":["黄山","黄山","","Huangshan","中国","CN","",1],"TYF":["图什比","图什比","","Torsby","瑞典","EU"],"TYL":["塔拉拉","塔拉拉","","Talara","秘鲁","LA"],"TYN":["太原","太原","","Taiyuan","中国","CN","",1],"TYR":["东得克萨斯","东得克萨斯","","Tyler","美国","NA"],"TYS":["诺克斯维尔","诺克斯维尔","","Knoxville/Maryville","美国","NA","",1],"TZA":["伯利兹貝里斯市-市政","伯利兹","","Belize City","伯利兹","NA","Q108223"],"TZL":["图兹拉","图兹拉","","Dubrave Gornje","波斯尼亚和黑塞哥维那","EU","",1],"TZN":["剛果鎮","","","Andros","巴哈马","NA"],"TZX":["特拉布宗","特拉布宗","","Trabzon","土耳其","EU"],"UAI":["蘇艾","蘇艾","","Suai","东帝汶","SEA"],"UAQ":["圣胡安","圣胡安","","San Juan","阿根廷","LA"],"UAR":["布阿法","布阿法","","Bouarfa","摩洛哥","AF"],"UBA":["乌贝拉巴","乌贝拉巴","","Uberaba","巴西","LA"],"UBJ":["宇部","宇部","","Ube","日本","EA"],"UBN":["新烏蘭巴托","","","Ulaanbaatar (Sergelen)","蒙古国","EA","",1],"UBP":["乌汶叻差他尼","","","Ubon Ratchathani","泰国","SEA"],"UCB":["乌兰察布","乌兰察布","","Ulanqab","中国","CN"],"UCT":["乌赫塔","乌赫塔","","Ukhta","俄罗斯","EU"],"UDI":["乌贝兰迪亚","乌贝兰迪亚","","Uberlândia","巴西","LA"],"UDR":["乌代布尔","乌代布尔","","Udaipur","印度","SA"],"UEL":["克利马内","克利马内","","Quelimane","莫桑比克","AF"],"UEO":["久米岛町","久米岛町","","Kumejima","日本","EA"],"UET":["奎达","奎达","","Quetta","巴基斯坦","SA","",1],"UFA":["乌法","乌法","","Ufa","俄罗斯","EU","",1],"UGA":["布尔干","","","Bulgan","蒙古国","EA"],"UGC":["乌尔根奇","乌尔根奇","","Urgench","乌兹别克斯坦","CA","",1],"UGU":["Bilogai","","","Bilogai","印度尼西亚","SEA"],"UIB":["基布多","基布多","","Quibdó","哥伦比亚","LA"],"UIH":["归仁","归仁","","Quy Nohn","越南","SEA"],"UIN":["昆西","昆西","","Quincy","美国","NA"],"UIO":["基多","基多","","Quito","厄瓜多尔","LA","",1],"UKB":["神户","神户","","Kobe","日本","EA","",1],"UKE":["Bhawanipatna","","","Bhawanipatna","印度","SA"],"UKK":["厄斯克门","厄斯克门","","Ust-Kamenogorsk (Oskemen)","哈萨克斯坦","CA","",1],"UKX":["乌斯季库特","乌斯季库特","","Ust-Kut","俄罗斯","EU"],"ULG":["乌列盖","乌列盖","","Ölgii","蒙古国","EA"],"ULH":["欧拉","欧拉","","Al-Ula","沙特阿拉伯","ME","",1],"ULK":["连斯克","连斯克","","Lensk","俄罗斯","EU"],"ULO":["烏蘭固木","","","Ulaangom","蒙古国","EA"],"ULP":["Quilpie Airport","","","","澳大利亚","OC"],"ULU":["古盧","古盧","","Gulu","乌干达","AF"],"ULV":["乌里扬诺夫斯克烏里揚諾夫斯克","乌里扬诺夫斯克","","Ulyanovsk","俄罗斯","EU","Q5627"],"ULY":["乌里扬诺夫斯克东方港","乌里扬诺夫斯克","","Cherdakly","俄罗斯","EU","Q5627"],"UME":["于默奥","于默奥","","Umeå","瑞典","EU","",1],"UNI":["尤宁岛","尤宁岛","","Union Island","圣文森特和格林纳丁斯","NA"],"UNK":["尤纳拉克利特","尤纳拉克利特","","Unalakleet","美国","NA"],"UNN":["拉廊府治县","拉廊府治县","","Ranong","泰国","SEA"],"UPG":["望加锡","望加锡","","Makassar","印度尼西亚","SEA","",1],"UPN":["乌鲁阿潘","乌鲁阿潘","","Uruapan","墨西哥","NA"],"URA":["乌拉尔","乌拉尔","","Uralsk","哈萨克斯坦","CA","",1],"URC":["乌鲁木齐","乌鲁木齐","","Ürümqi","中国","CN","",1],"URE":["库雷萨雷","库雷萨雷","","Kuressaare","爱沙尼亚","EU"],"URG":["乌鲁瓜亚纳","乌鲁瓜亚纳","","Uruguaiana","巴西","LA"],"URJ":["乌拉伊","乌拉伊","","Uray","俄罗斯","EU"],"URT":["素叻","","","Surat Thani","泰国","SEA"],"URY":["Gurayat","","","Gurayat","沙特阿拉伯","ME"],"USA":["康科德","康科德","","Concord","美国","NA"],"USH":["乌斯怀亚","乌斯怀亚","","Ushuaia","阿根廷","LA"],"USK":["乌辛斯克","乌辛斯克","","Usinsk","俄罗斯","EU"],"USM":["沙湄岛","沙湄岛","","Na Thon (Ko Samui Island)","泰国","SEA","",1],"USN":["蔚山","蔚山","","Ulsan","韩国","EA"],"USR":["乌斯季涅拉","乌斯季涅拉","","Ust-Nera","俄罗斯","EU"],"UST":["St Augustine","","","St Augustine","美国","NA"],"USU":["布桑加島","布桑加島","","Coron","菲律宾","SEA"],"UTH":["乌隆府","乌隆府","","Udon Thani","泰国","SEA","",1],"UTN":["乌平通","乌平通","","Upington","南非","AF"],"UTO":["印第安山长程雷达站","","","Utopia Creek","美国","NA"],"UTP":["罗勇府","罗勇府","","Rayong","泰国","SEA","",1],"UTT":["乌姆塔塔","乌姆塔塔","","Mthatha","南非","AF"],"UUA":["布古利马","布古利马","","Bugulma","俄罗斯","EU"],"UUD":["乌兰乌德","乌兰乌德","","Ulan Ude","俄罗斯","EU","",1],"UUS":["南萨哈林斯克","南萨哈林斯克","","Yuzhno-Sakhalinsk","俄罗斯","EU","",1],"UVE":["乌韦阿","乌韦阿","","Ouvéa","新喀里多尼亚","OC"],"UVF":["伯堡区","伯堡区","","Vieux Fort","圣卢西亚","NA","",1],"UYL":["尼亚拉","尼亚拉","","Nyala","苏丹","AF"],"UYN":["榆林","榆林","","Yulin","中国","CN"],"UYU":["烏尤尼","烏尤尼","","Quijarro","玻利维亚","LA","",1],"VAA":["瓦萨","瓦萨","","Vaasa","芬兰","EU","",1],"VAI":["瓦尼莫","","","Vanimo","巴布亚新几内亚","OC"],"VAM":["Villa International","","","Maamigili","马尔代夫","SA"],"VAN":["凡城","凡城","","Van","土耳其","EU"],"VAQ":["Vanavara","","","Vanavara","俄罗斯","EU"],"VAR":["瓦尔纳市镇","瓦尔纳市镇","","Varna","保加利亚","EU","",1],"VAS":["锡瓦斯","锡瓦斯","","Sivas","土耳其","EU"],"VAV":["瓦瓦烏","","","Vava'u Island","汤加","OC","",1],"VAW":["瓦尔德镇","瓦尔德镇","","Vardø","挪威","EU"],"VBS":["布雷西亚","布雷西亚","","Montichiari (BS)","意大利","EU"],"VBY":["維斯比","維斯比","","Visby","瑞典","EU","",1],"VCA":["芹苴","芹苴","","Can Tho","越南","SEA","",1],"VCE":["威尼斯","威尼斯","","Venezia (VE)","意大利","EU","",1],"VCP":["坎皮纳斯","坎皮纳斯","","Campinas","巴西","LA","",1],"VCS":["昆岛","昆岛","","Con Dao","越南","SEA"],"VCT":["维多利亚","维多利亚","","Victoria","美国","NA"],"VDC":["维多利亚-达孔基斯塔","维多利亚-达孔基斯塔","","Vitória da Conquista","巴西","LA"],"VDE":["耶罗岛","耶罗岛","","El Hierro Island","西班牙","AF"],"VDH":["洞海","洞海","","Dong Hoi","越南","SEA"],"VDM":["别德马","别德马","","Viedma / Carmen de Patagones","阿根廷","LA"],"VDO":["云屯","","","Van Don","越南","SEA"],"VDS":["瓦德瑟","瓦德瑟","","Vadsø","挪威","EU"],"VDZ":["瓦尔迪兹","瓦尔迪兹","","Valdez","美国","NA"],"VEL":["韦纳尔","韦纳尔","","Vernal","美国","NA"],"VEO":["Severo-Yeniseysk","","","Severo-Yeniseysk","俄罗斯","EU"],"VER":["哈拉帕","哈拉帕","","Veracruz","墨西哥","NA","",1],"VFA":["维多利亚瀑布城","维多利亚瀑布城","","Victoria Falls","津巴布韦","AF","",1],"VGA":["维杰亚瓦达","维杰亚瓦达","","Vijayawada","印度","SA","",1],"VGO":["蓬特韦德拉省","蓬特韦德拉省","","Vigo","西班牙","EU"],"VHM":["威廉敏娜","","","Vilhelmina","瑞典","EU"],"VIE":["维也纳","维也纳","","Vienna","奥地利","EU","",1],"VIG":["阿爾伯托阿德里阿尼","","","El Vigía","委内瑞拉","LA"],"VII":["荣市","荣市","","Vinh","越南","SEA"],"VIJ":["维尔京戈尔达岛","","","Spanish Town","英属维尔京群岛","NA"],"VIL":["达克拉","达克拉","","Dakhla","西撒哈拉","AF","",1],"VIT":["维多利亚-加斯泰斯","维多利亚-加斯泰斯","","Alava","西班牙","EU"],"VIX":["维多利亚","维多利亚","","Vitória","巴西","LA","",1],"VKG":["迪石","迪石","","Rach Gia","越南","SEA"],"VKO":["莫斯科伏努科沃","莫斯科","","Moscow","俄罗斯","EU","Q649",1],"VKT":["沃尔库塔","沃尔库塔","","Vorkuta","俄罗斯","EU"],"VLC":["巴伦西亚","巴伦西亚","","Valencia","西班牙","EU","",1],"VLD":["瓦尔德斯塔","瓦尔德斯塔","","Valdosta","美国","NA"],"VLI":["维拉港","维拉港","","Port Vila","瓦努阿图","OC","",1],"VLL":["比利亚努夫拉","比利亚努夫拉","","Valladolid","西班牙","EU"],"VLN":["巴伦西亚","巴伦西亚","","Valencia","委内瑞拉","LA","",1],"VLV":["Valera","","","Valera","委内瑞拉","LA"],"VMU":["Baimuru","","","Baimuru","巴布亚新几内亚","OC"],"VNO":["维尔纽斯","维尔纽斯","","Vilnius","立陶宛","EU","",1],"VNS":["瓦拉纳西","瓦拉纳西","","Varanasi","印度","SA","",1],"VNX":["维兰库洛","维兰库洛","","Vilanculo","莫桑比克","AF"],"VOG":["伏尔加格勒","伏尔加格勒","","Volgograd","俄罗斯","EU","",1],"VOL":["沃洛斯","沃洛斯","","Nea Anchialos","希腊","EU"],"VOZ":["沃罗涅日","沃罗涅日","","Voronezh","俄罗斯","EU"],"VPE":["翁吉瓦","翁吉瓦","","Ngiva","安哥拉","AF"],"VPN":["沃普纳菲厄泽","沃普纳菲厄泽","","Vopnafjörður","冰岛","EU"],"VPS":["华尔顿堡滩","华尔顿堡滩","","Valparaiso","美国","NA"],"VPY":["希莫尤","希莫尤","","Chimoio","莫桑比克","AF"],"VQS":["别克斯岛","别克斯岛","","Vieques","波多黎各","NA"],"VRA":["巴拉德罗","巴拉德罗","","Matanzas","古巴","NA","",1],"VRB":["维罗比奇","维罗比奇","","Vero Beach","美国","NA"],"VRC":["维拉克","维拉克","","Virac","菲律宾","SEA"],"VRL":["Vila Real","","","Vila Real","葡萄牙","EU"],"VRN":["维罗纳","维罗纳","","Caselle (VR)","意大利","EU","",1],"VSA":["比亚埃尔莫萨","比亚埃尔莫萨","","Villahermosa","墨西哥","NA","",1],"VSE":["维塞乌区","维塞乌区","","Viseu","葡萄牙","EU"],"VST":["韦斯特罗斯","韦斯特罗斯","","Stockholm / Västerås","瑞典","EU","",1],"VTE":["万象","万象","","Vientiane","老挝","SEA","",1],"VTU":["拉斯图纳斯","拉斯图纳斯","","Las Tunas","古巴","NA"],"VTZ":["维沙卡帕特南","维沙卡帕特南","","Visakhapatnam","印度","SA","",1],"VUP":["巴耶杜帕尔","巴耶杜帕尔","","Valledupar","哥伦比亚","LA"],"VUS":["大乌斯秋格","大乌斯秋格","","Velikiy Ustyug","俄罗斯","EU"],"VVC":["比亚维森西奥","比亚维森西奥","","Villavicencio","哥伦比亚","LA"],"VVI":["圣克鲁斯-德拉谢拉聖克魯斯 (玻利維亞)","圣克鲁斯-德拉谢拉","","Santa Cruz","玻利维亚","LA","Q170688",1],"VVO":["海参崴","海参崴","","Artyom","俄罗斯","EU","",1],"VVZ":["伊利济","伊利济","","Illizi","阿尔及利亚","AF"],"VXC":["利欣加","利欣加","","Lichinga","莫桑比克","AF"],"VXE":["圣维森特","圣维森特","","São Pedro","佛得角","AF","",1],"VXO":["韦克舍","韦克舍","","Växjö","瑞典","EU"],"VYI":["维柳伊斯克","维柳伊斯克","","Vilyuisk","俄罗斯","EU"],"WAE":["瓦迪達瓦西","瓦迪達瓦西","","Wadi Al Dawasir","沙特阿拉伯","ME"],"WAG":["旺阿努伊","旺阿努伊","","Wanganui","新西兰","OC"],"WAW":["华沙肖邦","华沙","","Warsaw","波兰","EU","Q270",1],"WBM":["Wapenamanda","","","Wapenamanda","巴布亚新几内亚","OC"],"WDH":["温得和克霍齐亚·库塔科","温得和克","","Windhoek","纳米比亚","AF","Q20618929",1],"WDS":["十堰","十堰","","Shiyan (Maojian)","中国","CN"],"WEF":["潍坊","潍坊","","Weifang (Kuiwen)","中国","CN"],"WEH":["威海","威海","","Weihai","中国","CN"],"WEI":["韦帕","韦帕","","Weipa","澳大利亚","OC"],"WGA":["沃加沃加","沃加沃加","","Forest Hill","澳大利亚","OC"],"WGE":["Walgett Airport","","","","澳大利亚","OC","AU:"],"WGN":["邵阳","邵阳","","Shaoyang (Wugang)","中国","CN"],"WHA":["芜湖","芜湖","","Wuhu","中国","CN"],"WHK":["华卡塔尼","华卡塔尼","","Whakatāne","新西兰","OC"],"WIC":["威克","威克","","Wick","英国","EU"],"WIL":["内罗毕威尔逊","内罗毕","","Nairobi","肯尼亚","AF","Q3870"],"WIN":["通泰","通泰","","","澳大利亚","OC"],"WJR":["瓦吉尔","瓦吉尔","","Wajir","肯尼亚","AF"],"WJU":["原州","原州","","Wonju","韩国","EA"],"WKA":["Wanaka","","","Wanaka","新西兰","OC"],"WKJ":["稚内","稚内","","Wakkanai","日本","EA"],"WKK":["阿莱克纳吉克","阿莱克纳吉克","","Aleknagik","美国","NA"],"WLG":["惠灵顿","惠灵顿","","Wellington","新西兰","OC","",1],"WLS":["马塔乌图","","","Wallis Island","瓦利斯和富图纳","OC","",1],"WMI":["华沙莫德林","华沙","","Nowy Dwór Mazowiecki","波兰","EU","Q270",1],"WMN":["馬魯安采特拉","馬魯安采特拉","","Maroantsetra","马达加斯加","AF"],"WMT":["仁怀","仁怀","","Zunyi","中国","CN"],"WMX":["瓦梅纳","瓦梅纳","","Wamena","印度尼西亚","SEA"],"WNI":["马塔霍拉","","","Wangi-wangi Island","印度尼西亚","SEA"],"WNP":["那牙","那牙","","Naga","菲律宾","SEA"],"WNR":["Windorah","","","Windorah","澳大利亚","OC"],"WNS":["讷瓦布沙阿","讷瓦布沙阿","","Nawabashah","巴基斯坦","SA"],"WNZ":["温州","温州","","Wenzhou (Longwan)","中国","CN","",1],"WOS":["元山","元山","","Wonsan","朝鲜","EA"],"WRE":["旺阿雷","旺阿雷","","Whangarei","新西兰","OC"],"WRG":["兰格尔","兰格尔","","Wrangell","美国","NA"],"WRO":["弗罗茨瓦夫","弗罗茨瓦夫","","Wrocław","波兰","EU","",1],"WSI":["西悉尼","","","Sydney","澳大利亚","OC","",1],"WST":["韦斯特利","韦斯特利","","Westerly","美国","NA"],"WSZ":["Westport","","","Westport","新西兰","OC"],"WTB":["图文巴","图文巴","","Toowoomba","澳大利亚","OC","",1],"WUA":["乌海","乌海","","Wuhai","中国","CN"],"WUH":["武汉","武汉","","Wuhan (Huangpi)","中国","CN","",1],"WUN":["Wiluna Airport","","","","澳大利亚","OC","AU:"],"WUS":["武夷山","武夷山","","Wuyishan","中国","CN"],"WUU":["瓦乌","","","Wau","南苏丹","AF"],"WUX":["无锡","无锡","","Wuxi","中国","CN","",1],"WUZ":["梧州","梧州","","Tangbu","中国","CN"],"WVB":["鲸湾港","鲸湾港","","Walvis Bay(Rooikop)","纳米比亚","AF","",1],"WWK":["韋瓦克","","","Wewak","巴布亚新几内亚","OC"],"WYA":["怀阿拉","怀阿拉","","Whyalla","澳大利亚","OC"],"WYS":["西黄石","西黄石","","West Yellowstone","美国","NA"],"XAI":["信阳","信阳","","Xinyang","中国","CN"],"XAP":["沙佩科","沙佩科","","Chapecó","巴西","LA"],"XBJ":["比尔詹德","比尔詹德","","Birjand","伊朗","ME","",1],"XCH":["聖誕島","聖誕島","","Flying Fish Cove","聖誕島","EA"],"XCR":["香槟地区沙隆","香槟地区沙隆","","Chalons en Champagne","法国","EU"],"XFN":["襄阳","襄阳","","Xiangyang (Xiangzhou)","中国","CN"],"XIC":["西昌","西昌","","Liangshan (Xichang)","中国","CN"],"XIL":["锡林浩特","锡林浩特","","Xilinhot","中国","CN"],"XIY":["西安","西安","","Xi'an","中国","CN","",1],"XKS":["Kasabonika","","","Kasabonika","加拿大","NA"],"XMH":["马尼希环礁","马尼希环礁","","","法属波利尼西亚","OC"],"XMN":["厦门","厦门","","Xiamen","中国","CN","",1],"XMS":["马卡斯","马卡斯","","Macas","厄瓜多尔","LA"],"XNA":["费耶特维尔","费耶特维尔","","Fayetteville/Springdale/Rogers","美国","NA"],"XNN":["西宁","西宁","","Haidong (Huzhu Tu Autonomous County)","中国","CN","",1],"XPL":["科馬亞瓜","","","Palmerola","洪都拉斯","NA","",1],"XQP":["克波斯區","克波斯區","","Quepos","哥斯达黎加","NA"],"XQU":["Qualicum Beach","","","Qualicum Beach","加拿大","NA"],"XRY":["赫雷斯-德拉弗龙特拉","赫雷斯-德拉弗龙特拉","","Jerez de la Frontera","西班牙","EU"],"XSC":["South Caicos","","","South Caicos","特克斯和凯科斯群岛","NA"],"XSP":["新加坡實里達","新加坡","","Seletar","新加坡","SEA","Q334"],"XTG":["Thargomindah","","","Thargomindah","澳大利亚","OC"],"XUZ":["徐州","徐州","","Xuzhou","中国","CN"],"XWA":["威利斯顿","威利斯顿","","Williston","美国","NA"],"YAA":["Anahim Lake","","","Anahim Lake","加拿大","NA"],"YAG":["Fort Frances","","","Fort Frances","加拿大","NA"],"YAK":["亚库塔特","亚库塔特","","Yakutat","美国","NA"],"YAM":["苏圣玛丽","苏圣玛丽","","Sault Ste Marie","加拿大","NA","Q986634"],"YAP":["科洛尼亚","科洛尼亚","","Yap Island","密克罗尼西亚联邦","OC","",1],"YAY":["圣安东尼 (纽芬兰与拉布拉多省)","圣安东尼 (纽芬兰与拉布拉多省)","","St. Anthony","加拿大","NA"],"YAZ":["吐芬奴","吐芬奴","","Tofino","加拿大","NA"],"YBC":["贝科莫","","","Baie-Comeau","加拿大","NA"],"YBG":["萨格奈","萨格奈","","Saguenay","加拿大","NA"],"YBK":["贝克莱克","贝克莱克","","Baker Lake","加拿大","NA"],"YBL":["坎贝尔河","","","Campbell River","加拿大","NA"],"YBP":["宜宾","宜宾","","Yibin (Cuiping)","中国","CN"],"YBR":["布兰登","布兰登","","Brandon","加拿大","NA"],"YBX":["布朗萨布隆","布朗萨布隆","","Blanc-Sablon","加拿大","NA"],"YBY":["Bonnyville","","","Bonnyville","加拿大","NA"],"YCB":["剑桥湾镇","剑桥湾镇","","Cambridge Bay","加拿大","NA"],"YCD":["纳奈莫","纳奈莫","","Nanaimo","加拿大","NA"],"YCG":["西古特尼區域","","","Castlegar","加拿大","NA"],"YCM":["圣凯瑟琳斯／尼亚加拉地区","","","Niagara-on-the-Lake","加拿大","NA"],"YCU":["运城","运城","","Yuncheng (Yanhu)","中国","CN","",1],"YDA":["道森","道森","","Dawson City","加拿大","NA"],"YDF":["迪尔莱克","迪尔莱克","","Deer Lake","加拿大","NA"],"YDN":["Dauphin","","","Dauphin","加拿大","NA"],"YEG":["埃德蒙顿地区","埃德蒙顿地区","","Edmonton","加拿大","NA","",1],"YEI":["耶尼谢希尔","耶尼谢希尔","","Yenişehir","土耳其","EU"],"YEV":["因纽维克","因纽维克","","Inuvik","加拿大","NA"],"YFB":["伊魁特","伊魁特","","Iqaluit","加拿大","NA"],"YFC":["弗雷德里克頓","弗雷德里克頓","","Fredericton","加拿大","NA"],"YFS":["Fort Simpson","","","Fort Simpson","加拿大","NA"],"YGJ":["米子","米子","","Yonago","日本","EA"],"YGL":["La Grande Rivière","","","La Grande Rivière","加拿大","NA"],"YGP":["加斯佩","加斯佩","","Gaspé","加拿大","NA"],"YGR":["伊莱斯·德·拉·玛德琳","伊莱斯·德·拉·玛德琳","","Les Îles-de-la-Madeleine","加拿大","NA"],"YGV":["Havre-Saint-Pierre","","","Havre-Saint-Pierre","加拿大","NA"],"YGW":["库居阿尔阿皮克","库居阿尔阿皮克","","Kuujjuarapik","加拿大","NA"],"YHM":["哈密尔顿","哈密尔顿","","Hamilton","加拿大","NA","",1],"YHU":["隆格伊","隆格伊","","Montréal","加拿大","NA"],"YHY":["黑河","黑河","","Hay River","加拿大","NA"],"YHZ":["哈利法克斯","哈利法克斯","","Halifax","加拿大","NA","",1],"YIA":["新日惹","","","Yogyakarta","印度尼西亚","SEA","",1],"YIC":["宜春","宜春","","Yichun","中国","CN"],"YIE":["阿尔山","阿尔山","","Arxan","中国","CN"],"YIF":["St-Augustin","","","St-Augustin","加拿大","NA"],"YIH":["宜昌","宜昌","","Yichang (Xiaoting)","中国","CN"],"YIN":["伊宁","伊宁","","Ili (Yining / Ghulja)","中国","CN"],"YIV":["Island Lake","","","Island Lake","加拿大","NA"],"YIW":["义乌","义乌","","Yiwu/Jinhua","中国","CN","",1],"YKA":["坎卢普斯","坎卢普斯","","Kamloops","加拿大","NA"],"YKF":["滑鐵盧區","","","Breslau","加拿大","NA"],"YKH":["营口","营口","","Yingkou (Laobian)","中国","CN"],"YKL":["謝夫維爾","謝夫維爾","","Schefferville","加拿大","NA"],"YKM":["亚基马","亚基马","","Yakima","美国","NA"],"YKO":["哈卡里","哈卡里","","Hakkari","土耳其","EU"],"YKS":["雅库茨克","雅库茨克","","Yakutsk","俄罗斯","EU","",1],"YLK":["巴里","巴里","","Barrie","加拿大","NA"],"YLL":["劳埃德明斯特","劳埃德明斯特","","Lloydminster","加拿大","NA"],"YLW":["基洛纳","基洛纳","","Kelowna","加拿大","NA","",1],"YLX":["玉林福绵","","","Yulin","中国","CN"],"YMM":["伍德布法罗地区自治","伍德布法罗地区自治","","Fort McMurray","加拿大","NA"],"YMO":["穆索尼","穆索尼","","Moosonee","加拿大","NA"],"YMS":["尤里马瓜斯","尤里马瓜斯","","Yurimaguas","秘鲁","LA"],"YMT":["奇布加莫","奇布加莫","","Chibougamau","加拿大","NA"],"YMX":["蒙特利尔－米拉贝勒","蒙特利尔","","Montréal","加拿大","NA","Q340"],"YNA":["Natashquan","","","Natashquan","加拿大","NA"],"YNB":["延布","延布","","Yanbu","沙特阿拉伯","ME","",1],"YND":["加蒂诺","加蒂诺","","Gatineau","加拿大","NA"],"YNJ":["延吉","延吉","","Yanji","中国","CN"],"YNL":["Points North Landing","","","Points North Landing","加拿大","NA"],"YNT":["烟台","烟台","","Yantai","中国","CN","",1],"YNY":["襄阳郡","襄阳郡","","Gonghang-ro","韩国","EA","",1],"YNZ":["盐城","盐城","","Yancheng (Tinghu)","中国","CN","",1],"YOJ":["高河镇","","","High Level","加拿大","NA"],"YOL":["约拉","约拉","","Yola","尼日利亚","AF"],"YOW":["渥太华","渥太华","","Ottawa","加拿大","NA","",1],"YPA":["Prince Albert","","","Prince Albert","加拿大","NA"],"YPE":["Peace River","","","Peace River","加拿大","NA"],"YPL":["Pickle Lake","","","Pickle Lake","加拿大","NA"],"YPN":["Port-Menier","","","Port-Menier","加拿大","NA"],"YPQ":["彼得堡","彼得堡","","Peterborough","加拿大","NA"],"YPR":["鲁珀特王子港","鲁珀特王子港","","Prince Rupert","加拿大","NA"],"YPW":["Powell River","","","Powell River","加拿大","NA"],"YPX":["Puvirnituq","","","Puvirnituq","加拿大","NA"],"YPY":["奇佩维恩堡","","","Fort Chipewyan","加拿大","NA"],"YPZ":["Burns Lake","","","Burns Lake","加拿大","NA"],"YQA":["马斯科卡","","","Gravenhurst","加拿大","NA"],"YQB":["魁北克","魁北克","","Quebec","加拿大","NA","",1],"YQD":["The Pas","","","The Pas","加拿大","NA"],"YQG":["温莎","温莎","","Windsor","加拿大","NA","",1],"YQH":["Watson Lake","","","Watson Lake","加拿大","NA"],"YQK":["凯诺拉","凯诺拉","","Kenora","加拿大","NA"],"YQL":["莱斯布里奇","莱斯布里奇","","Lethbridge","加拿大","NA"],"YQM":["蒙克顿","蒙克顿","","Moncton","加拿大","NA"],"YQN":["Nakina","","","Nakina","加拿大","NA"],"YQQ":["科莫克斯","","","Comox","加拿大","NA"],"YQR":["里贾纳","里贾纳","","Regina","加拿大","NA"],"YQT":["桑德贝","桑德贝","","Thunder Bay","加拿大","NA"],"YQU":["大草原城","","","Grande Prairie","加拿大","NA"],"YQX":["甘德","甘德","","Gander","加拿大","NA"],"YQY":["悉尼","悉尼","","Sydney","加拿大","NA"],"YQZ":["Quesnel","","","Quesnel","加拿大","NA"],"YRB":["雷索卢特","雷索卢特","","Resolute Bay","加拿大","NA"],"YRJ":["罗贝瓦勒","罗贝瓦勒","","Roberval","加拿大","NA"],"YRL":["红湖","红湖","","Red Lake","加拿大","NA"],"YRO":["Ottawa","","","Ottawa","加拿大","NA"],"YRT":["兰金","兰金","","Rankin Inlet","加拿大","NA"],"YSB":["大萨德伯里","大萨德伯里","","Sudbury","加拿大","NA"],"YSF":["斯托尼拉皮兹","","","Stony Rapids","加拿大","NA"],"YSJ":["圣约翰","圣约翰","","Saint John","加拿大","NA"],"YSM":["史密斯堡","","","Fort Smith","加拿大","NA"],"YSQ":["松原","松原","","Qian Gorlos Mongol Autonomous County","中国","CN"],"YTH":["汤普森","汤普森","","Thompson","加拿大","NA"],"YTS":["蒂明斯","蒂明斯","","Timmins","加拿大","NA"],"YTY":["泰州","泰州","","Yangzhou","中国","CN"],"YTZ":["多伦多比利·畢曉普多倫多市","多伦多","","Toronto","加拿大","NA","Q172"],"YUL":["蒙特利尔皮埃尔·埃利奥特·特鲁多","蒙特利尔","","Montréal","加拿大","NA","Q340",1],"YUM":["尤馬海軍陸戰隊航空基地","","","Yuma","美国","NA"],"YUS":["玉树","玉树","","Yushu (Batang)","中国","CN"],"YUX":["Sanirajak","","","Sanirajak","加拿大","NA"],"YUY":["鲁安 - 诺兰达","鲁安 - 诺兰达","","Rouyn-Noranda","加拿大","NA"],"YVB":["博纳旺蒂尔","博纳旺蒂尔","","Bonaventure","加拿大","NA"],"YVC":["La Ronge","","","La Ronge","加拿大","NA"],"YVO":["瓦勒多","瓦勒多","","Val-d'Or","加拿大","NA"],"YVP":["库朱瓦克","库朱瓦克","","Kuujjuaq","加拿大","NA"],"YVQ":["诺曼韦尔斯","","","Norman Wells","加拿大","NA"],"YVR":["温哥华","温哥华","","Vancouver","加拿大","NA","",1],"YVV":["Wiarton","","","Wiarton","加拿大","NA"],"YWG":["温尼伯","温尼伯","","Winnipeg","加拿大","NA","",1],"YWK":["瓦布什","瓦布什","","Wabush","加拿大","NA"],"YWL":["Williams Lake","","","Williams Lake","加拿大","NA"],"YXC":["克蘭布魯克/加拿大洛磯","","","Cranbrook","加拿大","NA"],"YXE":["萨斯卡通","萨斯卡通","","Saskatoon","加拿大","NA","",1],"YXH":["梅迪辛哈特","梅迪辛哈特","","Medicine Hat","加拿大","NA"],"YXJ":["圣约翰堡","圣约翰堡","","Fort Saint John","加拿大","NA"],"YXL":["苏卢考特","苏卢考特","","Sioux Lookout","加拿大","NA"],"YXS":["乔治王子城","乔治王子城","","Prince George","加拿大","NA"],"YXT":["特尔斯","特尔斯","","Terrace","加拿大","NA"],"YXU":["伦敦","伦敦","","London","加拿大","NA"],"YXX":["阿伯茨福德","阿伯茨福德","","Abbotsford","加拿大","NA"],"YXY":["白马","白马","","Whitehorse","加拿大","NA"],"YYA":["岳阳","岳阳","","Yueyang (Yueyanglou)","中国","CN"],"YYB":["北湾","北湾","","North Bay","加拿大","NA"],"YYC":["卡尔加里","卡尔加里","","Calgary","加拿大","NA","",1],"YYD":["史密瑟斯","","","Smithers","加拿大","NA"],"YYE":["Fort Nelson","","","Fort Nelson","加拿大","NA"],"YYF":["潘狄顿区域","","","Penticton","加拿大","NA"],"YYG":["夏洛特顿","夏洛特顿","","Charlottetown","加拿大","NA"],"YYJ":["维多利亚","维多利亚","","Victoria","加拿大","NA","",1],"YYL":["Lynn Lake","","","Lynn Lake","加拿大","NA"],"YYQ":["邱吉尔市 (曼尼托巴)","邱吉尔市 (曼尼托巴)","","Churchill","加拿大","NA"],"YYR":["哈皮瓦利-古斯贝","哈皮瓦利-古斯贝","","Goose Bay","加拿大","NA"],"YYT":["圣约翰斯","圣约翰斯","","St. John's","加拿大","NA","",1],"YYY":["美山","美山","","Mont-Joli","加拿大","NA"],"YYZ":["多伦多","多伦多","","Toronto","加拿大","NA","Q172",1],"YZF":["黄刀镇","黄刀镇","","Yellowknife","加拿大","NA"],"YZP":["夏洛特皇后群岛","夏洛特皇后群岛","","Sandspit","加拿大","NA"],"YZS":["珊瑚港","珊瑚港","","Coral Harbour","加拿大","NA"],"YZT":["哈迪港","","","Port Hardy","加拿大","NA"],"YZU":["Whitecourt","","","Whitecourt","加拿大","NA"],"YZV":["七岛","七岛","","Sept-Îles","加拿大","NA"],"YZY":["张掖","张掖","","Zhangye (Ganzhou)","中国","CN"],"ZAD":["扎达尔","扎达尔","","Zadar","克罗地亚","EU","",1],"ZAG":["萨格勒布","萨格勒布","","Velika Gorica","克罗地亚","EU","",1],"ZAH":["扎黑丹","扎黑丹","","Zahedan","伊朗","ME","",1],"ZAL":["瓦尔迪维亚","瓦尔迪维亚","","Valdivia","智利","LA"],"ZAM":["三宝颜","三宝颜","","Zamboanga","菲律宾","SEA","",1],"ZAT":["昭通","昭通","","Zhaotong","中国","CN"],"ZAZ":["萨拉戈萨","萨拉戈萨","","Zaragoza","西班牙","EU","",1],"ZBF":["巴瑟斯特","巴瑟斯特","","South Tetagouche","加拿大","NA"],"ZBR":["恰巴哈尔","恰巴哈尔","","Konarak","伊朗","ME"],"ZCL":["萨卡特卡斯","萨卡特卡斯","","Zacatecas","墨西哥","NA"],"ZCO":["特木科","特木科","","Temuco","智利","LA","",1],"ZEL":["貝拉貝拉","貝拉貝拉","","Bella Bella","加拿大","NA"],"ZHA":["湛江","湛江","","Zhanjiang","中国","CN","",1],"ZHY":["中卫","中卫","","Zhongwei (Shapotou)","中国","CN"],"ZIA":["莫斯科拉缅斯科耶","莫斯科","","Moscow","俄罗斯","EU","Q649",1],"ZIG":["济金绍尔","济金绍尔","","Ziguinchor","塞内加尔","AF"],"ZIH":["伊斯塔柏","伊斯塔柏","","Ixtapa","墨西哥","NA","",1],"ZIX":["日甘斯克","日甘斯克","","Zhigansk","俄罗斯","EU"],"ZKP":["济良卡","济良卡","","Zyryanka","俄罗斯","EU"],"ZLO":["曼萨尼约","曼萨尼约","","Manzanillo","墨西哥","NA"],"ZMT":["Masset","","","Masset","加拿大","NA"],"ZND":["津德尔","津德尔","","Zinder","尼日尔","AF"],"ZNE":["紐曼","紐曼","","Newman","澳大利亚","OC"],"ZNZ":["桑给巴尔","桑给巴尔","","Zanzibar","坦桑尼亚","AF","",1],"ZOS":["奥索尔诺","奥索尔诺","","Osorno","智利","LA"],"ZQN":["皇后镇","皇后镇","","Queenstown","新西兰","OC","",1],"ZQZ":["张家口","张家口","","Zhangjiakou","中国","CN"],"ZRH":["苏黎世","苏黎世","","Zurich","瑞士","EU","",1],"ZSA":["圣萨尔瓦多岛","圣萨尔瓦多岛","","San Salvador","巴哈马","NA","",1],"ZSE":["圣皮埃尔","圣皮埃尔","","Saint-Pierre","留尼汪","AF","",1],"ZSJ":["Sandy Lake","","","Sandy Lake","加拿大","NA"],"ZTH":["扎金索斯岛","扎金索斯岛","","Zakynthos","希腊","EA","",1],"ZUH":["珠海","珠海","","Zhuhai (Jinwan)","中国","CN","",1],"ZYI":["遵义","遵义","","Zunyi","中国","CN"],"ZYL":["锡尔赫特","锡尔赫特","","Sylhet","孟加拉国","SA","",1]},
+  // 常用城市分组
+  groups: [{"key":"CN_N","label":"华北东北","codes":{"PEK":"北京首都","PKX":"北京大兴","TSN":"天津","TAO":"青岛","DLC":"大连","SHE":"沈阳","HRB":"哈尔滨"}},{"key":"CN_E","label":"华东","codes":{"PVG":"上海浦东","SHA":"上海虹桥","HGH":"杭州","NKG":"南京","XMN":"厦门","FOC":"福州","WUX":"无锡"}},{"key":"CN_S","label":"华中华南","codes":{"CAN":"广州","SZX":"深圳","CSX":"长沙","WUH":"武汉","NNG":"南宁","HAK":"海口","SYX":"三亚"}},{"key":"CN_W","label":"西部","codes":{"CTU":"成都双流","TFU":"成都天府","CKG":"重庆","XIY":"西安","KMG":"昆明","URC":"乌鲁木齐"}},{"key":"HKMO","label":"港澳","codes":{"HKG":"香港","MFM":"澳门"}},{"key":"JPKR","label":"日韩","codes":{"NRT":"东京成田","HND":"东京羽田","KIX":"大阪关西","ICN":"首尔仁川"}},{"key":"SEA","label":"东南亚","codes":{"BKK":"曼谷","SIN":"新加坡","KUL":"吉隆坡","CGK":"雅加达","MNL":"马尼拉","CEB":"宿务","HAN":"河内","SGN":"胡志明","DPS":"巴厘岛"}},{"key":"SA","label":"南亚","codes":{"DEL":"德里","BOM":"孟买","CMB":"科伦坡","MLE":"马累"}},{"key":"ME","label":"中东","codes":{"DOH":"多哈","DXB":"迪拜","AUH":"阿布扎比","MCT":"马斯喀特","BAH":"巴林","KWI":"科威特","RUH":"利雅得","JED":"吉达","AMM":"安曼","TLV":"特拉维夫"}},{"key":"AF","label":"非洲","codes":{"CAI":"开罗","CMN":"卡萨布兰卡","NBO":"内罗毕","JNB":"约翰内斯堡","CPT":"开普敦"}},{"key":"EU","label":"欧洲","codes":{"LHR":"伦敦希思罗","CDG":"巴黎戴高乐","MAD":"马德里","BCN":"巴塞罗那","FCO":"罗马","FRA":"法兰克福","AMS":"阿姆斯特丹","HEL":"赫尔辛基","IST":"伊斯坦布尔","ZRH":"苏黎世","VIE":"维也纳","LIS":"里斯本","DUB":"都柏林"}},{"key":"NA","label":"北美","codes":{"JFK":"纽约肯尼迪","LAX":"洛杉矶","SFO":"旧金山","ORD":"芝加哥奥黑尔","DFW":"达拉斯","SEA":"西雅图","BOS":"波士顿","IAD":"华盛顿杜勒斯","YVR":"温哥华","YYZ":"多伦多"}},{"key":"OC","label":"大洋洲","codes":{"SYD":"悉尼","MEL":"墨尔本","BNE":"布里斯班","AKL":"奥克兰"}}],
+  // 航线预设
+  presets: [{"label":"中国 ⇄ 中东/开罗","A":["PEK","PKX","PVG","SHA","CAN","SZX","CTU","TFU","CKG","XIY","HGH","NKG","WUH","CSX","KMG","XMN","TSN","TAO","DLC","SHE","HKG","MFM"],"B":["DOH","DXB","CAI"]},{"label":"中国 ⇄ 欧洲","A":["PEK","PVG","CAN","CTU","HKG"],"B":["LHR","CDG","MAD","FRA","HEL","IST"]},{"label":"中国 ⇄ 北美","A":["PEK","PVG","CAN","HKG"],"B":["JFK","LAX","SFO","ORD","DFW","SEA"]}],
+  // 地区名
+  regions: {"CN":"中国大陆","HMT":"港澳台","EA":"日韩","SEA":"东南亚","SA":"南亚","ME":"中东","CA":"中亚","EU":"欧洲","AF":"非洲","NA":"北美","LA":"中南美","OC":"大洋洲"},
+  // 台词
+  lines: {"version":1,"persona":"Miku（仅 v0.1 测试版的占位命名，形象为初音未来官方立绘/Live2D 示例模型）。后续版本未经用户许可不得沿用此命名，默认回到 lines.json 的雷达酱人设。","placeholders":"{n} 有位天数 · {new} 新出现天数 · {pct} 进度百分比 · {seats} 剩余座位 · {count} 被戳次数 · {from}/{to} 城市名","lines":{"greet_morning":["早安～Miku 上线啦！今天也要捡到好票！","早上好！咖啡喝了吗？我先帮你看看航司今天心情怎么样～","叮咚～早班 Miku 上线，耳麦调试完毕！","早起的鸟儿有票抢！……大概。"],"greet_noon":["中午好！吃饱了才有力气抢票哦～","午休偷偷刷票……嘘，我不会告诉老板的。","午饭吃了吗？没吃的话，先看一眼票再去！"],"greet_evening":["晚上好～下班啦？来看看今天的票吧！","傍晚的天空是粉色的，跟我的耳机一个颜色～","辛苦啦！剩下的交给 Miku！"],"greet_night":["这么晚还在刷票？好、好吧，我陪你！","深夜模式启动……航司的放票小精灵也在加班吗？","熬夜对皮肤不好哦……不过，再刷一轮就睡！","嘘——夜深了，我们小声地找票。"],"greet_back":["欢迎回来！我一直有乖乖看家哦～","你终于来了！我都快把云朵数完了。","哼，这么久才来……才、才没有在等你呢！","回来啦！要不要看看我替你收着的票？"],"idle":["呼～耳麦今天信号满格！","我的双马尾其实是雷达哦，信不信由你～","航司的放票逻辑，比编双马尾还复杂……","日历说有位，页面说没有，到底是谁在说谎啦！","40k 换商务舱什么的，听起来就像在做梦呢～","如果能坐头等舱，我要把每一种果汁都点一遍！","知道吗？同一天的税费精确到分，就能认出是哪趟航班！快夸我！","叮——！……啊不对，是我的错觉。","今天的云，有点像一份冒热气的飞机餐。","我在练习用耳麦接收好运气……接收中……接收中……","有人说周中的票更好抢，我还在收集证据中！","要是机票也能像奶茶一样第二杯半价就好了。","别一直盯着我看啦……会害羞的。","我不是在发呆，我是在扫描宇宙信号！","噔噔咚！Miku 今日运势：大吉（大概）。","找不到票的话，就当是给钱包放了个假～","收藏夹里的每一张票，都是你未来的旅行呢。","航司要是能像我一样诚实就好了！","飞行模式？我一直都是飞行模式哦～","听说商务舱的枕头软得像云朵……好想摸一摸。","我的耳机里，一直在循环播放飞机起飞的声音。","我数到三，好票就会出现！一、二……二点五……","无聊的时候，我会给路过的每一架飞机取名字。","刚才那朵云跑得好快，是赶着去转机吧。","其实我有一点点恐高……嘘，别说出去！","里程放太久可能会过期哦！快想想要去哪儿～","你在看我对吧？我感应到了！耳麦响了！","今天也是认真工作的 Miku！……五分钟后再认真。","地球是圆的，所以总有一条航线能带你去想去的地方～","要是能去开罗，我想看金字塔晒月亮。","转机等太久的话，就在机场里逛逛吧，说不定有好吃的！","靠窗还是靠过道？……我选靠窗！要看云！","我偷偷给你的收藏夹施了魔法，祝它们都能成行～","航司改页面的速度，比我换表情还快……"],"drag":["哇哇哇——要飞起来了！","我也是会晕机的哦！","这是……人肉航班吗？","慢点慢点，耳机要掉了！","起飞！请系好安全带～"],"drop":["平稳落地！请为机长鼓掌～","呼，安全着陆。","这个位置视野不错嘛！","就停这儿啦，靠窗座！"],"scan_start":["收到！雷达展开，开始扫描～","出发！目标：所有藏起来的好票！","雷达转起来了！呜呜呜——","我要认真了哦！(｀・ω・´)","扫描时别关那个 aa.com 窗口哦，那是我的眼睛！","开始翻日历啦，一页、一页、又一页……"],"scan_progress":["已经扫了 {pct}% 啦～","{pct}%！再坚持一下！","进度 {pct}%，耳麦有点发烫了……","嘿咻嘿咻，{pct}%！","{pct}%……我看到了！好像有什么东西！","别催别催，{pct}% 了嘛～"],"scan_half":["过半啦！胜利就在前方！","一半了！给我加个油嘛～"],"scan_done_found":["扫描完成！找到 {n} 个有位的日子～挑喜欢的核实一下吧！","完成啦！{n} 天有位，不过这些还只是日历线索，先别急着下单哦！","叮！{n} 个日期到手！快夸我！……然后记得核实～","收工！{n} 天！Miku 今天表现超棒！"],"scan_done_new":["有 {new} 个日子是新放出来的！快看快看！","新票出现！{new} 天！航司终于开窍了！","上次还没有的，这次冒出来 {new} 天！"],"scan_done_none":["呜……这次一张都没找到，航司今天好小气。","空空如也……换个时间再来试试？","没票不是你的错，是航司的错！","零张……我去角落里画圈圈了。"],"scan_cancel":["好的，停下来歇一会儿～","收到，雷达收起！","暂停！我去喝口水～"],"human_check":["aa.com 想确认你是不是真人～去那个窗口勾一下吧，我等你！","人机验证要你本人来哦，我是看板娘，不算人……","勾一下 “I'm not a robot” 就好啦，这个我可不能替你勾！","aa.com 在敲门：“请问是人类吗？”快去回答它～"],"blocked":["aa.com 说我们查得太勤快了……休息一小时再来吧。","被航司嫌弃了呜呜，下次换「稳妥」速度试试？","冷却中……Miku 需要降降温。"],"verify_ok":["核实通过！机场对、舱位对、座位够！✨","真的有！这张票是真的！！","确认完毕，是货真价实的好票～","我就知道！我的直觉从不说谎（偶尔）！","完美！快去订吧，晚了可就被抢走了！"],"verify_mixed":["等等！这一程有一段是经济舱，是混舱陷阱！","差点上当！看着是商务，其实有一段要坐经济……","混舱警报！商务的价钱，经济的座位，不划算！"],"verify_gone":["呜……这天的位置已经被别人抢走了。","日历骗人！这天其实已经没位了。","晚了一步……下次我们再快一点！"],"verify_airport":["咦？出发机场被偷偷换掉了！这个不算！","搜深圳给我广州？这可不行！","机场对不上，这张不能要哦。"],"verify_seats":["座位不够大家一起坐呢……","只剩 {seats} 个座位，人数对不上哦。"],"verify_failed":["页面没加载出来……再试一次好不好？","唔，我没看清这一页，能再打开一次吗？"],"fav":["收藏好啦！我会帮你盯着它的～","放进小本本里了！","好眼光！这张我也喜欢！","收藏 +1！旅行计划又近了一步～"],"unfav":["好吧，那就放它走吧。","取消收藏……它会想你的。","嗯嗯，下一张会更好！"],"sleep":["呼……呼……（梦到了头等舱）","zzZ……再、再给我五分钟……","（双马尾慢慢垂下来了……）","呼噜……40k……头等舱……嘿嘿……"],"wake":["哇！我没睡！我在节能模式！","早……早上好？啊，原来是你。","我醒啦！刚刚梦到 40k 的头等舱！","嗯？有票了吗？有票了吗？"],"midnight":["零点了！新的一天，新的票！","叮——午夜钟声！航司会不会趁现在偷偷放票呢？"]},"poke":[["诶？叫我吗？","嗯哼～有什么吩咐？","戳戳回来！","在的在的！","嗨～"],["别、别一直戳啦……","再戳双马尾就要打结了！","呜哇，好痒！","你是在测试我的反应速度吗！"],["哼！我生气了！……才怪～","你是不是把我当解压按钮了！","戳一次扣你一千里程，记账中——","再戳我就……我就……蹲下来！"],["已经戳了 {count} 次了！你好闲哦！","好啦好啦你赢了！隐藏彩蛋：今天的你也超努力的！","……（假装睡着了）","我、我要报告机长了！"]]},
+  // 看板娘图片（WebP）
+  mascot: {"normal":"data:image/webp;base64,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","ratio":0.6567,"avatar":"data:image/webp;base64,UklGRtQXAABXRUJQVlA4WAoAAAAQAAAAXwAAXwAAQUxQSLIHAAABoL/tfxnpHtQ3aTue6Q53Z3fWe2zbtm3btm3btm0br32s1zraneT7+WFm2rQzETEBFHJhWUREyeV2PPjSx55/6aWXXnru6XsvO26fnVbIWERkW9nvoQGA+c/tKBaTIlzSIqL82kc/+s10DZ96xpgXLzxg2SjdgBE8cz80GP9ckKSYFSYpidLb3DZ2BLXaO6Pu/OeuqDL/u+ZtUAAD769G8fBISTR4+tcAoJRm+GatlAIAjasLH0IDYIV5+1GwQlqWJWqkRbTCzTMBVpphnpViqLMqr9QBFPRJwdQVjiSLaPl7FwBKI4SMl79oAA0ORGRWOfriHRNkxahy4zxAMcLJ8MoIQNKa31UBfH5AG202FVCM0Gr2gCBsOgFaKwa+umE+qoxQcygsukdXAVYagEbIQyEp9z00arViNHEQg3PAYEazm7NowyozGCHlprgPCiFmTxwKST2/QYcpQGM2HQKN5uUQyOiHUE3k2ZRF6/3PaG13QLUyScvOYW4yDsai66EQdvbFQUgx8Bdz6IybselSKLQwKfr+ZG5lFt0GjRZmiWXnMbc0ug4KLUxS5Xdwc3BILLoYGk3EgQnKTWwaw/5s2hUarcyix6BamaSh6eDm4wBsOhIKLdWXpKc5IG4yQQN/ggEOIOTsz6b9oQFG03M9+JN0PxRCy/4Y4BqGVx+Syr+Cw2OQ4VuzH5v2hUaL9SHFw1DNx15+nudDUt+f0M0HbsBqj7d82LQPNFoDA9CYOHC9D0s8A9UKGio83HGQ8iRpaAa4RTAAHtmrc81fPNl0NBSMc6gYADQ+HBrqf82TlK9zAKFm1OHDyotmrvJi0bJzwS2hrsaHQ33dmb282HQSFBqzCTbAAbAe3rOzp5jt9yBE5C1PZtlfkBrv9PeXC5k2D5KWmA9uGcyzN+3uKbrJlAebjoRGy1Q4qzzQ3paIxT1I53koYwxwuBQe7hnsLKQikWgjSX1/go2FXuHjpfq6i27MsSONLNoTGgCb4lApTFilr6+US0QsaXt5GAqtUWHc+r39HblU1BbCaiCo8iN0AL/MDZHCqLUr/eV8OuZIIWQDS+wIhl9uxJj4OTg4rqPwxdrd/eViOm5LQSQa2HQ9lC+PjD9uG0FIGS8t09dfLrbFHSnIgxDuGOgaNvTfxb+AQ8H83GL9/eWiG3cs4cmirRVzjWGNy19nHRxD46NFF+kvF9vijiUEebsFCka5jsJVl6IaHJjx5/q93SU37lhCkFch3DHQZsA1GqO3nA4dmAIr3Fqo5JJRWwjybNHGVbCRf2ajrsZ5e41AB8OY9BQUz1kjm405knxadDUUDDJ+PnoBMwDm2avvPQeKg9D4Ya2JqOK5bC7uS5A7FtrMH8teDg0AGq9mtv0OUGyO8cfKByqlcKjtRizhzaLNFMOkxkeLLfE2NABV1adllr9pHqDY3Kz13cswwr8uF0s5Uvi4E8rQMwN9K/0MzZhxw8iM9TPFje+cASiuYQPzdztwmVswgtfS6ZjtSVBpCrShOzoXze/6n9YY3upWfLveUm7HqtdOB5TWGgb1bFyceRAKV9jpiCU9WLQTaxg6u72nkjgdCmr/ns8xe9LubqWwyi2zAWDmsD8A73e0X1hF9RBKO5YQDSTdCWWGsV+pq1hKPwZV3b9t5/+Bebuluttzq9/63ccXbjMF2hMD0Ji9QWdh93EYXoeStmwgqONnsBHGf1sVy9lspnc8hvctl9/GMP4/OtfVmcv2dpUWG+WjljGyc7o/NXjWhFkbiqglRB2bdmMNQ3+tXezIJF1n67/1wYXiZvPxHxYu5RaLHeVKb+FjD9wArH84otBbiHce98pq0pH1JN0LZUZj1JLlYiYec+VNOCLVE997PvBoe851E7ad3eUPcAOvGlN606X2PJV6nQaC2n8Bm3qnryubiDqxyCL/nGuVS7F1zty3M5t37cF7b39Pw6zWH6zjtiXSiVjMkUIQkU27s4ZZhedKlba4Y9sJceAO0WxbLhFJFvJuMv46ALAZaEzoHVyiJykTEbuOpHuhjN2b7crGbSmduIykk6mkm89n3RTdjqpSDNN6eMyvs359e2tK2JYQJKnzR2hDGtfmy21xWwjbiSXisWg0Fo+nUnQJFIMR9P97UtKWgizaCgxjZxU63KglSFi24zi27Thxh66AZgSrmbmKBWvKpC2FTddDmQLvV2pPRSwiIWRdK0KZ+6EZYdQY1RmP2YLyE6ANMf7buAGJWmlLWuRDKK7hwKBwnZOJWLRxlWFs5mrtpVRECiIiYdlE9qF/QAE1IWQ9b/VYyqEroUxpjFqyVKgjLVsStR36PqARXoXHkm40+RW0uQ8GOvJJx7YlEcmhE78FNKMxB8e8cN14avX5YFMKr1S62pJRIhrY8KQXpgNKI9wK18eyx4Fh7s58JStosaNf+m0YgFIAwGHSPKrHfRnamMY5uV57tcenA4BSDL8cAsaC9VILYZ75qKJ7yAJAKWbUZy+hZN4lDvOM/3ZO7q9QZTRmeOYwKJyc4iCmr7L4D1Awz6G40IV5jS/LJ0CjMbOvMCpcHoTCk7mH2Qs8cJguCELjyq7xMBNixj7BnL3Ov2AvtRwuhtouG8hhO4MRMDM4mF9WLQXAvNsFUH7YV9AKb/VUAFZQOCD8DwAAEDkAnQEqYABgAD5BGolDoqGhGqyvVCgEBLYAZIb3qN8ZvynmbVz/M/in1udL0ZXt5/n/cz2tPMA51nmG/ar1a/yA92foFfr16zvqc/tz7Dn7gemx+63wh/2//mfuB7VWaAf1Xs8/tXgn+LfMf4H8rfVzxX9Tuo78h+0/4L8yPZDvp+I38v6gX49/Ov8t4e+2hmv/ID4CPdr6t/wv7r4xH+B6J/Ur/X+4B/Lf57/pfzd99v8T/vPGL+r/432AP5r/Tv9B/kP3F/1v0wfzX/h/zP+O9NH5//ef+3/kPgG/lH9K/1f97/zH/h/yn//8Uf7Reyz+uTy/RjLsIYCVjRcdZ9Svty/G9Ze/WdovdPTF8FFq42h59RBXp5jP8ZVEhw5iWxTEZUp5nnbyUhpBMV9qbn89PIhOJPCch4Am4Po5ewYz2p35kl2sev5ZSmMcI5bp5ohuKD1xMu6NlMbMB6uGXmYBSlt0x8eFhS1S3hERVk2drjqNa2VyvK/n0j+kB1QgHUenuVO7+LCoKk/gDicG73QwOVOlNs6f9q9lpwyUTk/nXa+BGvx9N295GesATIsghRe8ldzj53t1Jn1O4vZW4UXpdYS13z48wpShUNRylbKQAP7/YBq2DMn8I/LTo9jhsZnFPhjeEvAT2uiLht9PNfFK5Ipi3ei/hMz3dbvOJxQ4h2GJt+/wt37fq/JPbHpvSHECrA5R/lUGYGo7Aaw7nw1Cy9N+kzrxbVeyyF4NLxM1tGKPt0oaS82Y68khF8TqpMCSDReqg/LndaKwAsakhRTvDPybuXDlmVkPeFRe37El7CsHRSIrTwOBs7XIod9f/qIu1xTCWFx6JEPQM7hzo0+AXFxjce+8dnpW0qgVYiWcB9llNkOesovd7wbFAfiS2aTpbrpA7KrgrzoTcbWg0XPeum8Ygfm+YwuaftSZRzMqIrmBrHgaf7ZECRf5iwMdDB83QoxrBYL59mZwDJatc7Ppz+tIj5MIQQsMObMFmV39z05RM9NFk0kFroFumRnz5Gosomf9apMwNdIBUK+Kt+6ux/JQFSVVIMvnRbQ/4wiQYMvJsoV82vBkf8JVpdkcPtREsOA7Z59VyvSSrjAiObq20kgqx7MG8cRm/ViDumFEjtWbUFIdVDBCT9LeYHUQpdJ1V+VUQgLCN9AiqUT0Pke4SLa+0pzZK0JDl3zEML5OHn4ZioePCB9IZLUMlPLmxM091b3+xN61TAkON7QpOXKqb16C/zRaWUFvzMnYIp66lWi5JY2Ndy7KBb56OBMtUYwjm8Q82z7kCL9ojrwC75zVZxFG1KPmrF9fXNjLFvq1U3OzvoWFbQgDsFiC0T1hL6sTaBgkqOO4xCRPAUZKJcnNncaCeKDuw7HwnsUW63GTOaCiGymdHVwqENGFobx2LlQCtXZPwy3wQTLsHy6j1mqX+dVTbWyA+BIQjzIB0LCJsJkf0cWbqqDtd4CN7Zs8CXmGLOXdyxQYFOvgL2TnwT9e5oFfabrfrIOWp+W1I86uWSwUvqLGo3eaHl+6LnHxbqxd2nYWLIYf39CeTW0hvq/Kfj5T55kYVrnW+GDUFu3kOUasrIkPLs78AeAUonG5DHtH1sN4kp+U40WF4hXAV+XYXJQmqMkpykKVf/uDO4fObqLZjSXwapYdugBHkcLdbNW7ItTJ8NQr1MF32IQ+SjzWQrjvR9l1P5F5NfyOgb3QgotZjvNUebjN8jCxLcDnHAJKwgudgV9mVgBD8VqWwhGnjLgcSjY4XZipGTNdfWGfOi1FwLg76Xl1YI8lRSzvUwzOj2/IuaPCDzLSoIN5rT7hdxRiqcg5Rgw1lSOP/JsqD2/ePUo427KdMEy/BfEMxkosUxX1+aZvUzdXHyULUA/REXejZbVieFzJ27YlZk6+OL/Me7HeFdEBYid8xvn152PU5KIEgHOUYJN0gH+585oKKObnBdgkIO5Pw1Lr4ihOd+i4jdAV/iV5spw/88+bT9Glfv8YJXrGX5FCq3WhgJIuu8FnGsLRrroaTkMtWRawn5j3VY+Xr+N0aNmG9fseenwgJJty+bPxexIjfyE1WFiYCPI1mrbv8wNmA7QwcYaxv9uFOaAHJLa+UyL509n3RabLIcY4SBz10P8W2ARHOpVy2FK/xmNoo/BGnBcJG+B/AVPW7M5hgHJFFBE4RsxIDJ+G7qiF0hC8f/olvf/mPOQwZwD/Rlacec6cPl0xyV+OfvOgyC6tjMe+zf+6JiMNK531kMkdOvZogOxgWM3IY+SnqasvVTlbItMfFjWqbYn5Os2Vkb4by5HPL3VU9T0sY58jU8vVjXl6ZHmahf50Y7SgQOMoVmaOrH0VQjpomZGl83/OSo8VxS2Zbju/vXzRmftx/ejg621n8e3D0THMdZVS6/9KKau4dAaaay6wu6i19vZ7SqXS0hctIePW45P9BIWgI23sF6e+LThcXex1GYvsT9Q8uT16HgbuBcz4zyX5woaijm1tolfQqVxwkwElJHJ2zUJj/UkZHVSZwq00AsBnIL6LTRlkFYe4IXYmU20wgbDqZKUiJHxhlZIKv44iVW6x/Op/z7+c7O0ghZRh3VtVRJQ9RRv+RkujXU9twcSvC5phhsys6qr7xxo+nQuRektGzsSCEWZ2PV9Yjv8bhkqfXPUQdeD4Sw30LysyQ3Oz4u/6O6SN+PhcJMwhpXyfWkis85AQ/+RlsijUwjparz2lE5gfXbAg3rhOu/3Jcx9jDDq3x4VQJmRQGP6KpIzz0yz+WLzFhBNIwgLCG9CVjwK3CxFLyVE/AG5QpVlleTEgc9a417rr5u1VjLfEtfN9hO6brdfkduQ/kGXzx356Ss9CwRKKIP23DWSgHsBHuRG5SvW99kumXtT+yQ9fNvciZreSXaW62JiADhHzqSj8z8jZlmafZQc6mvLyOfTuCFY6SNxN4GcmRQus2ZttO7m+WR3dWKdJ7Ef5Aei2nhZLVIIp2Wz+aeaF7ctqcp4KqtOGMIhej3Kwi3bvGMUv6BcDTaawnE7mjSrxdkuiLsR30ymVVzxKGKx57aFHZzYRBYCAE6MY/gVPG1XPSBbVn7zeQYc4P8hX/w4v/xvTuywqZg+GODSeCL6C8WPxm/pFqG+FJp5hl+LD7TNY43cC2R+AecQamFJEERmhO114ffEhTnOEV4mwAcKLjn39EhabulE732qoZXulAx735zQAsMcIH0QYasF6WM27p3ajoRvNjyHH/QBayMCNCm9X4+qdszUL8QaJ11cdDH4vw1aXp/cEii7RK4kPoZjF6xivC39BlU4uaMEk88aq0f7dKPFNv3axQ0x08U5xS3KD2YUIESplLyu7Waom5GdUR5kQMvdhyFnb/KjF2Cyld6TM5OIOM3F4oqpYfOlD3OeMqP/ZJJ7zQPh3yO9F9ulasylbXlwhXTHiMkW3LAx2G3Vr7uCMsbh6GY/WUwP8PVd4Ryp1csGV5rG3bQJj/UxN6XtI2zHWCsLHI7NcvD8ak9+IXVSFTafxbtxWsSIDPBCV3mL27uFyyUUsW96+lvZgc7bgI9q5XOABOPZgNM9E3S6OGFIqLAfP60iRm/3ux6t8mmGO+aHbXKT9g+szvDbTx9XPSOWj0xaVM2l860MmO7MRJ8145AtjJoKYm4PDLHqY5b0qmK31M0cokDU0eEtw8zHyZ3CzyId4wAGrQJsOOwvF+rrhHnomKJqZLw/P6NFYsh7PEx3bj4sNdt6GA30U4aaiuzQ/5DzRo+19VgtR2kT0WcRbz9/yPAGhgyYWyemaR1JdBspVRe3/w9GTh0AeUI0s9ihyXBpiMiTmM7Mu4VpVEu0w6I/fVNnIJMf8gMkUO3Jbwsfwea60mWPKVkBdHiSuaYQnlOh3bbVgpz1lWfFdV7TT4BDnU1ANgsT93nTkUKVvaXjoUgEosM8YXSTHD1fk9tAi1llAfPXmv6RMia2RfW1252SGb+nBjTn6t6GO+K1rmz+Cv/pzVGpjiQXfg1kV+SamFSHgcnsTJ4qWOOQ9snRu9tLqFbNGmdns98Ykmn4XdLNuTaHqIDwlLm6a07I7lo4vwfeTipoUV8C81fKaSu/ysiavNsOgXrDwO0nVBDqwtQ7kjxrGQfwGM+hyjGku3GBO1rAh3CFZUTmgTCd04Ok2I5f0sWxgYEQTPpgRkT9HfFg6zcuLWSBjlqBev+ePeZjwC4kkT2If/Oemw+QoX2mvRvI8/83Zz9zWqTEQD400jQaVXAcTWkQd4uE1Yy/52qk0qFVAeqteamdYJ/SxHZ7AQdsOBvsDPNZzLmYTldUcnFY5xmUa/8dO7ZFVHaOtw6eC5xZOZ/7cHuw7DY5I10AvIq5t5I6h5cJa0eipT81oJYDOnUlwBJu+Y7U/UHBc2dT+SWy7AeV3q/PDMV2K60gZ5II/CiPC9SWIRbJ/UTL4wKU+lJmmylGmwM6PCYNT0B7ibovx/O8we8Mfoyofa/mbBZq9Aef+VnP7ai+AuKCxeTQit2UvWkxPIn3RjDeap+PiDGxFwCVaPwQfS3O5f+1KTRgtM5grrcJVi50tZ1oZsAKo34QiekoA3z+fZDGlGw86WhAUn2q+ZUCG7jYkGArxS5f8Cvkcll+DtK+9NepxxJ6ukijHZQp9ycpMPg/fWjd5++h7XfIe8m7P2k5AaomD2ms3l4CTiaeXhnIxDoKcHok1GqSCtVdOrKWvRPmeVFWQ8LNlLgu6/Q6O4+J06KYG3+QeM4y2dYu99KwWkto6kMlLzlri9t/nCy9AfFppSW36iE+BqzKTuWf7TYvbuShjCF//phOUtLIXuz60AA0bvJxfRaP1aVSB86FcVqeeR6XbyDOdO4hfb+n//OY/Rb8pvyamffsAy5wFX6xhBTFUMVR8BJ0mNOmV7u8WrAPPgKC/Y1ORUyy6jnewfs1LW+1dh5LxdKYeL0Wk9KknlF7s5bj5aSxraFclwQ0fxL79pUB2P0W0+wjmp1B+iYqk/MP4q2eKx3LX3WdAdAXNkTsBDhNiFUAGR/rI+HzP/vBY0+HtbeviqztpSpM6j98UEavYZ0tOVMxhJsfJlnG/IIYIvfWzSXKbcGI+rppCT/aoQvA7oNWaxv3ioTwPAYYQGwW97Vp2x6fr3E5h/KZJe2lNeZiekPYWJZTVCnZwpZs3mek7qehgidmOXtuHihCofaJO790pbnTRZnL1qv42r168VHwl7Ujy7NLpLsi/MbB7Hdu0RxqchmsjUBr/1LyCPzCskB7L7E/mOyviql46LX45hUCQ5xaSC6P3QjthMumsAHEQXDNe3I9+pVW5ztY/QvXHyhJb/UTtPtHOAi5vSQykLq3VJuMOOQp1Ii3rGvpcVCfnPNBLkrDIIe+0IhP8VVN4uBph2dFR0iiPEp6cwhchSnCUfeRNr2l9BurfacI/t6L2upHKSSNGv92ng1radoJdckX2RnV9Zhos2wjRZLIFwWEerghxYJFPLOSyAAAA"},
+  // Live2D 模型文件（base64）
+  live2d: null,
+};
+
+// 样式表
+const STYLES = `:host {
+  all: initial;
+}
+.ar {
+  --page: #f1f2f3;
+  --surface: #ffffff;
+  --wash: #f6f7f8;
+  --wash-2: #e3e5e7;
+  --ink: #18191c;
+  --ink-2: #61666d;
+  --muted: #9499a0;
+  --line: #e3e5e7;
+  --primary: #e95a8c;
+  --primary-ink: #fff;
+  --primary-soft: #fdeef3;
+  --primary-text: #d64479;
+  --good: #128a5b;
+  --trust: #0b78b4;
+  --lead: #61666d;
+  --warn: #b86e10;
+  --bad: #d43d4b;
+  --d-empty: #e3e5e7;
+  --d-lead: #f59ab9;
+  --d-trusted: #57b4e8;
+  --d-verified: #3cbf86;
+  --d-bad: #e05561;
+  --d-warn: #f3b23c;
+  --q1: #fdeef3;
+  --q2: #fbd3e1;
+  --q3: #f8b3cb;
+  --q4: #f48fb1;
+  --q5: #ec6b98;
+  --q6: #d9497c;
+  --q7: #b1305f;
+  --qi1: #18191c;
+  --qi2: #18191c;
+  --qi3: #18191c;
+  --qi4: #18191c;
+  --qi5: #fff;
+  --qi6: #fff;
+  --qi7: #fff;
+  --note: #fff6e5;
+  --note-ink: #8a5300;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 36px rgba(0, 0, 0, 0.18);
+  font:
+    14px/1.55 'MiSans',
+    'HarmonyOS Sans SC',
+    'PingFang SC',
+    'Microsoft YaHei UI',
+    system-ui,
+    -apple-system,
+    sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+@media (prefers-color-scheme: dark) {
+  .ar {
+    --page: #17181a;
+    --surface: #222326;
+    --wash: #2b2c30;
+    --wash-2: #3a3b40;
+    --ink: #e3e5e7;
+    --ink-2: #a2a7ae;
+    --muted: #757a81;
+    --line: #34353a;
+    --primary: #f0679a;
+    --primary-soft: #3a2530;
+    --primary-text: #ff8ab3;
+    --good: #43c98f;
+    --trust: #4cb3f0;
+    --lead: #a2a7ae;
+    --warn: #f0a23b;
+    --bad: #ff6b78;
+    --d-empty: #34353a;
+    --d-lead: #e87aa2;
+    --d-trusted: #4ba6dc;
+    --d-verified: #35b07a;
+    --q1: #33232b;
+    --q2: #4a2636;
+    --q3: #662a43;
+    --q4: #852f51;
+    --q5: #a83a63;
+    --q6: #d04f7d;
+    --q7: #f27ba5;
+    --qi1: #e3e5e7;
+    --qi2: #e3e5e7;
+    --qi3: #e3e5e7;
+    --qi4: #e3e5e7;
+    --qi7: #18191c;
+    --note: #3a2e17;
+    --note-ink: #ffd58f;
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 10px 36px rgba(0, 0, 0, 0.6);
+  }
+}
+.ar *,
+.ar *::before,
+.ar *::after {
+  box-sizing: border-box;
+}
+.ar [hidden] {
+  display: none !important;
+}
+.ar button,
+.ar select,
+.ar input {
+  font: inherit;
+  color: inherit;
+}
+.muted {
+  color: var(--muted);
+}
+.small {
+  font-size: 12px;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----- 看板娘：眨眼、摇摆 ----- */
+.ar-mascot {
+  display: block;
+  overflow: visible;
+}
+.ar-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ar-blink 5.2s infinite;
+}
+@keyframes ar-blink {
+  0%,
+  95%,
+  100% {
+    transform: scaleY(1);
+  }
+  97% {
+    transform: scaleY(0.1);
+  }
+}
+.sway {
+  transform-origin: 50% 100%;
+  animation: ar-sway 3.6s ease-in-out infinite;
+}
+@keyframes ar-sway {
+  0%,
+  100% {
+    transform: rotate(-2deg) translateY(0);
+  }
+  50% {
+    transform: rotate(2deg) translateY(-2px);
+  }
+}
+.busy .ar-ball {
+  animation: ar-ball 0.8s steps(2) infinite;
+}
+@keyframes ar-ball {
+  50% {
+    fill: #ff8fb1;
+  }
+}
+.busy .ar-arm {
+  transform-box: view-box;
+  transform-origin: 75px 97px;
+  animation: ar-wave 1s ease-in-out infinite;
+}
+@keyframes ar-wave {
+  50% {
+    transform: rotate(-12deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ar *,
+  .ar *::before,
+  .ar *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ----- 看板娘：图片形象与心情小动作 ----- */
+.ar-av {
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 20%;
+  background: var(--primary-soft);
+  flex: none;
+  display: inline-block;
+  vertical-align: middle;
+}
+.dock .fig {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  transform-origin: 50% 100%;
+  animation: ar-breathe 4s ease-in-out infinite;
+  pointer-events: none;
+}
+img.fig {
+  display: block;
+}
+@keyframes ar-breathe {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.012);
+  }
+}
+.dock.busy .fig {
+  animation: ar-sway 2.6s ease-in-out infinite;
+}
+.dock.m-happy .fig {
+  animation: ar-hop 0.9s ease-out 2;
+}
+@keyframes ar-hop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-9px);
+  }
+  55% {
+    transform: translateY(0);
+  }
+  75% {
+    transform: translateY(-4px);
+  }
+}
+.dock .deco {
+  position: absolute;
+  font-style: normal;
+  pointer-events: none;
+}
+.dock .spark {
+  top: 2px;
+  right: -8px;
+  color: #ff8fbf;
+  font-size: 15px;
+  animation: ar-twinkle 1.2s ease-in-out infinite;
+}
+.dock .spark.s2 {
+  top: 26px;
+  right: auto;
+  left: -8px;
+  font-size: 11px;
+  animation-delay: 0.4s;
+  color: #ffd166;
+}
+@keyframes ar-twinkle {
+  50% {
+    opacity: 0.2;
+    transform: scale(0.6);
+  }
+}
+.dock .bang {
+  top: -4px;
+  right: -6px;
+  color: var(--primary);
+  font-weight: 900;
+  font-size: 18px;
+  animation: ar-pop 0.3s ease-out;
+}
+.dock .drop {
+  top: 10px;
+  right: -4px;
+  width: 10px;
+  height: 13px;
+  background: #a8d8ff;
+  border: 1px solid #73b7ec;
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+}
+.dock .zz {
+  top: -6px;
+  right: -8px;
+  color: #a99be8;
+  font-weight: 800;
+  font-size: 14px;
+}
+.dock .zz small {
+  font-size: 10px;
+  margin-left: 1px;
+}
+.credit {
+  font-size: 10.5px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+/* ----- 常驻与气泡 ----- */
+.dock {
+  position: fixed;
+  z-index: 2147483000;
+  width: 66px;
+  height: 92px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.dock svg.fig {
+  width: 100%;
+  height: 100%;
+}
+.dock:active {
+  cursor: grabbing;
+}
+.dock .shadow {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: -2px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.14);
+  filter: blur(2px);
+}
+.dock .badge-n {
+  position: absolute;
+  top: 2px;
+  left: 0;
+  background: var(--primary);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 9px;
+  padding: 0 5px;
+  line-height: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+.bubble {
+  position: fixed;
+  z-index: 2147483002;
+  max-width: 240px;
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  padding: 8px 26px 8px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  animation: ar-pop 0.22s ease-out;
+}
+.bubble::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--surface);
+  transform: rotate(45deg);
+  bottom: -5px;
+  right: 26px;
+  box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.05);
+}
+.bubble.left::after {
+  right: auto;
+  left: 26px;
+}
+.bubble b {
+  color: var(--primary-text);
+}
+.bubble.good b {
+  color: var(--good);
+}
+.bubble.bad b {
+  color: var(--bad);
+}
+.bubble .bx {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px;
+}
+.bubble .bsub {
+  display: block;
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+@keyframes ar-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+}
+
+/* ----- 小窗 ----- */
+.mini {
+  position: fixed;
+  z-index: 2147483001;
+  width: 360px;
+  height: 520px;
+  max-height: calc(100vh - 24px);
+  background: var(--page);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: ar-pop 0.2s ease-out;
+}
+.mini-h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--surface);
+}
+.mini-h b {
+  font-size: 15px;
+  flex: 1;
+}
+.mini-b {
+  flex: 1;
+  overflow: auto;
+  padding: 10px 12px;
+}
+.say {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+.say .txt {
+  background: var(--surface);
+  border-radius: 4px 12px 12px 12px;
+  padding: 7px 11px;
+  font-size: 13px;
+  color: var(--ink-2);
+  box-shadow: var(--shadow);
+}
+.mcard {
+  display: flex;
+  gap: 10px;
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  border: 0;
+  width: 100%;
+  text-align: left;
+}
+.mcard:hover {
+  box-shadow: var(--shadow);
+}
+.mcard .thumb {
+  width: 64px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  flex: none;
+}
+.mcard .thumb svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.mcard .mt {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.mcard .mt .r {
+  font-weight: 600;
+  font-size: 14px;
+}
+.mcard .mt .p b {
+  color: var(--primary-text);
+  font-size: 15px;
+}
+.mcard .mt .p {
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.mini-f {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--surface);
+  flex-wrap: wrap;
+}
+.mini-f .btn {
+  flex: 1;
+  justify-content: center;
+}
+.prog {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+/* ----- 通用控件 ----- */
+.seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 8px;
+  background: var(--wash);
+}
+.seg button {
+  border: 0;
+  background: none;
+  padding: 3px 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  border-radius: 6px;
+  color: var(--ink-2);
+}
+.seg button.on {
+  background: var(--surface);
+  color: var(--primary-text);
+  font-weight: 600;
+  box-shadow: var(--shadow);
+}
+.btn {
+  border: 0;
+  background: var(--wash);
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ink-2);
+  text-decoration: none;
+}
+.btn:hover {
+  background: var(--wash-2);
+  color: var(--ink);
+}
+.btn.primary {
+  background: var(--primary);
+  color: var(--primary-ink);
+  font-weight: 600;
+}
+.btn.primary:hover {
+  filter: brightness(1.06);
+}
+.btn.small {
+  padding: 3px 11px;
+  font-size: 12px;
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.x {
+  border: 0;
+  background: var(--wash);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 17px;
+  cursor: pointer;
+  color: var(--ink-2);
+  line-height: 1;
+  flex: none;
+}
+.x:hover {
+  background: var(--wash-2);
+}
+.link {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0 2px;
+  font-size: 12px;
+}
+.link:hover {
+  color: var(--primary-text);
+}
+select {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  padding: 3px 6px;
+  color: var(--ink-2);
+}
+.bar {
+  height: 4px;
+  background: var(--wash-2);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 5px 0;
+}
+.bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--primary);
+  border-radius: 2px;
+  transition: width 0.4s;
+}
+
+/* ----- 完整面板 ----- */
+.full {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483003;
+  background: var(--page);
+  display: flex;
+  flex-direction: column;
+  animation: ar-pop 0.18s ease-out;
+}
+.top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 18px;
+  height: 56px;
+  background: var(--surface);
+  box-shadow: 0 1px 0 var(--line);
+  flex: none;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.brand b {
+  font-size: 16px;
+  display: block;
+  line-height: 1.2;
+}
+.brand .small {
+  display: block;
+  color: var(--muted);
+}
+.tabs {
+  display: flex;
+  gap: 20px;
+  height: 100%;
+  margin-left: 12px;
+}
+.tabs button {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--ink-2);
+  font-size: 15px;
+  position: relative;
+  height: 100%;
+  padding: 0 2px;
+}
+.tabs button.on {
+  color: var(--ink);
+  font-weight: 600;
+}
+.tabs button.on::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  width: 18px;
+  height: 3px;
+  margin-left: -9px;
+  border-radius: 2px;
+  background: var(--primary);
+}
+.tabs .n {
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: 2px;
+  font-weight: 400;
+}
+.spacer {
+  flex: 1;
+}
+.body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  min-height: 0;
+}
+.setup {
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  box-shadow: 1px 0 0 var(--line);
+}
+.setup-h {
+  display: none;
+}
+.setup-s {
+  flex: 1;
+  overflow: auto;
+  padding: 14px 16px;
+}
+.setup-s section + section {
+  margin-top: 18px;
+}
+.sec-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.sec-h h2 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+.preset {
+  font-size: 12px;
+  color: var(--muted);
+}
+.run {
+  padding: 12px 16px 14px;
+  display: grid;
+  gap: 8px;
+  background: var(--surface);
+  box-shadow: 0 -1px 0 var(--line);
+}
+.run .primary {
+  justify-content: center;
+  padding: 9px;
+  font-size: 15px;
+}
+.estimate {
+  font-size: 12px;
+  color: var(--muted);
+}
+.estimate b {
+  color: var(--ink);
+}
+.picked {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.picked .none {
+  font-size: 12px;
+  color: var(--muted);
+}
+.pchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--primary-soft);
+  color: var(--primary-text);
+  border-radius: 6px;
+  padding: 1px 4px 1px 8px;
+  font-size: 13px;
+}
+.pchip small {
+  opacity: 0.7;
+  font-size: 11px;
+}
+.pchip button {
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 2px;
+  opacity: 0.6;
+}
+.picked-h {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.search {
+  position: relative;
+  margin-top: 8px;
+}
+.search input {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: var(--wash);
+  border-radius: 8px;
+  padding: 7px 10px;
+  outline: none;
+}
+.search input:focus {
+  border-color: var(--primary);
+  background: var(--surface);
+}
+.suggest {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 5;
+  background: var(--surface);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  max-height: 320px;
+  overflow-y: auto;
+}
+.sug {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 7px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.sug b {
+  font-weight: 600;
+}
+.sug .code {
+  color: var(--primary-text);
+  font-weight: 600;
+  font-size: 12px;
+}
+.sug .sub {
+  color: var(--muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+.sug.on,
+.sug:hover {
+  background: var(--wash);
+}
+.sug.added b::after {
+  content: ' ✓';
+  color: var(--good);
+}
+.sug.all {
+  color: var(--primary-text);
+  font-weight: 600;
+  border-top: 1px solid var(--line);
+}
+.quick {
+  margin-top: 8px;
+}
+.quick > summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--muted);
+}
+.grp-h {
+  display: flex;
+  align-items: center;
+  padding: 6px 0 4px;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.grp-h span {
+  flex: 1;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.chip {
+  border: 1px solid transparent;
+  background: var(--wash);
+  border-radius: 6px;
+  padding: 1px 9px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.chip small {
+  margin-left: 3px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.chip.on {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary-text);
+}
+.opts {
+  display: grid;
+  gap: 12px;
+}
+.opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.opt-l {
+  width: 32px;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+  background: var(--wash);
+  padding: 2px;
+}
+.stepper button {
+  border: 0;
+  background: none;
+  width: 28px;
+  height: 26px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  color: var(--ink-2);
+}
+.stepper output {
+  min-width: 34px;
+  text-align: center;
+  font-weight: 600;
+}
+.hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.view {
+  flex: 1;
+  overflow: auto;
+  padding: 16px 22px 40px;
+}
+.feedbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.channels {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  flex: 1;
+  min-width: 0;
+  scrollbar-width: none;
+}
+.channels::-webkit-scrollbar {
+  display: none;
+}
+.channels button {
+  border: 0;
+  background: var(--surface);
+  padding: 4px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+.channels button.on {
+  background: var(--primary-soft);
+  color: var(--primary-text);
+  font-weight: 600;
+}
+.channels .n {
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: 3px;
+}
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-2);
+  flex-wrap: wrap;
+}
+.filterchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--primary-soft);
+  color: var(--primary-text);
+  border-radius: 6px;
+  padding: 2px 4px 2px 10px;
+  font-size: 13px;
+}
+.filterchip button {
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 15px;
+}
+.saybar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+.saybar .txt {
+  background: var(--surface);
+  border-radius: 12px 12px 12px 4px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: var(--ink-2);
+  box-shadow: var(--shadow);
+}
+
+/* ----- 卡片 ----- */
+.feed {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.card {
+  cursor: pointer;
+  background: var(--surface);
+  border-radius: 12px;
+  overflow: hidden;
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
+  animation: ar-pop 0.25s ease-out both;
+}
+.card:hover,
+.card:focus-visible {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  outline: none;
+}
+.cover {
+  position: relative;
+  overflow: hidden;
+}
+.cover > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.cover .scrim {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 52%;
+  background: linear-gradient(to top, rgba(20, 16, 40, 0.55), rgba(20, 16, 40, 0));
+}
+.cover .cv-top {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 6px;
+}
+.cover .price {
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--primary-text);
+  border-radius: 999px;
+  padding: 1px 9px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+.cover .cv-t {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 10px;
+  color: #fff;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+}
+.cover .cv-t small {
+  display: block;
+  font-size: 11.5px;
+  opacity: 0.92;
+}
+.cover .cv-t b {
+  display: block;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+}
+.cover .new {
+  position: absolute;
+  right: 8px;
+  bottom: 12px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  border-radius: 4px;
+  padding: 0 5px;
+  line-height: 16px;
+}
+.ctitle {
+  margin: 8px 10px 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card:hover .ctitle {
+  color: var(--primary-text);
+}
+.cfoot {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 6px 10px 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.cfoot .who {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fav {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 0 2px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.fav .h {
+  font-size: 15px;
+}
+.fav.on {
+  color: var(--primary-text);
+}
+.fav.on .h {
+  animation: ar-heart 0.35s ease-out;
+}
+@keyframes ar-heart {
+  40% {
+    transform: scale(1.45);
+  }
+}
+.more {
+  text-align: center;
+  margin: 22px 0 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.empty {
+  max-width: 380px;
+  margin: 40px auto;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.empty b {
+  color: var(--ink-2);
+  font-size: 15px;
+  font-weight: 500;
+  margin: 10px 0 4px;
+}
+
+/* ----- 状态标签 ----- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border-radius: 4px;
+  padding: 0 5px;
+  line-height: 17px;
+  font-size: 11px;
+  white-space: nowrap;
+  border: 1px solid currentColor;
+  background: var(--surface);
+}
+.badge i {
+  font-style: normal;
+  font-weight: 700;
+}
+.badge.good {
+  color: var(--good);
+}
+.badge.trust {
+  color: var(--trust);
+}
+.badge.lead {
+  color: var(--lead);
+}
+.badge.warn {
+  color: var(--warn);
+}
+.badge.bad {
+  color: var(--bad);
+}
+.cover .badge {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: transparent;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+/* ----- 总览矩阵 ----- */
+.tiles {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.tile {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 10px 16px;
+  min-width: 130px;
+}
+.tile .v {
+  font-size: 22px;
+  font-weight: 600;
+}
+.tile .k {
+  font-size: 12px;
+  color: var(--muted);
+}
+.note {
+  background: var(--note);
+  color: var(--note-ink);
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+.mwrap {
+  overflow: auto;
+  border-radius: 10px;
+  background: var(--surface);
+  padding: 8px;
+}
+table.matrix {
+  border-collapse: separate;
+  border-spacing: 3px;
+  font-variant-numeric: tabular-nums;
+}
+.matrix th {
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--ink-2);
+  padding: 4px 6px;
+  white-space: nowrap;
+  background: var(--surface);
+}
+.matrix tbody th {
+  text-align: left;
+  position: sticky;
+  left: 0;
+}
+.matrix th small {
+  color: var(--muted);
+  margin-left: 4px;
+}
+.cell {
+  width: 58px;
+  height: 40px;
+  border-radius: 6px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  line-height: 1.15;
+}
+.cell b {
+  display: block;
+  font-size: 14px;
+}
+.cell span {
+  font-size: 10px;
+  opacity: 0.85;
+}
+.cell.none {
+  color: var(--muted);
+  cursor: default;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.cell.zero {
+  color: var(--muted);
+  background: var(--wash);
+}
+.cell.q1 {
+  background: var(--q1);
+  color: var(--qi1);
+}
+.cell.q2 {
+  background: var(--q2);
+  color: var(--qi2);
+}
+.cell.q3 {
+  background: var(--q3);
+  color: var(--qi3);
+}
+.cell.q4 {
+  background: var(--q4);
+  color: var(--qi4);
+}
+.cell.q5 {
+  background: var(--q5);
+  color: var(--qi5);
+}
+.cell.q6 {
+  background: var(--q6);
+  color: var(--qi6);
+}
+.cell.q7 {
+  background: var(--q7);
+  color: var(--qi7);
+}
+.cell[data-o]:hover {
+  outline: 2px solid var(--ink);
+}
+.cell .mk {
+  position: absolute;
+  top: -6px;
+  right: -4px;
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--surface);
+  color: var(--good);
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  padding: 0 3px;
+  line-height: 13px;
+}
+.legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 10px;
+  align-items: center;
+}
+.ramp {
+  display: inline-flex;
+  gap: 2px;
+  vertical-align: middle;
+  margin: 0 4px;
+}
+.ramp i {
+  width: 14px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+/* ----- 详情抽屉 ----- */
+.scrim-all {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.32);
+  z-index: 2147483004;
+}
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(520px, 100vw);
+  z-index: 2147483005;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  overflow: auto;
+  animation: ar-slide 0.2s ease-out;
+}
+@keyframes ar-slide {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+.drawer > .x {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  background: rgba(255, 255, 255, 0.9);
+}
+.dcover {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+.dcover > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.dcover .cv-t b {
+  font-size: 34px;
+}
+.dbody {
+  padding: 12px 20px 24px;
+}
+.dbody p {
+  color: var(--ink-2);
+  font-size: 13px;
+  margin: 8px 0;
+}
+.dprice {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+.dprice b {
+  font-size: 24px;
+  color: var(--primary-text);
+  font-variant-numeric: tabular-nums;
+}
+.dmeta {
+  font-size: 12px;
+  color: var(--muted);
+}
+h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 18px 0 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+h3 .sub {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--muted);
+}
+.facts {
+  display: grid;
+  grid-template-columns: 74px 1fr;
+  gap: 4px 10px;
+  font-size: 13px;
+  margin: 10px 0;
+}
+.facts dt {
+  color: var(--muted);
+}
+.facts dd {
+  margin: 0;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+  align-items: center;
+}
+.daybox {
+  background: var(--wash);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-top: 10px;
+}
+.months {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+.month {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 8px 8px;
+}
+.month-t {
+  font-weight: 600;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+.month-t span {
+  color: var(--muted);
+  font-weight: 400;
+}
+.wk,
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.wk span {
+  text-align: center;
+  font-size: 10px;
+  color: var(--muted);
+}
+.day {
+  border: 0;
+  background: none;
+  border-radius: 4px;
+  aspect-ratio: 1;
+  padding: 0;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: var(--muted);
+}
+.day.other {
+  box-shadow: inset 0 0 0 1px var(--wash-2);
+}
+.day.has {
+  cursor: pointer;
+  color: #fff;
+  font-weight: 600;
+}
+.day.st-lead {
+  background: var(--d-lead);
+}
+.day.st-trusted {
+  background: var(--d-trusted);
+}
+.day.st-verified {
+  background: var(--d-verified);
+}
+.day.st-gone,
+.day.st-airport,
+.day.st-excluded {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--d-bad);
+  color: var(--muted);
+  text-decoration: line-through;
+}
+.day.st-mixed,
+.day.st-seats {
+  background: var(--d-warn);
+}
+.day.new::after {
+  content: '';
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 1px var(--surface);
+}
+.day.has:hover,
+.day.sel {
+  outline: 2px solid var(--ink);
+  z-index: 1;
+}
+.tierrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: var(--wash);
+  cursor: pointer;
+  border: 0;
+  text-align: left;
+  width: 100%;
+  margin-bottom: 4px;
+  color: var(--ink);
+}
+.tierrow:hover {
+  background: var(--wash-2);
+}
+.tierrow .sub {
+  color: var(--muted);
+  font-size: 12px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+.fine {
+  font-size: 12px;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  margin-top: 18px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 2147483010;
+  background: rgba(24, 25, 28, 0.9);
+  color: #fff;
+  padding: 6px 16px 6px 8px;
+  border-radius: 10px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-lg);
+  animation: ar-pop 0.2s ease-out;
+  max-width: calc(100vw - 32px);
+}
+.tip {
+  position: fixed;
+  z-index: 2147483010;
+  pointer-events: none;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  max-width: 260px;
+  line-height: 1.6;
+}
+
+/* ----- 手机 ----- */
+/* 只在手机上出现的按钮；必须写在下面的断点之前，否则会盖掉手机上的显示 */
+.mobile-only {
+  display: none !important;
+}
+@media (max-width: 720px) {
+  .mini {
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    bottom: 0 !important;
+    width: 100%;
+    height: 72vh;
+    border-radius: 16px 16px 0 0;
+  }
+  .top {
+    padding: 0 10px;
+    gap: 8px;
+    height: 52px;
+  }
+  .brand .small,
+  .top .modehint {
+    display: none;
+  }
+  .tabs {
+    gap: 14px;
+    margin-left: 4px;
+  }
+  .body {
+    grid-template-columns: 1fr;
+  }
+  .setup {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 82vh;
+    z-index: 6;
+    border-radius: 16px 16px 0 0;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(105%);
+    transition: transform 0.25s;
+  }
+  .setup.open {
+    transform: none;
+  }
+  .setup-h {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px 0;
+    font-weight: 600;
+  }
+  .view {
+    padding: 12px 10px 40px;
+  }
+  .feed {
+    gap: 8px;
+  }
+  .col {
+    gap: 10px;
+  }
+  .cover .cv-t b {
+    font-size: 20px;
+  }
+  .ctitle {
+    font-size: 13px;
+    margin: 6px 8px 0;
+  }
+  .cfoot {
+    margin: 5px 8px 8px;
+  }
+  .mobile-only {
+    display: inline-flex !important;
+  }
+}
+
+/* ----- 动效：封面里云在飘、太阳呼吸、悬停时小飞机起飞、视差；离屏的卡片暂停 ----- */
+.art .cl {
+  animation: ar-drift 28s ease-in-out infinite alternate;
+  animation-play-state: paused;
+}
+.art .cl.c1 {
+  animation-duration: 36s;
+  animation-direction: alternate-reverse;
+}
+.art .cl.c2 {
+  animation-duration: 44s;
+}
+@keyframes ar-drift {
+  from {
+    transform: translateX(-16px);
+  }
+  to {
+    transform: translateX(16px);
+  }
+}
+.art .glow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ar-glow 4.5s ease-in-out infinite;
+  animation-play-state: paused;
+}
+@keyframes ar-glow {
+  50% {
+    opacity: 0.55;
+    transform: scale(1.14);
+  }
+}
+.in-view .art .cl,
+.in-view .art .glow,
+.dcover .art .cl,
+.dcover .art .glow,
+.thumb .art .cl {
+  animation-play-state: running;
+}
+.art .pl {
+  transition: transform 1.8s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+.card:hover .art .pl,
+.dcover .art .pl {
+  transform: translate(var(--dx), var(--dy));
+}
+.dcover .art .pl {
+  transition-delay: 0.35s;
+}
+.card .art .l-far,
+.card .art .l-near,
+.card .art .l-cloud {
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+.card .art .l-cloud {
+  transform: translate(calc(var(--tx, 0) * 5px), calc(var(--ty, 0) * 3px));
+}
+.card .art .l-far {
+  transform: translate(calc(var(--tx, 0) * 3px), calc(var(--ty, 0) * 2px));
+}
+.card .art .l-near {
+  transform: translate(calc(var(--tx, 0) * 9px), calc(var(--ty, 0) * 4px));
+}
+.card .cover {
+  transform: perspective(800px) rotateY(calc(var(--tx, 0) * 4deg))
+    rotateX(calc(var(--ty, 0) * -3deg));
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.3, 1);
+  will-change: transform;
+}
+.card {
+  animation: ar-rise 0.42s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+@keyframes ar-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+  }
+}
+
+/* 封面从卡片飞进抽屉时，抽屉本身不再滑入 */
+.drawer.flip {
+  animation: none;
+}
+.dcover {
+  aspect-ratio: 4 / 3;
+}
+.dcover .cv-t b {
+  font-size: 34px;
+}
+.dcover .cv-t {
+  bottom: 14px;
+  left: 18px;
+}
+
+/* 按下、收藏、拖动的小反馈 */
+.btn,
+.chip,
+.seg button,
+.fav,
+.mcard,
+.x,
+.channels button,
+.tierrow,
+.tabs button {
+  transition:
+    transform 0.12s ease-out,
+    background 0.15s,
+    color 0.15s;
+}
+.btn:active,
+.chip:active,
+.seg button:active,
+.fav:active,
+.mcard:active,
+.x:active,
+.channels button:active,
+.tierrow:active {
+  transform: scale(0.95);
+}
+.heartp {
+  position: fixed;
+  z-index: 2147483011;
+  pointer-events: none;
+  color: var(--primary);
+  font-style: normal;
+  font-size: 13px;
+  will-change: transform, opacity;
+}
+.dock .holder {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 100%;
+}
+.dock.settle .holder {
+  animation: ar-wobble 0.7s cubic-bezier(0.3, 0.7, 0.4, 1);
+}
+@keyframes ar-wobble {
+  20% {
+    transform: rotate(-7deg) scaleY(0.96);
+  }
+  45% {
+    transform: rotate(5deg) scaleY(1.02);
+  }
+  70% {
+    transform: rotate(-2deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+.dock canvas.l2d {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: block;
+}
+.prog.busy .bar i {
+  background: linear-gradient(90deg, var(--primary) 0%, #ffc4da 45%, var(--primary) 90%);
+  background-size: 220% 100%;
+  animation: ar-shimmer 1.3s linear infinite;
+}
+@keyframes ar-shimmer {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+.skel-card {
+  background: var(--surface);
+  border-radius: 12px;
+  overflow: hidden;
+  padding-bottom: 10px;
+}
+.skel {
+  background: linear-gradient(90deg, var(--wash) 25%, var(--wash-2) 50%, var(--wash) 75%);
+  background-size: 220% 100%;
+  animation: ar-shimmer 1.4s linear infinite;
+}
+.skel.line {
+  height: 12px;
+  border-radius: 6px;
+  margin: 10px 10px 0;
+}
+.skel.line.short {
+  width: 55%;
+}
+
+/* 手机上顶栏分两行，标签不被挤压 */
+@media (max-width: 720px) {
+  .top {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 6px 10px;
+    row-gap: 4px;
+  }
+  .brand > div {
+    display: none;
+  }
+  .tabs {
+    height: 36px;
+  }
+  .tabs button {
+    white-space: nowrap;
+    font-size: 14px;
+  }
+  .tabs button.on::after {
+    bottom: 2px;
+  }
+  .top .seg.mode {
+    order: 5;
+  }
+  .top .combo {
+    order: 6;
+    flex: 1;
+    min-width: 0;
+  }
+  .feedbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .channels {
+    width: 100%;
+  }
+  .tools {
+    justify-content: flex-start;
+  }
+  .dcover .cv-t b {
+    font-size: 26px;
+  }
+}
+
+.drawer {
+  overflow-x: hidden;
+}
+.dcover .cv-top {
+  right: 52px;
+  top: 12px;
+  left: 14px;
+}
+
+.dock .holder {
+  transition:
+    opacity 0.6s,
+    transform 0.6s;
+}
+.dock.sleeping .holder {
+  opacity: 0.78;
+  transform: translateY(3px) scale(0.97);
+}
+
+/* 抽屉里的月历：任何宽度下 7 列都装得进月份框 */
+.ar .drawer .months {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.ar .drawer .month {
+  min-width: 0;
+  overflow: hidden;
+  padding: 6px 6px 8px;
+}
+.ar .drawer .wk,
+.ar .drawer .days {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
+}
+.ar .drawer .wk span,
+.ar .drawer .days > * {
+  min-width: 0;
+}
+.ar .drawer .wk span {
+  text-align: center;
+  font-size: 10px;
+  line-height: 16px;
+}
+.ar .drawer .day {
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  margin: 0;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 400;
+  overflow: hidden;
+}
+.ar .drawer .day.has {
+  font-weight: 600;
+}
+@media (max-width: 720px) {
+  .ar .drawer .day {
+    font-size: 10.5px;
+  }
+}
+@media (max-width: 340px) {
+  .ar .drawer .months {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ----- iPhone 与触屏：安全区、44px 触控目标、惯性滚动；没有悬停时小飞机在可见时自己起飞 ----- */
+.safe-probe {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: env(safe-area-inset-bottom, 0px);
+  visibility: hidden;
+  pointer-events: none;
+}
+.view,
+.setup-s,
+.mini-b,
+.drawer,
+.suggest {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+.full .top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+@media (max-width: 720px) {
+  .mini,
+  .setup {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .drawer .dbody {
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+}
+@media (pointer: coarse) {
+  .btn,
+  .seg button,
+  .channels button,
+  .tierrow,
+  .fav,
+  .chip,
+  .stepper button {
+    min-height: 44px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+  }
+  .stepper button {
+    width: 44px;
+  }
+  .x,
+  .pchip button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  select,
+  .search input {
+    min-height: 44px;
+  }
+  .tools label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  /* 文字链接、顶栏标签、折叠标题外观不变，只把可点范围撑到 44px 高 */
+  .link,
+  .tabs button,
+  summary {
+    position: relative;
+  }
+  .link::before,
+  .tabs button::before,
+  summary::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 44px;
+    margin-top: -22px;
+  }
+  .link::before {
+    left: -8px;
+    right: -8px;
+  }
+}
+@media (hover: none) {
+  .in-view .art .pl {
+    transform: translate(var(--dx), var(--dy));
+  }
+}
+`;
+
+start();
+})();
