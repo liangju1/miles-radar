@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         里程票雷达 手机版
 // @namespace    https://github.com/liangju1/miles-radar
-// @version      1.0.0
+// @version      1.0.1
 // @description  在 aa.com 上批量查 AAdvantage 里程票空位，按“里程+税费”分档，小红书式卡片浏览，下单前一键核实。
 // @author       里程票雷达
 // @homepageURL  https://github.com/liangju1/miles-radar
@@ -16,7 +16,7 @@
 // ==/UserScript==
 
 /*
- * 里程票雷达 v1.0.0（手机版）
+ * 里程票雷达 v1.0.1（手机版）
  * 在 aa.com 上批量查 AAdvantage 里程票空位，按“里程+税费”分档，下单前一键核实。
  * 看板娘：Miku（初音未来，占位）
  * 占位形象：初音未来 © Crypton Future Media, INC. 2007 · Art by KEI · CC BY-NC 3.0
@@ -76,13 +76,15 @@ function duration(seconds) {
 const CABINS = {
   J: {
     query: 'BUSINESS,FIRST',
-    label: '商务/头等',
+    label: '商务·头等',
+    short: '商务',
     word: '商务舱',
     products: ['BUSINESS', 'FIRST'],
   },
   Y: {
     query: 'COACH',
     label: '经济',
+    short: '经济',
     word: '经济舱',
     products: ['COACH', 'MAIN', 'MAIN_CABIN', 'ECONOMY'],
   },
@@ -567,6 +569,8 @@ function buildTiers(rows, checkOf) {
       ref: reference,
       rep: representative,
       new: members.reduce((sum, row) => sum + row.new, 0),
+      // 这一档里最晚第一次出现的日期是什么时候，「最新」排序用
+      seenAt: members.reduce((latest, row) => (row.first > latest ? row.first : latest), ''),
       peak: busiestMonth(dates),
     });
   }
@@ -630,10 +634,13 @@ function routeSummary(route, tiers, dates, twin) {
 
 function planJobs(params) {
   const jobs = [];
+  // 选了整个国家的，在这里展开成主要机场
+  const origins = expandCodes(params.A);
+  const destinations = expandCodes(params.B);
   // 近的月份排在前面，先出结果
   for (const date of monthStarts(+params.months)) {
-    for (const a of params.A) {
-      for (const b of params.B) {
+    for (const a of origins) {
+      for (const b of destinations) {
         if (a === b) continue;
         for (const cabin of params.cabins) {
           if (params.dir !== 'back') jobs.push({ o: a, d: b, cabin, date, pax: +params.pax });
@@ -687,6 +694,7 @@ const Scan = {
       msg: '',
     };
     const newTiers = new Set();
+    const foundTiers = new Set();
     let next = 0;
     let blockedInARow = 0;
     let blocked = false;
@@ -702,6 +710,7 @@ const Scan = {
         const result = await fetchCalendar(job);
         if (result.error) {
           progress.errors++;
+          progress.lastError = result.error;
           // 连续三次 403/429 就停：再查只会被封得更久
           blockedInARow = result.blocked ? blockedInARow + 1 : 0;
           blocked = blockedInARow >= 3;
@@ -710,6 +719,13 @@ const Scan = {
           const [kept, fresh] = DB.applyMonth(job, result.days, nowIso());
           progress.found += kept;
           progress.new += fresh;
+          const lastDay = monthBounds(job.date)[1];
+          for (const [date, miles, cash] of result.days) {
+            if (date < job.date || date > lastDay || typeof miles !== 'number') continue;
+            foundTiers.add(
+              `${job.o}|${job.d}|${job.cabin}|${Math.round(miles)}|${Number(cash || 0).toFixed(2)}`,
+            );
+          }
           if (fresh) {
             for (const [, miles, cash] of result.days) {
               newTiers.add(`${job.o}|${job.d}|${miles}|${Number(cash).toFixed(2)}`);
@@ -733,6 +749,11 @@ const Scan = {
       new: progress.new,
       errors: progress.errors,
       newTiers: newTiers.size,
+      tiers: foundTiers.size,
+      lastError: progress.lastError || '',
+      // seen：用户打开过结果没有（看板娘上的数字）；ack：结束弹窗点过按钮没有
+      seen: false,
+      ack: false,
       params,
       msg: blocked
         ? 'aa.com 暂时拒绝了查询（403/429）。扫到的都已保存，过一小时用「稳妥」速度再试吧。'
@@ -965,6 +986,9 @@ function airports() {
     });
     airportTable[code] = entry;
   }
+  for (const [code, entry] of Object.entries(METRO_CODES)) {
+    airportTable[code] = airportTable[code] || Object.assign({ metro: true }, entry);
+  }
   // 常用分组里的叫法优先，比较口语
   for (const group of DATA.groups) {
     for (const [code, name] of Object.entries(group.codes)) {
@@ -1038,16 +1062,110 @@ function searchAirports(query) {
   return matches.slice(0, 60).map(match => match[1]);
 }
 
+// ----- 国家 -----
+// 选择里用 "@国家名" 表示整个国家，扫描时展开成主要机场。
+// aa.com 的日历接受城市代码（NYC、LON 实测可用），能用城市代码的就合并，少发请求。
+
+const METRO_CODES = {
+  NYC: { n: '纽约（全部机场）', c: '纽约', ce: 'New York', co: '美国', r: 'NA', big: 1 },
+  WAS: { n: '华盛顿（全部机场）', c: '华盛顿', ce: 'Washington', co: '美国', r: 'NA', big: 1 },
+  CHI: { n: '芝加哥（全部机场）', c: '芝加哥', ce: 'Chicago', co: '美国', r: 'NA', big: 1 },
+  LON: { n: '伦敦（全部机场）', c: '伦敦', ce: 'London', co: '英国', r: 'EU', big: 1 },
+  PAR: { n: '巴黎（全部机场）', c: '巴黎', ce: 'Paris', co: '法国', r: 'EU', big: 1 },
+  TYO: { n: '东京（全部机场）', c: '东京', ce: 'Tokyo', co: '日本', r: 'EA', big: 1 },
+  BJS: { n: '北京（全部机场）', c: '北京', ce: 'Beijing', co: '中国', r: 'CN', big: 1 },
+};
+
+// 键是字典里的中文国家名；中国 = 中国大陆，港澳台各自单列
+const COUNTRIES = {
+  中国: {
+    label: '中国大陆',
+    en: 'china mainland prc',
+    alias: '大陆 内地',
+    gates: 'BJS PVG SHA CAN SZX CTU TFU CKG XIY HGH',
+  },
+  美国: {
+    en: 'united states usa us america',
+    alias: '美利坚',
+    gates: 'NYC LAX SFO CHI DFW SEA WAS BOS MIA ATL IAH',
+  },
+  日本: { en: 'japan', gates: 'TYO KIX NGO FUK CTS' },
+  韩国: { en: 'korea south korea', gates: 'ICN GMP PUS' },
+  英国: { en: 'united kingdom uk britain england', gates: 'LON MAN EDI' },
+  法国: { en: 'france', gates: 'PAR NCE' },
+  德国: { en: 'germany', gates: 'FRA MUC BER DUS HAM' },
+  荷兰: { en: 'netherlands holland', gates: 'AMS' },
+  西班牙: { en: 'spain', gates: 'MAD BCN' },
+  意大利: { en: 'italy', gates: 'FCO MXP VCE' },
+  土耳其: { en: 'turkey turkiye', gates: 'IST SAW AYT' },
+  阿联酋: { en: 'united arab emirates uae', gates: 'DXB AUH' },
+  卡塔尔: { en: 'qatar', gates: 'DOH' },
+  沙特阿拉伯: { en: 'saudi arabia', alias: '沙特', gates: 'RUH JED' },
+  泰国: { en: 'thailand', gates: 'BKK DMK HKT CNX' },
+  新加坡: { en: 'singapore', gates: 'SIN' },
+  马来西亚: { en: 'malaysia', gates: 'KUL PEN BKI' },
+  印度尼西亚: { en: 'indonesia', alias: '印尼', gates: 'CGK DPS' },
+  菲律宾: { en: 'philippines', gates: 'MNL CEB' },
+  越南: { en: 'vietnam viet nam', gates: 'SGN HAN DAD' },
+  印度: { en: 'india', gates: 'DEL BOM BLR MAA' },
+  澳大利亚: { en: 'australia', alias: '澳洲', gates: 'SYD MEL BNE PER' },
+  新西兰: { en: 'new zealand', gates: 'AKL CHC' },
+  加拿大: { en: 'canada', gates: 'YYZ YVR YUL YYC' },
+  墨西哥: { en: 'mexico', gates: 'MEX CUN GDL' },
+  中国香港: { label: '中国香港', en: 'hong kong', alias: '香港', gates: 'HKG' },
+  中国澳门: { label: '中国澳门', en: 'macau macao', alias: '澳门', gates: 'MFM' },
+  中国台湾: { label: '中国台湾', en: 'taiwan', alias: '台湾', gates: 'TPE KHH' },
+};
+
+const isCountry = token => token.charAt(0) === '@';
+const countryOf = code => airport(code).co || '';
+const countryLabel = name => (COUNTRIES[name] && COUNTRIES[name].label) || name;
+const placeName = token => (isCountry(token) ? countryLabel(token.slice(1)) : cityName(token));
+
+// 没有整理过的国家：字典里的大机场，最多 6 个
+function gatewaysOf(name) {
+  const curated = COUNTRIES[name];
+  if (curated) return curated.gates.split(' ').filter(code => airports()[code]);
+  return Object.entries(airports())
+    .filter(([, entry]) => entry.co === name && entry.big && !entry.metro)
+    .slice(0, 6)
+    .map(([code]) => code);
+}
+
+function expandCodes(tokens) {
+  const codes = [];
+  for (const token of tokens) {
+    for (const code of isCountry(token) ? gatewaysOf(token.slice(1)) : [token]) {
+      if (!codes.includes(code)) codes.push(code);
+    }
+  }
+  return codes;
+}
+
+let countryNames = null;
+function searchCountries(query) {
+  const text = query.trim().toLowerCase();
+  if (!text) return [];
+  if (!countryNames) {
+    countryNames = new Set(Object.keys(COUNTRIES));
+    for (const entry of Object.values(airports()))
+      if (entry.co && entry.big) countryNames.add(entry.co);
+  }
+  const hits = [];
+  for (const name of countryNames) {
+    const info = COUNTRIES[name] || {};
+    const words = [name, info.label || '', info.alias || ''].join(' ');
+    const english = ' ' + (info.en || '');
+    if (words.includes(query.trim()) || (text.length >= 2 && english.includes(' ' + text))) {
+      if (gatewaysOf(name).length) hits.push(name);
+    }
+  }
+  return hits.slice(0, 2);
+}
+
 // ----- 人设与台词 -----
 
 const persona = () => DATA.persona;
-
-function aboutText() {
-  const credit = DATA.mascot.normal
-    ? '占位形象：初音未来 © Crypton Future Media, INC. 2007 · Art by KEI · CC BY-NC 3.0'
-    : '';
-  return [DATA.persona.about, credit].filter(Boolean).join(' · ');
-}
 
 // 每组台词一个"洗牌袋"：整组轮完一遍才会重复
 const lineBags = {};
@@ -1153,6 +1271,50 @@ const SKIES = [
     stars: true,
   },
 ];
+
+// 季节配色：封面的季节跟着这一档有位最多的月份走
+const EXTRA_SKIES = {
+  summerBlue: {
+    top: '#3fb3ff',
+    bot: '#dcf3ff',
+    sun: '#fff0a0',
+    far: '#9cc9e8',
+    near: '#4a8bc6',
+    ground: '#3c7cbc',
+    win: '#e6f6ff',
+  },
+  summerTeal: {
+    top: '#2cc3e3',
+    bot: '#e2fbff',
+    sun: '#fff3b0',
+    far: '#8ed2dc',
+    near: '#379bad',
+    ground: '#2d899a',
+    win: '#e8fdff',
+  },
+  amber: {
+    top: '#ffc684',
+    bot: '#fff0d8',
+    sun: '#fff3c4',
+    far: '#e8b287',
+    near: '#b46d4c',
+    ground: '#a35f42',
+    win: '#fff0d8',
+  },
+};
+const SEASON_SKIES = {
+  winter: [0, 3, 5],
+  spring: [1, 4, 0],
+  summer: ['summerBlue', 'summerTeal'],
+  autumn: [2, 'amber'],
+};
+
+function seasonPalette(season, seed) {
+  const list = SEASON_SKIES[season];
+  if (!list) return SKIES[seed % SKIES.length];
+  const pick = list[seed % list.length];
+  return typeof pick === 'number' ? SKIES[pick] : EXTRA_SKIES[pick];
+}
 
 function bldg(x, w, h, color, win, rand) {
   let s = `<rect x="${x.toFixed(1)}" y="${GROUND - h}" width="${w.toFixed(1)}" height="${h + 1}" rx="1.5" ${fillAttr(color)}/>`;
@@ -1575,6 +1737,11 @@ const SCENES = {
   HMT: (pal, rand) => hills(pal.far, 120, rand) + skyline(0, 300, 50, 150, pal.near, pal.win, rand),
 };
 const SCENE_OF = {
+  NYC: 'newyork',
+  LON: 'london',
+  PAR: 'paris',
+  TYO: 'tokyo',
+  BJS: 'beijing',
   DOH: 'doha',
   DXB: 'dubai',
   DWC: 'dubai',
@@ -1633,22 +1800,77 @@ const SCENE_OF = {
   VKO: 'moscow',
 };
 
-// 一张目的地明信片，分层输出方便做动画：天空/太阳、云、远景、近景地标、小飞机
+// 一张目的地明信片，分层输出方便做动画：天空/太阳、云、远景、近景地标、小飞机。
+// look.season 决定季节（雪、花瓣、盛夏、落叶），look.planes 是天上的飞机数（有位越多越多）
 let coverCount = 0;
-function coverArt(code, region, seed) {
+function coverArt(code, region, seed, look = {}) {
   const rand = seededRandom(seed);
-  const pal = SKIES[seed % SKIES.length];
+  const pal = seasonPalette(look.season, seed);
   const scene = SCENES[SCENE_OF[code]] || SCENES[region] || SCENES.NA;
   // 每次渲染用唯一 id：同一个 id 出现在隐藏元素里时，url(#id) 会失效
   const id = 'g' + seed.toString(36) + '_' + ++coverCount;
+  const winter = look.season === 'winter';
+  // 冬天：把每个形状朝上的边缘描一道白，像积了雪
+  const snowFilter = winter
+    ? `<filter id="${id}w" x="-3%" y="-3%" width="106%" height="106%"><feOffset in="SourceAlpha" dy="6" result="d"/><feComposite in="SourceAlpha" in2="d" operator="out" result="cap"/><feFlood flood-color="#fff" flood-opacity=".95"/><feComposite in2="cap" operator="in" result="snow"/><feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="snow"/></feMerge></filter>`
+    : '';
   return `<svg class="art" viewBox="0 0 300 400" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${pal.top}"/><stop offset="1" stop-color="${pal.bot}"/></linearGradient>
-    <radialGradient id="${id}s"><stop offset="0" stop-color="${pal.sun}" stop-opacity=".9"/><stop offset="1" stop-color="${pal.sun}" stop-opacity="0"/></radialGradient></defs>
-    <g class="l-sky">${skyLayer(pal, rand, id)}</g><g class="l-cloud">${cloudLayer(pal, rand)}</g><g class="l-plane">${planeLayer(rand)}</g>
-    ${landscapeLayers(scene, pal, rand)}</svg>`;
+    <radialGradient id="${id}s"><stop offset="0" stop-color="${pal.sun}" stop-opacity=".9"/><stop offset="1" stop-color="${pal.sun}" stop-opacity="0"/></radialGradient>${snowFilter}</defs>
+    <g class="l-sky">${skyLayer(pal, rand, id, look.season === 'summer')}</g><g class="l-cloud">${cloudLayer(pal, rand)}</g><g class="l-plane">${planeLayer(rand, look.planes || 1)}</g>
+    ${landscapeLayers(scene, pal, rand, winter ? `url(#${id}w)` : '')}${seasonLayer(look.season, rand)}</svg>`;
 }
 
-function skyLayer(pal, rand, id) {
+function seasonLayer(season, rand) {
+  let svg = '';
+  if (season === 'winter') {
+    for (let i = 0; i < 22; i++) {
+      svg += `<circle cx="${(rand() * 300).toFixed(0)}" cy="${(40 + rand() * 280).toFixed(0)}" r="${(1 + rand() * 1.6).toFixed(1)}" fill="#fff" opacity="${(0.7 + rand() * 0.3).toFixed(2)}"/>`;
+    }
+  } else if (season === 'spring') {
+    for (let i = 0; i < 14; i++) {
+      const x = (rand() * 300).toFixed(0);
+      const y = (90 + rand() * 230).toFixed(0);
+      svg += `<ellipse cx="${x}" cy="${y}" rx="3.2" ry="1.9" transform="rotate(${(rand() * 180).toFixed(0)} ${x} ${y})" fill="#ffd2e1" stroke="#ef8fb1" stroke-width=".7"/>`;
+    }
+    svg += blossomBranch(rand() < 0.5);
+  } else if (season === 'autumn') {
+    const colors = ['#e8743b', '#f2a33a', '#c8502e', '#e9b949'];
+    for (let i = 0; i < 12; i++) {
+      const x = (rand() * 300).toFixed(0);
+      const y = (90 + rand() * 230).toFixed(0);
+      svg += `<path d="M0 -6 Q5 0 0 6 Q-5 0 0 -6 Z M0 -6 L0 6" transform="translate(${x} ${y}) rotate(${(rand() * 360).toFixed(0)}) scale(${(1 + rand() * 0.6).toFixed(2)})" fill="${colors[i % 4]}" stroke="#9a4a22" stroke-width=".5"/>`;
+    }
+  }
+  return svg ? `<g class="fx">${svg}</g>` : '';
+}
+
+// 春天从画面一侧伸进来的一枝花
+function blossomBranch(left) {
+  const flower = (x, y) => {
+    let petals = '';
+    for (let k = 0; k < 5; k++) {
+      const angle = (k * 72 * Math.PI) / 180;
+      petals += `<circle cx="${(x + Math.cos(angle) * 3.6).toFixed(1)}" cy="${(y + Math.sin(angle) * 3.6).toFixed(1)}" r="3.2" fill="#ffc3d7"/>`;
+    }
+    return petals + `<circle cx="${x}" cy="${y}" r="1.6" fill="#e2557f"/>`;
+  };
+  const branch =
+    '<path d="M306 150 Q258 158 218 186 M264 156 Q252 140 240 132 M242 170 Q234 188 224 198" stroke="#7b4d45" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+    [
+      [282, 152],
+      [254, 160],
+      [232, 176],
+      [240, 132],
+      [224, 198],
+      [216, 186],
+    ]
+      .map(([x, y]) => flower(x, y))
+      .join('');
+  return left ? `<g transform="translate(300 0) scale(-1 1)">${branch}</g>` : branch;
+}
+
+function skyLayer(pal, rand, id, rays) {
   let svg = `<rect x="-30" y="-10" width="360" height="420" fill="url(#${id})"/>`;
   if (pal.stars) {
     for (let i = 0; i < 26; i++) {
@@ -1658,6 +1880,17 @@ function skyLayer(pal, rand, id) {
   const sunX = (50 + rand() * 200).toFixed(0);
   const sunY = (70 + rand() * 80).toFixed(0);
   svg += `<circle class="glow" cx="${sunX}" cy="${sunY}" r="62" fill="url(#${id}s)"/><circle cx="${sunX}" cy="${sunY}" r="24" fill="${pal.sun}"/>`;
+  if (rays) {
+    // 盛夏：太阳带一圈光芒
+    for (let i = 0; i < 12; i++) {
+      const angle = (i * 30 * Math.PI) / 180;
+      const x1 = (+sunX + Math.cos(angle) * 31).toFixed(1);
+      const y1 = (+sunY + Math.sin(angle) * 31).toFixed(1);
+      const x2 = (+sunX + Math.cos(angle) * 42).toFixed(1);
+      const y2 = (+sunY + Math.sin(angle) * 42).toFixed(1);
+      svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${pal.sun}" stroke-width="3.5" stroke-linecap="round" opacity=".9"/>`;
+    }
+  }
   if (pal.moon) svg += `<circle cx="${+sunX + 9}" cy="${sunY - 6}" r="20" fill="${pal.top}"/>`;
   return svg;
 }
@@ -1675,20 +1908,27 @@ function cloudLayer(pal, rand) {
   return svg;
 }
 
-function planeLayer(rand) {
-  const x = 40 + rand() * 180;
-  const y = 50 + rand() * 90;
+// 飞机数 = 这一档有位多少（1/2/3 架）；放在各种裁切比例下都看得到的高度
+function planeLayer(rand, count = 1) {
   const flip = rand() < 0.5 ? 1 : -1;
-  const trail = `M${(x - flip * 90).toFixed(0)} ${(y + 40).toFixed(0)} Q${(x - flip * 40).toFixed(0)} ${(y + 30).toFixed(0)} ${x.toFixed(0)} ${y.toFixed(0)}`;
-  return (
-    `<path d="${trail}" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="5 6" stroke-linecap="round" opacity=".8"/>` +
-    `<g class="pl" style="--dx:${(flip * 46).toFixed(0)}px;--dy:-16px"><g transform="translate(${x.toFixed(0)} ${y.toFixed(0)}) scale(${flip} 1) rotate(-18)">` +
-    '<path d="M-12 0 Q-4 -3 12 -1 Q15 0 12 1 Q-4 3 -12 0 Z M-2 -1 L-7 -10 L-3 -10 L4 -1 Z M-2 1 L-7 10 L-3 10 L4 1 Z M-11 0 L-14 -5 L-11 -5 L-8 0 Z" fill="#fff"/></g></g>'
-  );
+  let svg = '';
+  for (let i = 0; i < count; i++) {
+    const size = [1, 0.8, 0.66][i];
+    const x = count === 1 ? 70 + rand() * 160 : 45 + (i * 210) / (count - 1) + (rand() - 0.5) * 30;
+    const y = 120 + rand() * 70 + i * 12;
+    if (i === 0) {
+      const trail = `M${(x - flip * 90).toFixed(0)} ${(y + 40).toFixed(0)} Q${(x - flip * 40).toFixed(0)} ${(y + 30).toFixed(0)} ${x.toFixed(0)} ${y.toFixed(0)}`;
+      svg += `<path d="${trail}" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="5 6" stroke-linecap="round" opacity=".8"/>`;
+    }
+    svg +=
+      `<g class="pl" style="--dx:${(flip * (46 - i * 8)).toFixed(0)}px;--dy:-${16 - i * 3}px"><g transform="translate(${x.toFixed(0)} ${y.toFixed(0)}) scale(${(flip * size).toFixed(2)} ${size}) rotate(-18)">` +
+      '<path d="M-12 0 Q-4 -3 12 -1 Q15 0 12 1 Q-4 3 -12 0 Z M-2 -1 L-7 -10 L-3 -10 L4 -1 Z M-2 1 L-7 10 L-3 10 L4 1 Z M-11 0 L-14 -5 L-11 -5 L-8 0 Z" fill="#fff"/></g></g>';
+  }
+  return svg;
 }
 
 // 按颜色把场景拆成远景和近景，视差时两层移动幅度不同
-function landscapeLayers(scene, pal, rand) {
+function landscapeLayers(scene, pal, rand, filter) {
   let far = '';
   let near = '';
   for (const shape of scene(pal, rand).match(
@@ -1702,7 +1942,8 @@ function landscapeLayers(scene, pal, rand) {
     else near += shape;
   }
   near += `<rect x="-30" y="${GROUND}" width="360" height="${400 - GROUND + 10}" fill="${pal.ground}"/><rect x="-30" y="${GROUND}" width="360" height="3" fill="#fff" opacity=".18"/>`;
-  return `<g class="l-far" opacity=".95">${far}</g><g class="l-near" opacity=".97">${near}</g>`;
+  const snow = filter ? ` filter="${filter}"` : '';
+  return `<g class="l-far" opacity=".95"${snow}>${far}</g><g class="l-near" opacity=".97"${snow}>${near}</g>`;
 }
 
 // 原创 SVG 形象（没有嵌入图片时用）。心情：'' | happy | surprised | worry | sleep
@@ -1940,12 +2181,19 @@ function serveFromMemory(pixi, files) {
 }
 
 async function cacheTextures(pixi, settings, files) {
-  // 贴图从字节解码后放进缓存，模型按同一地址取用时直接命中
+  // 贴图从字节解码后放进缓存，模型按同一地址取用时直接命中。
+  // WebGL 上传 ImageBitmap 时不会再替我们预乘 alpha，而 Cubism 按预乘过的贴图混合，
+  // 所以这里就要预乘，否则半透明的边缘会发白；再开 mipmap 和线性过滤，缩小时不起锯齿
   for (const texture of settings.FileReferences.Textures) {
     const bitmap = await createImageBitmap(new Blob([files[texture]]), {
-      premultiplyAlpha: 'none',
+      premultiplyAlpha: 'premultiply',
     });
-    pixi.Texture.addToCache(pixi.Texture.from(bitmap), LIVE2D_BASE + texture);
+    const base = new pixi.BaseTexture(bitmap, {
+      alphaMode: pixi.ALPHA_MODES.PREMULTIPLIED_ALPHA,
+      mipmap: pixi.MIPMAP_MODES.ON,
+      scaleMode: pixi.SCALE_MODES.LINEAR,
+    });
+    pixi.Texture.addToCache(new pixi.Texture(base), LIVE2D_BASE + texture);
   }
 }
 
@@ -1984,9 +2232,10 @@ function live2dRenderer(fallback) {
       const app = new pixi.Application({
         width,
         height,
-        backgroundAlpha: 0,
+        backgroundAlpha: 0, // 完全透明的清屏色
         antialias: true,
-        resolution: Math.min(2, window.devicePixelRatio || 1),
+        // 至少按 2 倍分辨率画，眼睛和线条才清楚
+        resolution: Math.max(2, Math.min(3, window.devicePixelRatio || 1)),
         autoDensity: true,
       });
       const model = await pixi.live2d.Live2DModel.from(settings, {
@@ -1997,6 +2246,7 @@ function live2dRenderer(fallback) {
         app.destroy(true);
         return;
       }
+      // 全身，靠画布尺寸和分辨率让脸看得清
       const scale = Math.min(
         width / model.internalModel.width,
         height / model.internalModel.height,
@@ -2089,9 +2339,10 @@ let prefs = null;
 
 function initState() {
   prefs = Object.assign(
-    { mode: 'auto', view: 'feed', sort: 'rec', quickOpen: { A: false, B: false } },
+    { view: 'feed', sort: 'rec', quickOpen: { A: false, B: false } },
     Store.get('prefs', {}),
   );
+  delete prefs.mode; // 旧版的全自动/半自动开关已经去掉
   if (!prefs.sel) {
     const preset = DATA.presets[0];
     prefs.sel = {
@@ -2144,6 +2395,202 @@ const cancelAnimations = (el, subtree) => {
 };
 const badge = status =>
   `<span class="badge ${STATUS[status].tone}"><i>${STATUS[status].icon}</i>${STATUS[status].label}</span>`;
+const shortMiles = miles => (miles % 1000 ? (miles / 1000).toFixed(1) : miles / 1000) + 'k';
+
+// ----- 扫描结果的文案（结束弹窗、小窗和面板顶部共用） -----
+
+const lastScan = () => Scan.state.last || Store.get('lastScan', null);
+
+function updateLastScan(patch) {
+  const last = Store.get('lastScan', null);
+  if (!last) return;
+  Object.assign(last, patch);
+  Store.set('lastScan', last);
+  if (Scan.state.last && Scan.state.last.at === last.at) Object.assign(Scan.state.last, patch);
+}
+
+// found 有位 / none 没位 / cancelled 手动停了 / blocked 被 403/429 拦 / failed 查询全失败
+function scanKind(last) {
+  if (last.outcome === 'blocked') return 'blocked';
+  if (last.outcome === 'cancelled') return 'cancelled';
+  if (last.errors && last.errors >= last.done) return 'failed';
+  return last.found > 0 ? 'found' : 'none';
+}
+
+function placesText(tokens) {
+  const names = tokens.map(placeName);
+  return names.length <= 3
+    ? names.join('、')
+    : `${names.slice(0, 2).join('、')}等 ${names.length} 处`;
+}
+
+function scanSummary(params) {
+  if (!params) return '';
+  const arrow = { out: '→', back: '←', both: '⇄' }[params.dir] || '⇄';
+  const cabins = params.cabins.map(cabin => CABINS[cabin].label).join(' + ');
+  return `${placesText(params.A)} ${arrow} ${placesText(params.B)} · 未来 ${params.months} 个月 · ${params.pax} 人 · ${cabins}`;
+}
+
+function resultCopy(last) {
+  const kind = scanKind(last);
+  const failedPart = last.errors && kind !== 'failed' ? ` · ${last.errors} 次查询失败` : '';
+  const summary = esc(scanSummary(last.params)) + failedPart;
+  const progress = `已扫 ${fmtInt(last.done)}/${fmtInt(last.total)} 次查询`;
+  const tiers = last.tiers ? `（${fmtInt(last.tiers)} 档）` : '';
+  const copy = { kind, summary, note: '', mood: 'worry' };
+  if (kind === 'found') {
+    copy.mood = 'happy';
+    copy.title = `扫完了！找到 ${fmtInt(last.found)} 天有位${tiers}`;
+    copy.note = last.new ? `其中新出现 ${fmtInt(last.new)} 天` : '';
+  } else if (kind === 'none') {
+    copy.title = '这次没扫到有位的日期';
+  } else if (kind === 'cancelled') {
+    copy.mood = '';
+    copy.title = '扫描已停止';
+    copy.note = `${progress}，找到 ${fmtInt(last.found)} 天有位，都已保存`;
+  } else if (kind === 'blocked') {
+    copy.title = 'aa.com 暂时拒绝了查询（403/429）';
+    copy.note = `${progress}，找到的 ${fmtInt(last.found)} 天已保存。建议过一小时再用「稳妥」速度重试`;
+  } else {
+    copy.title = '扫描失败了';
+    copy.note = `${fmtInt(last.errors)} 次查询都没成功（${esc(last.lastError || '网络错误')}），检查网络后再试`;
+  }
+  return copy;
+}
+
+// place：dialog 结束弹窗 / mini 小窗 / panel 面板顶部 / feed 空的瀑布流
+function resultButtons(last, place) {
+  const kind = scanKind(last);
+  const params = last.params || prefs.sel;
+  let buttons = '';
+  if (kind === 'found') {
+    buttons =
+      place === 'panel' ? '' : '<button class="btn primary" data-act="seeResults">去看看</button>';
+  } else if (kind === 'none') {
+    if (+params.months < 12) {
+      const label = +params.months >= 10 ? '扫满 12 个月' : '多扫 3 个月';
+      buttons += `<button class="btn primary" data-act="scanMore">${label}</button>`;
+    }
+    if (+params.pax > 1) buttons += '<button class="btn" data-act="scanOnePax">改成 1 人</button>';
+    buttons += '<button class="btn" data-act="changeSetup">改设置</button>';
+  } else {
+    const label = kind === 'blocked' ? '重试（稳妥速度）' : '重试';
+    buttons += `<button class="btn primary" data-act="retry">${label}</button>`;
+  }
+  if (place === 'dialog') buttons += '<button class="btn" data-act="dialogClose">关闭</button>';
+  else if (place !== 'feed')
+    buttons += '<button class="btn" data-act="dismissResult">知道了</button>';
+  return buttons;
+}
+
+function resultCardHtml(last, place) {
+  const copy = resultCopy(last);
+  const big = copy.kind !== 'found';
+  const face = big ? mascotBody(place === 'mini' ? 86 : 112, copy.mood) : mascotHead(44, 'happy');
+  return `<div class="rcard ${copy.kind}${big ? ' big' : ''}" role="status">
+    <div class="rc-face">${face}</div>
+    <div class="rc-t"><b>${copy.title}</b>${copy.note ? `<span class="rc-note">${copy.note}</span>` : ''}<span class="rc-sum">${copy.summary}</span></div>
+    <div class="rc-acts">${resultButtons(last, place)}</div></div>`;
+}
+
+// 扫描中：醒目的进度条；扫完：结果卡；平时（只在小窗）：一行上次扫描
+function statusHtml(place) {
+  const scan = Scan.state;
+  if (scan.job === 'scan') {
+    const percent = scan.total ? Math.round((scan.done / scan.total) * 100) : 0;
+    const eta = scan.eta != null && scan.done ? ` · 还要约 ${duration(scan.eta)}` : '';
+    const fresh = scan.new ? `<em>新 ${fmtInt(scan.new)}</em>` : '';
+    return `<div class="scanstrip" role="status"><div class="ss-row"><i class="ss-dot"></i>
+      <b>正在扫描 <span class="num">${fmtInt(scan.done)}/${fmtInt(scan.total)}</span></b>
+      <span class="ss-found">已找到 <b class="num">${fmtInt(scan.found)}</b> 天${fresh}</span>
+      <button class="btn small" data-act="stop">${scan.msg ? '正在停止…' : '停止'}</button></div>
+      <div class="ss-bar"><i style="width:${percent}%"></i></div>
+      <div class="ss-sub">${percent}%${eta} · 扫描只在这个标签页开着时进行</div></div>`;
+  }
+  const last = lastScan();
+  if (state.resultCard && last) {
+    // 面板里没有任何卡片时，空的瀑布流会放大显示同一张卡
+    if (place === 'panel' && !state.cards.length && scanKind(last) !== 'found') return '';
+    return resultCardHtml(last, place);
+  }
+  return place === 'mini' ? progressHtml() : '';
+}
+
+function renderStatus() {
+  const slot = state.fullOpen && $('.full .status-slot');
+  if (slot) slot.innerHTML = statusHtml('panel');
+}
+
+// 打开小窗或面板 = 看过结果了：看板娘上的数字消失，这次打开期间显示结果卡
+function noteResultsOpened() {
+  const last = lastScan();
+  if (!last || last.seen !== false) return;
+  updateLastScan({ seen: true });
+  state.resultCard = true;
+}
+
+// ----- 结束弹窗：只有点按钮才关，Esc 和点遮罩都不关 -----
+
+function showScanDialog(last) {
+  const copy = resultCopy(last);
+  const wrap = $('.dlg-wrap');
+  wrap.innerHTML = `<div class="dlg-scrim"></div>
+    <div class="dlg ${copy.kind}" role="alertdialog" aria-modal="true" aria-labelledby="ar-dlg-h" aria-describedby="ar-dlg-d">
+      <div class="dlg-face">${mascotHead(76, copy.mood)}</div>
+      <h2 id="ar-dlg-h">${copy.title}</h2>${copy.note ? `<p class="dlg-note">${copy.note}</p>` : ''}
+      <p id="ar-dlg-d" class="dlg-sum">${copy.summary}</p>
+      <div class="dlg-btns">${resultButtons(last, 'dialog')}</div></div>`;
+  wrap.hidden = false;
+  state.dialogOpen = true;
+  setTimeout(() => {
+    const button = $('.dlg .btn.primary') || $('.dlg .btn');
+    if (button && state.dialogOpen) button.focus({ preventScroll: true });
+  }, 60);
+}
+
+function closeScanDialog() {
+  if (!state.dialogOpen) return;
+  state.dialogOpen = false;
+  const wrap = $('.dlg-wrap');
+  wrap.hidden = true;
+  wrap.innerHTML = '';
+  updateLastScan({ ack: true });
+}
+
+function showResults() {
+  const last = lastScan();
+  updateLastScan({ seen: true });
+  state.resultCard = true;
+  state.channel = 'all';
+  state.routeFilter = null;
+  prefs.miles = null;
+  prefs.view = 'feed';
+  if (last && last.params) prefs.combo = { pax: +last.params.pax, cabin: last.params.cabins[0] };
+  savePrefs();
+  refreshData();
+  if (!state.fullOpen) return openFull(false);
+  renderCombos();
+  updateTabs();
+  renderFeed(true);
+  renderStatus();
+  $('.view').scrollTop = 0;
+}
+
+// 弹窗和结果卡上的「多扫 3 个月 / 改成 1 人 / 重试」：在上次的条件上改一点，直接开扫
+function rescan(patch) {
+  const last = lastScan();
+  closeScanDialog();
+  updateLastScan({ seen: true });
+  prefs.sel = Object.assign({}, (last && last.params) || prefs.sel, patch);
+  savePrefs();
+  if (state.fullOpen) {
+    renderPicked('A');
+    renderPicked('B');
+    renderOptions();
+    renderEstimate();
+  }
+  startScan(prefs.sel);
+}
 
 function mount() {
   if (document.getElementById('award-radar-host')) return;
@@ -2155,7 +2602,8 @@ function mount() {
     <div class="dock" data-act="dock" title="${esc(persona().name)}"></div><div class="bubble" hidden></div>
     <div class="mini" hidden></div><div class="full" hidden></div>
     <div class="scrim-all" hidden></div><aside class="drawer" hidden></aside>
-    <div class="toast" hidden></div><div class="tip" hidden></div><div class="safe-probe"></div></div>`;
+    <div class="toast" hidden></div><div class="tip" hidden></div><div class="dlg-wrap" hidden></div>
+    <div class="safe-probe"></div></div>`;
   bindDock();
   bindRoot();
   placeDock();
@@ -2168,6 +2616,9 @@ function mount() {
   refreshData();
   renderDock();
   initTalk();
+  // 上次扫描结束时的弹窗还没点过（比如中途刷新了页面），再弹一次
+  const last = lastScan();
+  if (last && last.ack === false && !Scan.running()) setTimeout(() => showScanDialog(last), 900);
 }
 
 function toast(message, ms = 2600, mood = 'happy') {
@@ -2186,10 +2637,16 @@ function rendererKind() {
   return DATA.mascot.normal ? 'image' : 'svg';
 }
 
+// 看板娘大小：小/中/大，记在设置里
+const MASCOT_SIZES = { s: 0.78, m: 1, l: 1.25 };
+const sizeFactor = () => MASCOT_SIZES[prefs.mascotSize] || 1;
+
+// 全身像，画得够大（中号：桌面约 300px、手机约 200px），脸才看得清
 function dockHeight() {
-  if (rendererKind() === 'live2d') return isPhone() ? 96 : 140;
-  if (DATA.mascot.normal) return isPhone() ? 80 : 120;
-  return isPhone() ? 66 : 92;
+  let base = isPhone() ? 66 : 92;
+  if (rendererKind() === 'live2d') base = isPhone() ? 200 : 300;
+  else if (DATA.mascot.normal) base = isPhone() ? 150 : 220;
+  return Math.round(base * sizeFactor());
 }
 
 function dockWidth() {
@@ -2207,35 +2664,42 @@ function placeDock() {
   const saved = prefs.dock || {};
   // iPhone 底部有 Home 指示条，默认位置往上让出安全区
   const safeBottom = $('.safe-probe').offsetHeight;
-  const x = Math.max(
+  let x = Math.max(
     4,
     Math.min(
       window.innerWidth - width - 4,
       saved.x == null ? window.innerWidth - width - 22 : saved.x,
     ),
   );
-  const y = Math.max(
+  let y = Math.max(
     4,
     Math.min(
       window.innerHeight - height - 4,
       saved.y == null ? window.innerHeight - height - 22 - safeBottom : saved.y,
     ),
   );
+  if (state.fullOpen) {
+    x = window.innerWidth - width - (isPhone() ? 4 : 18);
+    y = window.innerHeight - height - (isPhone() ? 4 : 8) - safeBottom;
+  }
   dock.style.left = x + 'px';
   dock.style.top = y + 'px';
   state.dockRect = { x, y, width, height };
-  // Live2D 画布大小跟着手机/桌面断点走，跨断点时重建
-  const phone = isPhone();
+  $('.ar').style.setProperty('--dock-w', width + 'px');
+  $('.ar').style.setProperty('--dock-h', height + 'px');
+  dock.classList.toggle('side-l', x + width / 2 < window.innerWidth / 2);
+  // Live2D 画布大小跟着断点和大小设置走，变了就重建
+  const size = width + 'x' + height;
   if (
     state.renderer &&
-    state.phoneLayout !== undefined &&
-    state.phoneLayout !== phone &&
+    state.rendererSize &&
+    state.rendererSize !== size &&
     state.renderer.kind === 'live2d'
   ) {
     state.renderer.destroy();
     mountRenderer();
   }
-  state.phoneLayout = phone;
+  state.rendererSize = size;
   positionFloating();
 }
 
@@ -2258,15 +2722,16 @@ function renderDock() {
   const dock = $('.dock');
   const mood = currentMood();
   const busy = Scan.running();
-  const newCount = state.cards.filter(card => card.new).length;
+  const keep = ['settle', 'side-l', 'glide'].filter(name => dock.classList.contains(name));
   dock.className =
     `dock m-${mood || 'idle'}` +
     (busy ? ' busy' : '') +
     (state.sleeping ? ' sleeping' : '') +
-    (dock.classList.contains('settle') ? ' settle' : '');
+    (keep.length ? ' ' + keep.join(' ') : '');
   if (!$('.holder', dock)) {
     dock.innerHTML =
-      '<div class="shadow"></div><div class="holder"></div><div class="decos"></div><span class="badge-n" hidden></span>';
+      '<div class="shadow"></div><div class="holder"></div><div class="decos"></div><span class="badge-n" hidden></span>' +
+      '<div class="ring" hidden><svg viewBox="0 0 36 36"><circle class="trk" cx="18" cy="18" r="15"/><circle class="val" cx="18" cy="18" r="15" pathLength="100" stroke-dasharray="0 100"/></svg><b></b></div>';
     mountRenderer();
   }
   if (state.renderer && state.lastMood !== mood) {
@@ -2274,9 +2739,37 @@ function renderDock() {
     state.renderer.setMood(mood);
   }
   $('.decos', dock).innerHTML = MOOD_DECOS[mood] || '';
+  // 扫描中：旁边一个带百分比的进度环
+  const ring = $('.ring', dock);
+  ring.hidden = !busy;
+  if (busy) {
+    const scan = Scan.state;
+    const percent = scan.total ? Math.round((scan.done / scan.total) * 100) : 0;
+    $('.val', ring).setAttribute('stroke-dasharray', `${percent} 100`);
+    $('b', ring).textContent = percent + '%';
+  }
+  // 扫完还没打开看：有位显示档数，没位显示 0，出错显示 !
   const counter = $('.badge-n', dock);
-  counter.hidden = !(newCount && !busy);
-  counter.textContent = newCount;
+  const last = lastScan();
+  let text = '';
+  let tone = '';
+  if (!busy && last && last.seen === false) {
+    const kind = scanKind(last);
+    if (kind === 'found' || (kind === 'cancelled' && last.found)) {
+      const count = last.tiers || last.found;
+      text = count > 99 ? '99+' : String(count);
+    } else if (kind === 'none' || kind === 'cancelled') {
+      text = '0';
+      tone = ' zero';
+    } else {
+      text = '!';
+      tone = ' alert';
+    }
+  }
+  counter.hidden = !text;
+  counter.className = 'badge-n' + tone;
+  counter.textContent = text;
+  counter.title = text ? '上次扫描的结果，点我看看' : '';
 }
 
 function setMood(mood, ms = 8000) {
@@ -2345,7 +2838,7 @@ function bindDock() {
     if (moved) start = null;
   });
   dock.addEventListener('pointermove', event => {
-    if (!start) return;
+    if (!start || state.fullOpen) return; // 面板里的看板娘站在固定位置，不拖
     // 鼠标没按住就不算拖动，避免丢了 pointerup 之后跟着光标跑
     if (event.pointerType === 'mouse' && !(event.buttons & 1)) {
       start = null;
@@ -2382,9 +2875,13 @@ function onDockClick() {
   const rapid = state.lastClick && now - state.lastClick < 1500;
   state.lastClick = now;
   state.pokes = (state.pokes || []).filter(t => now - t < 20000).concat(now);
-  if (!rapid) {
-    if (state.miniOpen) closeMini();
-    else openMini();
+  if (!rapid && !state.fullOpen) {
+    if (state.miniOpen) {
+      state.resultCard = false;
+      closeMini();
+    } else {
+      openMini();
+    }
   }
   const count = state.pokes.length;
   const level = count >= 10 ? 4 : count >= 6 ? 3 : count >= 3 ? 2 : 1;
@@ -2400,9 +2897,11 @@ function onDockClick() {
 // 同一时间只有一个气泡；显示时长约 2.5 秒 + 每字 0.12 秒
 function say(html, options = {}) {
   const bubble = $('.bubble');
-  if (state.fullOpen && !options.sticky) return;
   bubble.className = 'bubble' + (options.kind ? ' ' + options.kind : '');
-  bubble.innerHTML = `<button class="bx" data-act="mute" title="今天先别说话">×</button>${html}`;
+  const closer = options.sticky
+    ? '<button class="bx" data-act="closeBubble" title="关闭">×</button>'
+    : '<button class="bx" data-act="mute" title="今天先别说话">×</button>';
+  bubble.innerHTML = closer + html;
   bubble.hidden = false;
   const length = options.length || String(html).replace(/<[^>]+>/g, '').length;
   if (options.mood) setMood(options.mood, options.sticky ? 3600e3 : 2500 + 120 * length);
@@ -2454,8 +2953,8 @@ function talk(group, vars, options = {}) {
   if (!text) return;
   const mood = options.mood != null ? options.mood : LINE_MOODS[group] || '';
   const muted = sessionStorage.getItem('ar-mute') === '1';
-  if (options.idle && (muted || state.miniOpen || state.fullOpen || !$('.bubble').hidden)) return;
-  if (muted || state.fullOpen) {
+  if (options.idle && (muted || state.miniOpen || state.card || !$('.bubble').hidden)) return;
+  if (muted) {
     if (ALWAYS_SHOWN.has(group) || (options.toast && !muted)) {
       toast(
         text + (options.subText ? ' · ' + options.subText : ''),
@@ -2636,13 +3135,21 @@ function refreshData() {
   state.routes = analyze(current.pax, current.cabin);
   state.cards = [];
   for (const route of state.routes.values()) {
+    const byTier = new Map();
+    for (const day of route.dates) {
+      if (!byTier.has(day.tier)) byTier.set(day.tier, []);
+      byTier.get(day.tier).push(day);
+    }
     for (const tier of route.tiers) {
+      const days = byTier.get(tier.id) || [];
       state.cards.push(
         Object.assign({}, tier, {
           o: route.o,
           d: route.d,
           twin: route.twin,
           scanned: route.scanned,
+          dates: days.map(day => day.date),
+          facts: tierFacts(days),
         }),
       );
     }
@@ -2660,6 +3167,7 @@ function refreshData() {
 let lastScanRefresh = 0;
 function onScan(scan) {
   if (scan.job === 'scan') {
+    if (scan.done === 0 && !state.scanTalked) state.resultCard = false;
     if (Date.now() - lastScanRefresh > 3000) {
       lastScanRefresh = Date.now();
       refreshData();
@@ -2668,9 +3176,16 @@ function onScan(scan) {
     talkScanProgress(scan);
   } else if (scan.last) {
     state.scanTalked = false;
+    state.resultCard = true;
+    // 面板或小窗开着时结果就摆在眼前，不再挂数字
+    if (state.fullOpen || state.miniOpen) updateLastScan({ seen: true });
     refreshData();
     renderJob();
+    // 换掉还挂着的进度台词，说扫描结果（没位那句会一直留着）
+    clearTimeout(state.bubbleTimer);
+    $('.bubble').hidden = true;
     talkScanResult(scan.last);
+    showScanDialog(scan.last);
   }
 }
 
@@ -2692,28 +3207,37 @@ function talkScanProgress(scan) {
   }
 }
 
+// 弹窗点「关闭」后看板娘再说一句；没位和出错的那句不会自己消失
 function talkScanResult(last) {
   state.lastPercent = 0;
-  if (last.outcome === 'blocked') {
+  const kind = scanKind(last);
+  if (kind === 'blocked') {
     talk('blocked', null, {
       kind: 'bad',
-      toast: true,
+      sticky: true,
       sub: '扫到的都已保存，过一小时用「稳妥」速度再试',
     });
-  } else if (last.outcome !== 'done') {
-    talk('scan_cancel', null, { toast: true });
+  } else if (kind === 'failed') {
+    say(
+      `<b>扫描失败了</b><span class="bsub">${fmtInt(last.errors)} 次查询都没成功（${esc(last.lastError || '网络错误')}）</span>`,
+      { sticky: true, kind: 'bad', mood: 'worry' },
+    );
+  } else if (kind === 'cancelled') {
+    talk('scan_cancel');
   } else if (last.new > 0) {
-    talk('scan_done_new', { new: last.new, n: last.found }, { toast: true });
-  } else if (last.found > 0) {
-    talk('scan_done_found', { n: last.found }, { toast: true });
+    talk('scan_done_new', { new: last.new, n: last.found });
+  } else if (kind === 'found') {
+    talk('scan_done_found', { n: last.found });
   } else {
-    talk('scan_done_none', null, { toast: true });
+    talk('scan_done_none', null, { sticky: true, sub: esc(scanSummary(last.params)) });
   }
 }
 
 // ----- 小窗 -----
 
 function openMini() {
+  noteResultsOpened();
+  renderDock();
   state.miniOpen = true;
   const mini = $('.mini');
   mini.hidden = false;
@@ -2745,53 +3269,54 @@ const topCards = count =>
 function miniGreeting(cards) {
   if (Scan.running()) return '我在努力扫描中，这个标签页先别关哦～';
   if (cards.some(card => card.status === 'trusted')) return '有已核实的同款票！先看这几张～';
-  if (cards.length) return '这几档最值得看，记得点开核实哦～';
+  if (cards.length) return '这几档最值得看，点「核实」确认一下哦～';
   return `还没有票的数据 ${KAOMOJI[0]} 点下面开始扫描吧！`;
 }
 
 function miniCardHtml(card) {
-  return `<button class="mcard" data-card="${esc(cardId(card))}">
+  const facts = card.facts;
+  const ribbon = card.new ? `<span class="ribbon small">NEW · 新放出 ${card.new} 天</span>` : '';
+  return `<button class="mcard${card.new ? ' has-new' : ''}" data-card="${esc(cardId(card))}">${ribbon}
     <div class="thumb">${cardCoverArt(card)}</div>
     <div class="mt"><span class="r">${esc(cityName(card.o))} → ${esc(cityName(card.d))}</span>
-      <span class="p"><b>${fmtInt(card.miles)}</b> 里程 + ${money(card.cash)}</span>
+      <span class="p"><i class="cab">${CABINS[combo().cabin].short}</i><b>${fmtInt(card.miles)}</b> 里程 + ${money(card.cash)}</span>
+      ${facts ? `<span class="k">${esc(keyFact(card))} · 最近 ${facts.nearest.slice(5)}</span>` : ''}
       <span>${badge(card.status)} <span class="small muted">${card.days} 天有位</span></span></div></button>`;
 }
 
 function renderMini() {
   const cards = topCards(5);
-  const about = aboutText();
-  const modeLabel = prefs.mode === 'semi' ? '半自动' : '全自动';
+  const requests = estimate(prefs.sel).requests;
   const scanButton = Scan.running()
     ? '<button class="btn" data-act="stop">停止扫描</button>'
-    : '<button class="btn primary" data-act="quickScan">开始扫描</button>';
+    : `<button class="btn primary" data-act="quickScan">开始扫描 · 约 ${fmtInt(requests)} 次</button>`;
   $('.mini').innerHTML = `<div class="mini-h">${mascotHead(30, '')}<b>${esc(persona().name)}</b>
-      <span class="small muted">${modeLabel} · ${combo().pax}人 ${CABINS[combo().cabin].label}</span>
+      <span class="small muted">${combo().pax}人 ${CABINS[combo().cabin].label}</span>
       <button class="x" data-act="closeMini" aria-label="关闭">×</button></div>
     <div class="mini-b">
+      ${statusHtml('mini')}
+      <div class="mini-cab"><span>扫哪种舱位</span>${['Y', 'J']
+        .map(
+          cabin =>
+            `<button class="cchip${prefs.sel.cabins.includes(cabin) ? ' on' : ''}" data-cab="${cabin}">${CABINS[cabin].label}</button>`,
+        )
+        .join('')}</div>
       <div class="say">${mascotHead(26, cards.length ? 'happy' : '')}<div class="txt">${miniGreeting(cards)}</div></div>
-      ${progressHtml()}
       ${cards.map(miniCardHtml).join('')}
-      ${about ? `<div class="credit">${esc(about)}</div>` : ''}
     </div>
     <div class="mini-f">${scanButton}
       <button class="btn" data-act="openSetup">设置</button>
       <button class="btn" data-act="openFull">展开完整面板</button></div>`;
 }
 
+// 不在扫描时的一行「上次扫描」
 function progressHtml() {
-  const scan = Scan.state;
-  if (scan.job !== 'scan') {
-    const last = scan.last || Store.get('lastScan', null);
-    if (!last) return '';
-    const fresh = last.newTiers ? `，新放出 ${last.newTiers} 档` : '';
-    const blocked = last.outcome === 'blocked' ? '（被 aa.com 拦了一下）' : '';
-    return `<div class="prog">上次扫描 ${ago(last.at)}：${fmtInt(last.found)} 个有位日期${fresh}${blocked}</div>`;
-  }
-  const percent = scan.total ? Math.round((scan.done / scan.total) * 100) : 0;
-  const fresh = scan.new ? `（新 ${scan.new}）` : '';
-  const eta = scan.eta != null && scan.done ? ` · 还要约 ${duration(scan.eta)}` : '';
-  return `<div class="prog busy">扫描中 <b class="num">${fmtInt(scan.done)}/${fmtInt(scan.total)}</b> · 找到 ${fmtInt(scan.found)} 天${fresh}${eta}
-    <div class="bar"><i style="width:${percent}%"></i></div><span class="muted">扫描只在这个标签页开着时进行</span></div>`;
+  if (Scan.running()) return '';
+  const last = lastScan();
+  if (!last) return '';
+  const fresh = last.newTiers ? `，新放出 ${last.newTiers} 档` : '';
+  const blocked = last.outcome === 'blocked' ? '（被 aa.com 拦了一下）' : '';
+  return `<div class="prog">上次扫描 ${ago(last.at)}：${fmtInt(last.found)} 个有位日期${fresh}${blocked}</div>`;
 }
 
 // ----- 完整面板 -----
@@ -2802,7 +3327,6 @@ function fullHeaderHtml() {
     <nav class="tabs"><button data-view="feed">发现</button><button data-view="fav">收藏<span class="n fav-n"></span></button><button data-view="matrix">总览</button></nav>
     <span class="spacer"></span>
     <button class="btn small mobile-only" data-act="toggleSetup">扫描设置</button>
-    <div class="seg mode"><button data-mode="auto">全自动</button><button data-mode="semi">半自动</button></div>
     <select class="combo" aria-label="显示哪种结果"></select>
     <button class="x" data-act="closeFull" aria-label="关闭">×</button></header>`;
 }
@@ -2823,20 +3347,24 @@ function optionsHtml() {
       ['both', '往返都查'],
     ])}</div>
     <div class="opt"><span class="opt-l">舱位</span>${segHtml('cabins', [
-      ['J', '商务/头等'],
       ['Y', '经济'],
-    ])}</div>
+      ['J', '商务·头等'],
+    ])}<span class="hint">可以两个都选</span></div>
     <div class="opt"><span class="opt-l">人数</span><div class="stepper"><button data-act="pax-">−</button><output class="pax"></output><button data-act="pax+">＋</button></div><span class="hint">座位不够的日期不会出现</span></div>
     <div class="opt"><span class="opt-l">范围</span><select class="months">${months}</select></div>
     <div class="opt"><span class="opt-l">速度</span>${segHtml('speed', [
       ['normal', '标准'],
       ['gentle', '稳妥'],
     ])}</div>
+    <div class="opt"><span class="opt-l">看板娘</span>${segHtml('mascotSize', [
+      ['s', '小'],
+      ['m', '中'],
+      ['l', '大'],
+    ])}</div>
   </section>`;
 }
 
 function setupHtml(open) {
-  const about = aboutText();
   return `<aside class="setup ${open ? 'open' : ''}">
     <div class="setup-h">扫描设置<button class="x" data-act="toggleSetup">×</button></div>
     <div class="setup-s">
@@ -2845,7 +3373,6 @@ function setupHtml(open) {
       ${optionsHtml()}
     </div>
     <div class="run"><div class="estimate"></div><div class="jobbtn"></div><div class="jobprog"></div>
-      ${about ? `<div class="credit">${esc(about)}</div>` : ''}
       <details class="debug"><summary>调试信息</summary><pre class="debug-info"></pre></details></div>
   </aside>`;
 }
@@ -2853,21 +3380,22 @@ function setupHtml(open) {
 function openFull(withSetup) {
   const miniRect = state.miniOpen ? $('.mini').getBoundingClientRect() : null;
   closeMini(true);
+  noteResultsOpened();
   state.fullOpen = true;
   stopObservingCards();
   const full = $('.full');
   full.hidden = false;
   full.innerHTML =
     fullHeaderHtml() +
-    `<div class="body">${setupHtml(withSetup)}<section class="main"><div class="view"></div></section></div>`;
+    `<div class="status-slot"></div><div class="body">${setupHtml(withSetup)}<section class="main"><div class="view"></div></section></div>`;
   state.setupOpen = !!withSetup;
+  $('.ar').classList.toggle('setup-open', state.setupOpen);
   $('.presets').innerHTML =
     '<option value="">选择…</option>' +
     DATA.presets.map((p, i) => `<option value="${i}">${esc(p.label)}</option>`).join('');
   buildPicker('A');
   buildPicker('B');
   renderOptions();
-  renderMode();
   renderCombos();
   renderJob();
   updateTabs();
@@ -2880,13 +3408,30 @@ function openFull(withSetup) {
   });
   if (miniRect) flip(full, miniRect, 560, 'cubic-bezier(.2,.85,.25,1.06)');
   else springFrom(full, dockCenter(), 520);
+  // 看板娘跟进面板，站在右下角
+  $('.ar').classList.add('panel-open');
+  glideDock();
+}
+
+// 看板娘在常驻位置和面板右下角之间滑过去
+function glideDock() {
+  const dock = $('.dock');
+  if (!reducedMotion()) {
+    dock.classList.add('glide');
+    clearTimeout(state.glideTimer);
+    state.glideTimer = setTimeout(() => dock.classList.remove('glide'), 650);
+  }
+  placeDock();
 }
 
 function closeFull() {
   if (!state.fullOpen) return;
   state.fullOpen = false;
+  state.resultCard = false;
   stopObservingCards();
   const full = $('.full');
+  $('.ar').classList.remove('panel-open', 'tucked');
+  glideDock();
   shrinkTo(full, dockCenter(), 260).then(() => {
     if (state.fullOpen) return;
     full.hidden = true;
@@ -2901,12 +3446,6 @@ function updateTabs() {
   const count = state.cards.filter(card => state.favorites.has(favoriteKey(card))).length;
   const counter = $('.fav-n');
   if (counter) counter.textContent = count || '';
-}
-
-function renderMode() {
-  $$('.seg.mode button').forEach(button =>
-    button.classList.toggle('on', button.dataset.mode === prefs.mode),
-  );
 }
 
 function renderCombos() {
@@ -2932,6 +3471,7 @@ function renderJob() {
     ? '<button class="btn" data-act="stop" style="width:100%;justify-content:center">停止扫描</button>'
     : '<button class="btn primary" data-act="scan" style="width:100%">开始扫描</button>';
   $('.jobprog').innerHTML = progressHtml();
+  renderStatus();
 }
 
 // ----- 机场选择 -----
@@ -2952,6 +3492,11 @@ function buildPicker(side) {
     savePrefs();
   });
   renderPicked(side);
+}
+
+function countryChipHtml(token, side) {
+  const count = gatewaysOf(token.slice(1)).length;
+  return `<span class="pchip country"><i>🌐</i>${esc(placeName(token))}<small>整个国家 · ${count} 个机场</small><button data-rm="${esc(token)}" data-side="${side}">×</button></span>`;
 }
 
 function pickedChipHtml(code, side) {
@@ -2976,9 +3521,16 @@ function renderPicked(side) {
   if (!picker) return;
   const codes = prefs.sel[side];
   const selected = new Set(codes);
-  $('.cnt', picker).textContent = codes.length ? `已选 ${codes.length} 个` : '';
+  const expanded = expandCodes(codes).length;
+  $('.cnt', picker).textContent = !codes.length
+    ? ''
+    : codes.some(isCountry)
+      ? `已选 ${codes.length} 项 · 展开后 ${expanded} 个机场`
+      : `已选 ${codes.length} 个`;
   $('.picked', picker).innerHTML = codes.length
-    ? codes.map(code => pickedChipHtml(code, side)).join('')
+    ? codes
+        .map(code => (isCountry(code) ? countryChipHtml(code, side) : pickedChipHtml(code, side)))
+        .join('')
     : '<span class="none">还没选，在下面搜一下吧～</span>';
   $('.quick-b', picker).innerHTML = DATA.groups
     .map(group => quickGroupHtml(group, side, selected))
@@ -2997,6 +3549,11 @@ function suggestionHtml(item, index, side, selected) {
   const active = index === state.suggestionAt[side] ? ' on' : '';
   if (item.kind === 'all') {
     return `<div class="sug all${active}" data-i="${index}" data-side="${side}">＋ 全部添加（${item.codes.length} 个）</div>`;
+  }
+  if (item.kind === 'country') {
+    const gates = gatewaysOf(item.name);
+    const added = selected.has('@' + item.name) ? ' added' : '';
+    return `<div class="sug country${active}${added}" data-i="${index}" data-side="${side}"><b>🌐 整个国家：${esc(countryLabel(item.name))}（主要机场 ${gates.length} 个）</b><span class="sub">${gates.join(' ')}</span></div>`;
   }
   if (item.kind === 'raw') {
     return `<div class="sug${active}" data-i="${index}" data-side="${side}"><b>${item.code}</b><span class="sub">字典里没有，按三字码添加</span></div>`;
@@ -3019,9 +3576,11 @@ function renderSuggestions(side) {
     return;
   }
   const matches = searchAirports(query);
-  const items = matches
-    .slice(0, 8)
-    .map(match => ({ kind: 'one', code: match.code, entry: match.entry }));
+  const items = searchCountries(query)
+    .map(name => ({ kind: 'country', name }))
+    .concat(
+      matches.slice(0, 8).map(match => ({ kind: 'one', code: match.code, entry: match.entry })),
+    );
   if (matches.length > 1)
     items.push({ kind: 'all', codes: matches.slice(0, 30).map(match => match.code) });
   if (!matches.length && /^[a-z]{3}$/i.test(query))
@@ -3050,6 +3609,9 @@ function pickSuggestion(side, index) {
   if (item.kind === 'all') {
     setSelection(side, prefs.sel[side].concat(item.codes));
     toast(`添加了 ${item.codes.length} 个机场`);
+  } else if (item.kind === 'country') {
+    setSelection(side, prefs.sel[side].concat('@' + item.name));
+    toast(`已添加整个国家：${countryLabel(item.name)}`, 1800);
   } else {
     setSelection(side, prefs.sel[side].concat(item.code));
     toast(`已添加 ${cityName(item.code)} ${item.code}`, 1500);
@@ -3064,25 +3626,35 @@ function renderOptions() {
     const on =
       option === 'cabins'
         ? sel.cabins.includes(button.dataset.v)
-        : sel[option] === button.dataset.v;
+        : option === 'mascotSize'
+          ? (prefs.mascotSize || 'm') === button.dataset.v
+          : sel[option] === button.dataset.v;
     button.classList.toggle('on', on);
   });
   $('.pax').textContent = sel.pax;
   $('.months').value = sel.months;
 }
 
+// 查询次数放在显眼的位置；国家×国家很容易变多，超过 1500 次就温和地提醒
 function renderEstimate() {
   const el = $('.estimate');
   if (!el) return;
   const { requests, seconds } = estimate(prefs.sel);
-  const tooMany =
-    requests > 3000
-      ? '<br><span style="color:var(--bad)">有点多哦，少选几个城市或缩短范围吧</span>'
-      : '';
-  el.innerHTML = `约 <b class="num">${fmtInt(requests)}</b> 次查询 · 预计 ${duration(seconds)}${tooMany}`;
+  const countries = prefs.sel.A.concat(prefs.sel.B).filter(isCountry);
+  const expanded = countries.length
+    ? `<span class="est-sub">${countries.map(token => `${esc(placeName(token))} 展开成 ${gatewaysOf(token.slice(1)).length} 个机场`).join('、')}</span>`
+    : '';
+  const many = requests > 1500;
+  const advice = many
+    ? `<span class="est-tip">有点多哦～ 可以少扫几个月（现在 ${prefs.sel.months} 个月），或者少选几个国家/机场，会快很多</span>`
+    : '';
+  el.className = 'estimate' + (many ? ' many' : '');
+  el.innerHTML = `<div class="est-main">约 <b class="num">${fmtInt(requests)}</b> 次查询 · 预计 ${duration(seconds)}</div>${expanded}${advice}`;
 }
 
 function startScan(params) {
+  closeScanDialog();
+  state.resultCard = false;
   prefs.combo = { pax: +params.pax, cabin: params.cabins[0] };
   savePrefs();
   refreshData();
@@ -3101,14 +3673,115 @@ const recommendedOrder = (a, b) =>
 
 const SORTS = {
   rec: recommendedOrder,
+  miles: (a, b) => a.miles - b.miles || a.cash - b.cash,
   cash: (a, b) => a.cash - b.cash || a.miles - b.miles,
   days: (a, b) => b.days - a.days || a.cash - b.cash,
   soon: (a, b) => a.first.localeCompare(b.first) || a.cash - b.cash,
+  // 有新放出日期的在前，再按第一次出现的时间从新到旧
+  newest: (a, b) =>
+    (b.new > 0) - (a.new > 0) ||
+    (b.seenAt || '').localeCompare(a.seenAt || '') ||
+    b.new - a.new ||
+    recommendedOrder(a, b),
 };
+const SORT_OPTIONS = [
+  ['rec', '推荐'],
+  ['miles', '里程最少'],
+  ['cash', '税费最低'],
+  ['days', '有位最多'],
+  ['soon', '最早出发'],
+  ['newest', '最新'],
+];
+
+// 选了国家时按「国家对」分组比较；其余单独选的机场合成一组
+function sideGroups(tokens) {
+  const groups = tokens.filter(isCountry).map(token => ({
+    key: token,
+    label: placeName(token),
+    codes: new Set(expandCodes([token])),
+  }));
+  const plain = tokens.filter(token => !isCountry(token));
+  if (plain.length)
+    groups.push({ key: 'airports', label: placesText(plain), codes: new Set(plain) });
+  return groups;
+}
+
+function comparePairs() {
+  const sel = prefs.sel;
+  if (prefs.view === 'fav' || (!sel.A.some(isCountry) && !sel.B.some(isCountry))) return [];
+  const pairs = [];
+  for (const a of sideGroups(sel.A)) for (const b of sideGroups(sel.B)) pairs.push({ a, b });
+  return pairs.slice(0, 8);
+}
+
+const inPair = (card, pair) =>
+  (pair.a.codes.has(card.o) && pair.b.codes.has(card.d)) ||
+  (pair.b.codes.has(card.o) && pair.a.codes.has(card.d));
+
+function directionStats(cards) {
+  const usable = cards.filter(card => card.status !== 'excluded');
+  const dates = new Set();
+  usable.forEach(card => card.dates.forEach(date => dates.add(date)));
+  return {
+    days: dates.size,
+    cheapest: usable.slice().sort(SORTS.miles)[0],
+    nearest: usable.map(card => card.facts.nearest).sort()[0],
+    fresh: usable.reduce((sum, card) => sum + card.new, 0),
+  };
+}
+
+function compareHalfHtml(label, stats) {
+  if (!stats.days)
+    return `<div class="cmp-half"><small>${label}</small><b class="cmp-days none">还没有位</b><span>扫一下看看</span></div>`;
+  return `<div class="cmp-half"><small>${label}</small><b class="cmp-days">${fmtInt(stats.days)} 天</b>
+    <span class="cmp-price">最低 ${shortMiles(stats.cheapest.miles)} + ${money(stats.cheapest.cash)}</span>
+    <span>最近 ${stats.nearest.slice(5)} 出发</span>${stats.fresh ? `<span class="cmp-new">NEW ${fmtInt(stats.fresh)} 天</span>` : ''}</div>`;
+}
+
+function compareCardHtml(pair, index) {
+  const cards = state.cards.filter(card => inPair(card, pair));
+  const out = directionStats(cards.filter(card => pair.a.codes.has(card.o)));
+  const back = directionStats(cards.filter(card => pair.b.codes.has(card.o)));
+  const byRoute = new Map();
+  for (const card of cards) {
+    if (card.status === 'excluded') continue;
+    const key = card.o + '|' + card.d;
+    const entry = byRoute.get(key) || { o: card.o, d: card.d, days: 0 };
+    entry.days += card.days;
+    byRoute.set(key, entry);
+  }
+  const chips = Array.from(byRoute.values())
+    .sort((x, y) => y.days - x.days)
+    .slice(0, 3)
+    .map(
+      route =>
+        `<button class="rchip" data-route="${route.o}|${route.d}">${esc(cityName(route.o))}→${esc(cityName(route.d))} · ${route.days} 天</button>`,
+    )
+    .join('');
+  const code = Array.from(pair.b.codes)[0];
+  const total = out.days + back.days;
+  const art = coverArt(code, airport(code).r || 'NA', hashStr(pair.a.key + pair.b.key), {
+    planes: total > 60 ? 3 : total > 10 ? 2 : 1,
+  });
+  return `<article class="cmp${state.pair === index ? ' on' : ''}" data-pair="${index}">
+    <div class="cmp-head"><div class="cmp-art">${art.replace('xMidYMax slice', 'xMidYMid slice')}</div><h3>${esc(pair.a.label)} ⇄ ${esc(pair.b.label)}</h3></div>
+    <div class="cmp-dirs">${compareHalfHtml('去程 →', out)}${compareHalfHtml('回程 ←', back)}</div>
+    ${chips ? `<div class="cmp-routes">${chips}</div>` : ''}</article>`;
+}
+
+function compareHtml(pairs) {
+  if (!pairs.length) return '';
+  return `<div class="compare">${pairs.map(compareCardHtml).join('')}</div>`;
+}
 
 function filterCards() {
   let cards = state.cards.slice();
   if (prefs.view === 'fav') cards = cards.filter(card => state.favorites.has(favoriteKey(card)));
+  const pairs = comparePairs();
+  if (pairs.length) {
+    state.pair = Math.min(state.pair || 0, pairs.length - 1);
+    cards = cards.filter(card => inPair(card, pairs[state.pair]));
+  }
   if (state.routeFilter) {
     cards = cards.filter(card => card.o === state.routeFilter.o && card.d === state.routeFilter.d);
   }
@@ -3120,11 +3793,12 @@ function filterCards() {
   else if (state.channel === 'new') cards = cards.filter(card => card.new);
   else if (state.channel !== 'all')
     cards = cards.filter(card => regionOf(card.o, card.d).key === state.channel);
+  const beforeMiles = cards;
+  if (prefs.miles) cards = cards.filter(card => card.miles === prefs.miles);
   cards.sort(SORTS[prefs.sort] || recommendedOrder);
-  return { cards, base };
+  return { cards, base, beforeMiles, pairs };
 }
 
-// 像帖子标题一样说人话，但不能把没核实的票说成真的
 function postTitle(card) {
   const from = cityName(card.o);
   const to = cityName(card.d);
@@ -3146,16 +3820,60 @@ function postTitle(card) {
   return `${from}飞${to}${cabin} ${price}｜日历显示 ${card.days} 天有位${peak}，待核实`;
 }
 
+// 封面画面跟着数据走：季节 = 有位最多的月份，飞机数 = 有位多少
+const seasonOf = month =>
+  month === 12 || month <= 2 ? 'winter' : month <= 5 ? 'spring' : month <= 8 ? 'summer' : 'autumn';
+
 function cardCoverArt(card) {
-  return coverArt(card.d, airport(card.d).r || regionOf(card.o, card.d).key, hashStr(cardId(card)));
+  const look = card.facts
+    ? {
+        season: seasonOf(card.facts.peakMonth),
+        planes: card.days <= 7 ? 1 : card.days <= 30 ? 2 : 3,
+      }
+    : {};
+  return coverArt(
+    card.d,
+    airport(card.d).r || regionOf(card.o, card.d).key,
+    hashStr(cardId(card)),
+    look,
+  );
+}
+
+// 封面上的一句大字：从数据里挑最有用的一条
+function keyFact(card) {
+  const facts = card.facts;
+  if (card.days <= 3) return `只有 ${card.days} 天有位`;
+  if (facts.months === 1) return `${facts.peakMonth}月 · ${facts.peakCount}天有位`;
+  return `${facts.peakMonth}月最多 · ${facts.peakCount}天`;
+}
+
+const UNUSABLE = new Set(['gone', 'airport', 'excluded', 'mixed', 'seats']);
+
+function tierFacts(days) {
+  if (!days.length) return null;
+  const perMonth = {};
+  for (const day of days)
+    perMonth[day.date.slice(0, 7)] = (perMonth[day.date.slice(0, 7)] || 0) + 1;
+  const [peak, peakCount] = Object.entries(perMonth).sort((a, b) => b[1] - a[1])[0];
+  const nearest = days.find(day => !UNUSABLE.has(day.status)) || days[0];
+  return {
+    peakMonth: +peak.slice(5),
+    peakCount,
+    months: Object.keys(perMonth).length,
+    nearest: nearest.date,
+  };
 }
 
 function coverHtml(card, ratio, large) {
+  const facts = card.facts;
+  const lines = facts
+    ? `<span class="cv-k">${esc(keyFact(card))}</span><span class="cv-s">最近 ${facts.nearest.slice(5)} 出发</span>`
+    : '';
   return `<div class="${large ? 'cover dcover' : 'cover'}" ${ratio ? `style="aspect-ratio:${ratio}"` : ''}>${cardCoverArt(card)}
     <div class="scrim"></div>
-    <div class="cv-top">${badge(card.status)}<span class="price">${Math.round(card.miles / 1000)}k + ${money(card.cash)}</span></div>
-    <div class="cv-t"><small>从 ${esc(cityName(card.o))} 出发</small><b>${esc(cityName(card.d))}</b></div>
-    ${card.new ? '<span class="new">NEW</span>' : ''}</div>`;
+    <div class="cv-top">${badge(card.status)}<span class="price"><i class="cab">${CABINS[combo().cabin].short}</i>${Math.round(card.miles / 1000)}k + ${money(card.cash)}</span></div>
+    ${card.new ? `<div class="ribbon">NEW · 新放出 ${card.new} 天</div>` : ''}
+    <div class="cv-t"><small>从 ${esc(cityName(card.o))} 出发</small><b>${esc(cityName(card.d))}</b>${lines}</div></div>`;
 }
 
 function favoriteButton(id, on, withLabel) {
@@ -3168,7 +3886,7 @@ function cardHtml(card) {
   return `<article class="card" data-card="${esc(id)}" tabindex="0">
     ${coverHtml(card, COVER_RATIOS[hashStr(id) % COVER_RATIOS.length])}
     <div class="ctitle">${esc(postTitle(card))}</div>
-    <div class="cfoot">${mascotHead(18, '')}<span class="who">${esc(persona().name)} · ${ago(card.scanned)}</span>${favoriteButton(id, state.favorites.has(favoriteKey(card)))}</div></article>`;
+    <div class="cfoot">${mascotHead(18, '')}<span class="who">${esc(persona().name)} · ${ago(card.scanned)}</span><button class="vbtn" data-vcard="${esc(id)}">核实</button>${favoriteButton(id, state.favorites.has(favoriteKey(card)))}</div></article>`;
 }
 
 function feedGreeting(cards) {
@@ -3179,9 +3897,7 @@ function feedGreeting(cards) {
   if (trusted) return `有 ${trusted} 档已核实的同款票，先看它们！`;
   if (fresh) return `新放出 ${fresh} 档，手快有手慢无～`;
   if (!cards.length) return '';
-  return prefs.mode === 'semi'
-    ? '看中哪张就点开「核实」一下哦～'
-    : '这些都是日历线索，切到半自动就能核实～';
+  return '看中哪张就点「核实」，打开 aa.com 搜索页确认一下哦～';
 }
 
 function channelList(base) {
@@ -3204,17 +3920,10 @@ function channelList(base) {
 }
 
 function feedBarHtml(channels) {
-  const sortOptions = [
-    ['rec', '推荐'],
-    ['cash', '税费最低'],
-    ['days', '有位最多'],
-    ['soon', '最早出发'],
-  ]
-    .map(
-      ([key, label]) =>
-        `<option value="${key}" ${prefs.sort === key ? 'selected' : ''}>${label}</option>`,
-    )
-    .join('');
+  const sortOptions = SORT_OPTIONS.map(
+    ([key, label]) =>
+      `<option value="${key}" ${prefs.sort === key ? 'selected' : ''}>${label}</option>`,
+  ).join('');
   const routeChip = state.routeFilter
     ? `<span class="filterchip">${esc(cityName(state.routeFilter.o))} → ${esc(cityName(state.routeFilter.d))}<button data-act="clearRoute">×</button></span>`
     : '';
@@ -3228,13 +3937,55 @@ function feedBarHtml(channels) {
         `<button data-ch="${key}" class="${state.channel === key ? 'on' : ''}">${esc(label)}<span class="n">${count}</span></button>`,
     )
     .join('');
-  return `<div class="feedbar"><div class="channels">${tabs}</div>
+  const current = combo();
+  const cabinTabs = ['Y', 'J']
+    .map(
+      cabin =>
+        `<button class="cchip${current.cabin === cabin ? ' on' : ''}" data-show-cab="${cabin}">${CABINS[cabin].label}</button>`,
+    )
+    .join('');
+  return `<div class="cabrow"><span>舱位</span>${cabinTabs}</div><div class="feedbar"><div class="channels">${tabs}</div>
     <div class="tools">${routeChip}<select class="sort">${sortOptions}</select>${excludedToggle}
       <button class="btn small" data-act="csv">导出 CSV</button></div></div>`;
 }
 
+// 固定里程：只看某一个里程档，和频道、国家对一起生效，会记住
+function milesChipsHtml(cards) {
+  const counts = new Map();
+  for (const card of cards) counts.set(card.miles, (counts.get(card.miles) || 0) + 1);
+  if (prefs.miles && !counts.has(prefs.miles)) counts.set(prefs.miles, 0);
+  if (counts.size < 2 && !prefs.miles) return '';
+  const chips = Array.from(counts)
+    .sort((a, b) => a[0] - b[0])
+    .map(
+      ([miles, count]) =>
+        `<button class="mchip${prefs.miles === miles ? ' on' : ''}" data-miles="${miles}">${shortMiles(miles)}<span class="n">${count}</span></button>`,
+    )
+    .join('');
+  return `<div class="milesrow"><span class="ml">里程</span><button class="mchip${prefs.miles ? '' : ' on'}" data-miles="0">全部<span class="n">${cards.length}</span></button>${chips}</div>`;
+}
+
+// 有票但被频道/里程/航线筛选藏起来了
+function hiddenByFilterHtml(hidden) {
+  return `<div class="empty filtered" style="flex:1">${mascotBody(96, 'surprised')}<b>有 ${hidden} 档票被筛选藏起来了</b>现在的频道或里程筛选下没有票
+    <button class="btn primary" data-act="clearFilters" style="margin-top:10px">清除筛选</button></div>`;
+}
+
 function emptyFeedHtml() {
   const noData = !state.cards.length;
+  const last = lastScan();
+  // 这次扫描什么也没扫到：空的瀑布流放大显示结果卡，带一键重扫
+  if (
+    noData &&
+    prefs.view !== 'fav' &&
+    last &&
+    last.params &&
+    scanKind(last) !== 'found' &&
+    +last.params.pax === combo().pax &&
+    last.params.cabins.includes(combo().cabin)
+  ) {
+    return `<div class="empty-result">${resultCardHtml(last, 'feed')}</div>`;
+  }
   const title =
     prefs.view === 'fav'
       ? '还没有收藏哦'
@@ -3253,14 +4004,16 @@ function emptyFeedHtml() {
 function renderFeed(reset) {
   if (!state.fullOpen || prefs.view === 'matrix') return;
   const view = $('.view');
-  const { cards, base } = filterCards();
+  const { cards, base, beforeMiles, pairs } = filterCards();
   state.filtered = cards;
   const channels = channelList(base);
   if (!channels.some(channel => channel[0] === state.channel)) state.channel = 'all';
   if (reset || !$('.feed', view)) {
     const greeting = feedGreeting(cards);
     view.innerHTML =
+      compareHtml(pairs) +
       feedBarHtml(channels) +
+      milesChipsHtml(beforeMiles) +
       (greeting
         ? `<div class="saybar">${mascotHead(28, 'happy')}<span class="txt">${esc(greeting)}</span></div>`
         : '') +
@@ -3273,7 +4026,14 @@ function renderFeed(reset) {
     return;
   }
   if (!cards.length) {
-    grid.innerHTML = emptyFeedHtml();
+    const hidden =
+      prefs.view === 'fav'
+        ? state.cards.filter(card => state.favorites.has(favoriteKey(card))).length
+        : pairs.length
+          ? base.length
+          : state.cards.length;
+    const filtered = state.channel !== 'all' || state.routeFilter || prefs.miles || hidden;
+    grid.innerHTML = hidden && filtered ? hiddenByFilterHtml(hidden) : emptyFeedHtml();
     $('.more', view).textContent = '';
     return;
   }
@@ -3346,7 +4106,16 @@ function appendCards(count) {
     remaining > 0 ? '往下滑还有更多～' : state.filtered.length > 8 ? `到底啦 ${KAOMOJI[2]}` : '';
 }
 
+// 手机上滑动瀑布流时，面板里的看板娘缩到屏幕边上，停下来再回来，不挡卡片
+function tuckDock() {
+  if (!isPhone() || !state.fullOpen) return;
+  $('.ar').classList.add('tucked');
+  clearTimeout(state.tuckTimer);
+  state.tuckTimer = setTimeout(() => $('.ar').classList.remove('tucked'), 900);
+}
+
 function onFeedScroll() {
+  tuckDock();
   const view = $('.view');
   const nearBottom = view.scrollTop + view.clientHeight > view.scrollHeight - 800;
   if (prefs.view !== 'matrix' && state.shown < state.filtered.length && nearBottom) appendCards(18);
@@ -3432,8 +4201,8 @@ function renderMatrix() {
     view.innerHTML = `<div class="empty">${mascotBody(110)}<b>还没有数据</b>先选好航线开始扫描吧</div>`;
     return;
   }
-  const origins = prefs.sel.A;
-  const destinations = prefs.sel.B;
+  const origins = expandCodes(prefs.sel.A);
+  const destinations = expandCodes(prefs.sel.B);
   const directions = prefs.sel.dir === 'both' ? ['out', 'back'] : [prefs.sel.dir];
   const routeOf = (a, b, direction) =>
     state.routes.get(direction === 'out' ? a + '|' + b : b + '|' + a);
@@ -3594,12 +4363,10 @@ function otherTiersHtml(tiers) {
 }
 
 function drawerBodyHtml(route, tier, card) {
-  const semi = prefs.mode === 'semi';
-  const verifyButton =
-    semi && tier.rep
-      ? `<button class="btn primary" data-verify="${tier.rep}">${tier.status === 'lead' ? '核实这一档' : '再核实一天'}（${tier.rep.slice(5)}）</button>`
-      : '';
-  const about = aboutText();
+  const verifyButton = tier.rep
+    ? `<button class="btn primary" data-verify="${tier.rep}">${tier.status === 'lead' ? '核实这一档' : '再核实一天'}（${tier.rep.slice(5)}）</button>`
+    : '';
+  const newDays = route.dates.filter(day => day.tier === tier.id && day.new).length;
   const meta = `${route.o} → ${route.d} · ${combo().pax} 人 · ${CABINS[combo().cabin].label} · 这一档 ${tier.days} 天（${tier.first.slice(5)} ~ ${tier.last.slice(5)}）· 日历${ago(route.scanned)}查询`;
   return `<div class="dbody">
     <div class="dprice"><b>${fmtInt(tier.miles)}</b><span class="muted">里程/人</span><span style="color:var(--ink-2)">+ ${money(tier.cash)}</span></div>
@@ -3608,12 +4375,12 @@ function drawerBodyHtml(route, tier, card) {
     ${route.twin ? `<p class="note">⚠ 这条航线的日历和 ${esc(cityName(route.twin))} ${route.twin} 每天都一样，实际机场以核实为准。</p>` : ''}
     ${tierFactsHtml(tier.ref)}
     <div class="actions">${verifyButton}${favoriteButton(cardId(card), state.favorites.has(favoriteKey(card)), true)}</div>
-    ${semi ? '' : '<p class="small muted">切到「半自动」就可以核实这一档。</p>'}
     <h3>这一档的日期 <span class="sub">点日期看详情</span></h3>
+    ${newDays ? `<p class="newlegend"><i></i>粉色框 = 新放出（上次扫描以后才出现），这一档有 ${newDays} 天</p>` : ''}
     <div class="months">${monthsHtml(route.dates, tier.id)}</div>
     <div class="daybox" hidden></div>
     ${otherTiersHtml(route.tiers.filter(t => t.id !== tier.id))}
-    <div class="fine">${mascotHead(26, '')}<span>合作航司的票偶尔会在付款或出票时才被拒，这一点下单前没法检测。核实能确认的是：搜索页上真的有这一天、机场对、舱位对、座位够。${about ? '<br>' + esc(about) : ''}</span></div>
+    <div class="fine">${mascotHead(26, '')}<span>合作航司的票偶尔会在付款或出票时才被拒，这一点下单前没法检测。核实能确认的是：搜索页上真的有这一天、机场对、舱位对、座位够。</span></div>
   </div>`;
 }
 
@@ -3628,7 +4395,9 @@ function renderDrawer(fromCard) {
     $('.scrim-all').hidden = true;
     return;
   }
-  const card = Object.assign({}, tier, { o: route.o, d: route.d });
+  const card =
+    state.cards.find(x => x.o === route.o && x.d === route.d && x.id === tier.id) ||
+    Object.assign({}, tier, { o: route.o, d: route.d });
   cancelAnimations(drawer, true);
   drawer.innerHTML = `<button class="x" data-act="closeDrawer">×</button>${coverHtml(card, null, true)}${drawerBodyHtml(route, tier, card)}`;
   drawer.classList.toggle('flip', !!fromCard);
@@ -3702,10 +4471,7 @@ function showDay(date) {
     facts += `<dt>上次核实</dt><dd>${esc(check.note || check.status)}，${ago(check.checked_at)}</dd>`;
   }
   const note = check && check.note && check.flights ? ' ' + esc(check.note) : '';
-  const verifyButton =
-    prefs.mode === 'semi'
-      ? `<button class="btn primary small" data-verify="${day.date}">核实这一天</button>`
-      : '';
+  const verifyButton = `<button class="btn primary small" data-verify="${day.date}">核实这一天</button>`;
   const box = $('.daybox');
   box.innerHTML = `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${fmtDate(day.date)}</b>${badge(day.status)}</div>
     <p>${DATE_EXPLAIN[day.status]}${note}</p><dl class="facts">${facts}</dl>
@@ -3716,11 +4482,12 @@ function showDay(date) {
 // 预览版会替换这两个动作
 let openExternal = url => window.open(url, '_blank');
 
-let verify = date => {
+// 一次点击只打开一个搜索页；人机验证由用户自己完成
+let verify = (date, route = state.card) => {
   const current = combo();
   const item = {
-    o: state.card.o,
-    d: state.card.d,
+    o: route.o,
+    d: route.d,
     cabin: current.cabin,
     pax: current.pax,
     date,
@@ -3740,6 +4507,12 @@ let verify = date => {
 function onOptionClick(button) {
   const option = button.parentElement.dataset.opt;
   const value = button.dataset.v;
+  if (option === 'mascotSize') {
+    prefs.mascotSize = value;
+    savePrefs();
+    renderOptions();
+    return placeDock();
+  }
   if (option === 'cabins') {
     const cabins = new Set(prefs.sel.cabins);
     if (cabins.has(value)) cabins.delete(value);
@@ -3765,24 +4538,75 @@ function toggleCodes(side, codes) {
 }
 
 const ACTIONS = {
+  closeBubble() {
+    clearTimeout(state.bubbleTimer);
+    $('.bubble').hidden = true;
+    setMood('', 0);
+  },
+  dialogClose() {
+    const last = lastScan();
+    closeScanDialog();
+    if (last && $('.bubble').hidden) talkScanResult(last);
+  },
+  seeResults() {
+    closeScanDialog();
+    showResults();
+  },
+  dismissResult() {
+    state.resultCard = false;
+    updateLastScan({ seen: true });
+    if (state.miniOpen) renderMini();
+    renderStatus();
+    renderDock();
+  },
+  scanMore() {
+    const last = lastScan();
+    rescan({ months: Math.min(12, +((last && last.params) || prefs.sel).months + 3) });
+  },
+  scanOnePax: () => rescan({ pax: 1 }),
+  retry() {
+    const last = lastScan();
+    rescan(last && last.outcome === 'blocked' ? { speed: 'gentle' } : {});
+  },
+  changeSetup() {
+    closeScanDialog();
+    updateLastScan({ seen: true });
+    if (!state.fullOpen) return openFull(true);
+    state.setupOpen = true;
+    $('.setup').classList.add('open');
+    $('.ar').classList.add('setup-open');
+  },
+  clearFilters() {
+    state.channel = 'all';
+    state.routeFilter = null;
+    prefs.miles = null;
+    savePrefs();
+    if (!filterCards().cards.length) state.showExcluded = true;
+    renderFeed(true);
+  },
   mute() {
     sessionStorage.setItem('ar-mute', '1');
     $('.bubble').hidden = true;
     renderDock();
   },
-  closeMini: () => closeMini(),
+  closeMini() {
+    state.resultCard = false;
+    closeMini();
+  },
   openFull: () => openFull(false),
   openSetup: () => openFull(true),
   closeFull: () => closeFull(),
   toggleSetup() {
     state.setupOpen = !state.setupOpen;
     $('.setup').classList.toggle('open', state.setupOpen);
+    $('.ar').classList.toggle('setup-open', state.setupOpen);
   },
   quickScan: () => startScan(prefs.sel),
   scan() {
     if (isPhone()) {
       state.setupOpen = false;
       $('.setup').classList.remove('open');
+      $('.ar').classList.remove('setup-open');
     }
     startScan(prefs.sel);
   },
@@ -3813,14 +4637,62 @@ function onRootClick(event) {
   const suggestion = event.target.closest('.sug[data-i]');
   if (suggestion) return pickSuggestion(suggestion.dataset.side, +suggestion.dataset.i);
   if (event.target.classList.contains('scrim-all')) return closeDrawer();
-  const el = event.target.closest('button, [data-card], td[data-o]');
+  const el = event.target.closest('button, [data-card], [data-pair], td[data-o]');
   if (!el) return;
   const data = el.dataset;
   if (data.fav) {
     event.stopPropagation();
     return toggleFavorite(data.fav, el);
   }
+  if (data.vcard) {
+    const card = state.cards.find(x => cardId(x) === data.vcard);
+    if (card) verify(card.rep || card.facts.nearest, card);
+    return;
+  }
+  if (data.pair) {
+    state.pair = +data.pair;
+    state.routeFilter = null;
+    return renderFeed(true);
+  }
+  if (data.route) {
+    const [o, d] = data.route.split('|');
+    event.stopPropagation();
+    state.routeFilter = { o, d };
+    state.channel = 'all';
+    return renderFeed(true);
+  }
+  if (data.cab) {
+    const cabins = new Set(prefs.sel.cabins);
+    if (cabins.has(data.cab)) cabins.delete(data.cab);
+    else cabins.add(data.cab);
+    if (!cabins.size) return toast('至少选一个舱位哦', 2000, 'worry');
+    prefs.sel.cabins = ['Y', 'J'].filter(cabin => cabins.has(cabin));
+    savePrefs();
+    if (state.miniOpen) renderMini();
+    if (state.fullOpen) {
+      renderOptions();
+      renderEstimate();
+    }
+    return;
+  }
+  if (data.showCab) {
+    prefs.combo = { pax: combo().pax, cabin: data.showCab };
+    savePrefs();
+    closeDrawer();
+    refreshData();
+    renderCombos();
+    return;
+  }
+  if (data.miles != null) {
+    prefs.miles = +data.miles || null;
+    savePrefs();
+    return renderFeed(true);
+  }
   if (data.card) return openCardDrawer(data.card, el);
+  if (el.matches('[data-pair]') && el.tagName !== 'BUTTON') {
+    state.pair = +data.pair;
+    return renderFeed(true);
+  }
   if (el.matches('td[data-o]')) {
     state.routeFilter = { o: data.o, d: data.d };
     state.channel = 'all';
@@ -3834,13 +4706,6 @@ function onRootClick(event) {
     savePrefs();
     updateTabs();
     return prefs.view === 'matrix' ? renderMatrix() : renderFeed(true);
-  }
-  if (data.mode) {
-    prefs.mode = data.mode;
-    savePrefs();
-    renderMode();
-    if (state.card) renderDrawer();
-    return renderFeed(true);
   }
   if (data.ch) {
     state.channel = data.ch;
@@ -3924,6 +4789,20 @@ function onSearchKey(event, input) {
 
 function onRootKey(event) {
   const el = event.target;
+  if (state.dialogOpen) {
+    // 弹窗只能点按钮关：Esc 不关，Tab 在按钮之间循环
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+    } else if (event.key === 'Tab') {
+      const buttons = $$('.dlg .btn');
+      const index = buttons.indexOf(state.root.activeElement);
+      const next = (index + (event.shiftKey ? -1 : 1) + buttons.length) % buttons.length;
+      if (buttons[next]) buttons[next].focus();
+      event.preventDefault();
+    }
+    return;
+  }
   if (el.matches && el.matches('.search input')) return onSearchKey(event, el);
   if (event.key === 'Escape') {
     if (state.card) closeDrawer();
@@ -4307,7 +5186,7 @@ async function start() {
 
 const DATA = {
   // 构建信息
-  build: {"version":"1.0.0","target":"lite","label":"手机版"},
+  build: {"version":"1.0.1","target":"lite","label":"手机版"},
   // 人设
   persona: {"key":"miku","name":"Miku","about":"看板娘：Miku（初音未来，占位）"},
   // 机场字典：三字码 → [显示名, 城市, 中文机场名, 英文城市, 国家, 地区, 同城键, 大机场]
@@ -6269,12 +7148,9 @@ h3 .sub {
   .tabs button.on::after {
     bottom: 2px;
   }
-  .top .seg.mode {
-    order: 5;
-  }
   .top .combo {
     order: 6;
-    flex: 1;
+    flex: 1 1 100%;
     min-width: 0;
   }
   .feedbar {
@@ -6356,6 +7232,671 @@ h3 .sub {
 @media (max-width: 340px) {
   .ar .drawer .months {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ----- 扫描状态：看板娘旁的进度环、角标、顶部状态条、结果卡 ----- */
+.dock .ring {
+  position: absolute;
+  top: 6px;
+  left: -18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dock.side-l .ring {
+  left: auto;
+  right: -18px;
+}
+.dock .ring svg {
+  position: absolute;
+  inset: 3px;
+  transform: rotate(-90deg);
+}
+.dock .ring circle {
+  fill: none;
+  stroke-width: 3.5;
+}
+.dock .ring .trk {
+  stroke: var(--wash-2);
+}
+.dock .ring .val {
+  stroke: var(--primary);
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.4s;
+}
+.dock .ring b {
+  position: relative;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--primary-text);
+  font-variant-numeric: tabular-nums;
+}
+.dock .badge-n {
+  top: 4px;
+  left: -6px;
+  min-width: 24px;
+  height: 24px;
+  line-height: 24px;
+  border-radius: 12px;
+  padding: 0 7px;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(233, 90, 140, 0.45);
+}
+.dock.side-l .badge-n {
+  left: auto;
+  right: -6px;
+}
+.dock .badge-n.zero {
+  background: #8a909a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+.dock .badge-n.alert {
+  background: var(--bad);
+}
+.dock.glide {
+  transition:
+    left 0.55s cubic-bezier(0.2, 0.8, 0.3, 1),
+    top 0.55s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.scanstrip {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  box-shadow:
+    inset 0 0 0 1.5px var(--primary-soft),
+    var(--shadow);
+}
+.full .status-slot .scanstrip,
+.full .status-slot .rcard {
+  margin: 10px 16px 0;
+}
+.ss-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  color: var(--ink);
+}
+.ss-row > b {
+  font-size: 15px;
+}
+.ss-found {
+  color: var(--ink-2);
+  flex: 1;
+}
+.ss-found b {
+  color: var(--primary-text);
+  font-size: 15px;
+}
+.ss-found em {
+  font-style: normal;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 6px;
+  padding: 0 6px;
+  margin-left: 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.ss-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: ar-pulse 1.2s ease-in-out infinite;
+}
+@keyframes ar-pulse {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.75);
+  }
+}
+.ss-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--wash-2);
+  overflow: hidden;
+  margin: 8px 0 4px;
+}
+.ss-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--primary), #ffa3c4, var(--primary));
+  background-size: 200% 100%;
+  animation: ar-flow 1.6s linear infinite;
+  transition: width 0.4s;
+}
+@keyframes ar-flow {
+  to {
+    background-position: -200% 0;
+  }
+}
+.ss-sub {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.rcard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  box-shadow:
+    inset 0 0 0 2px var(--primary-soft),
+    var(--shadow);
+}
+.rcard .rc-t {
+  flex: 1;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.rcard .rc-t b {
+  font-size: 16px;
+  color: var(--ink);
+}
+.rcard.found .rc-t b {
+  color: var(--primary-text);
+}
+.rc-note {
+  font-weight: 700;
+  color: var(--primary-text);
+  font-size: 13px;
+}
+.rc-sum {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.rc-acts {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.rcard.big {
+  flex-direction: column;
+  text-align: center;
+  padding: 18px 16px;
+}
+.rcard.big .rc-t {
+  min-width: 0;
+  align-items: center;
+}
+.rcard.big .rc-t b {
+  font-size: 18px;
+}
+.rcard.big .rc-acts {
+  justify-content: center;
+}
+.rcard.blocked .rc-t b,
+.rcard.failed .rc-t b {
+  color: var(--bad);
+}
+.empty-result {
+  max-width: 460px;
+  margin: 24px auto;
+  width: 100%;
+}
+
+/* ----- 结束弹窗：只有按钮能关 ----- */
+.dlg-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483012;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.dlg-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 16, 40, 0.45);
+  animation: ar-fade 0.2s ease-out;
+}
+@keyframes ar-fade {
+  from {
+    opacity: 0;
+  }
+}
+.dlg {
+  position: relative;
+  width: min(420px, 100%);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 20px;
+  padding: 22px 22px 18px;
+  text-align: center;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.3);
+  animation: ar-pop 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.15);
+}
+.dlg-face .ar-av,
+.dlg-face svg {
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px var(--primary-soft);
+}
+.dlg h2 {
+  font-size: 20px;
+  line-height: 1.35;
+  margin: 12px 0 4px;
+}
+.dlg.found h2 {
+  color: var(--primary-text);
+}
+.dlg.blocked h2,
+.dlg.failed h2 {
+  color: var(--bad);
+}
+.dlg-note {
+  margin: 0 0 4px;
+  font-weight: 700;
+  color: var(--primary-text);
+}
+.dlg-sum {
+  margin: 4px 0 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.dlg-btns {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.dlg-btns .btn {
+  min-height: 44px;
+  padding: 8px 18px;
+  font-size: 15px;
+}
+
+/* ----- 封面：大字信息、NEW 丝带、季节动效 ----- */
+.cover .scrim {
+  height: 62%;
+  background: linear-gradient(
+    to top,
+    rgba(20, 16, 40, 0.68),
+    rgba(20, 16, 40, 0.3) 55%,
+    rgba(20, 16, 40, 0)
+  );
+}
+.cover .cv-t .cv-k {
+  display: block;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.3;
+  margin-top: 3px;
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.45),
+    0 0 12px rgba(0, 0, 0, 0.3);
+}
+.cover .cv-t .cv-s {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.95;
+}
+.dcover .cv-t .cv-k {
+  font-size: 20px;
+}
+.ribbon {
+  position: absolute;
+  top: 40px;
+  left: -6px;
+  z-index: 2;
+  background: linear-gradient(90deg, #ff3f84, var(--primary));
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  padding: 4px 14px 4px 12px;
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 3px 10px rgba(233, 63, 132, 0.45);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 7px) 50%, 100% 100%, 0 100%);
+  white-space: nowrap;
+}
+.ribbon::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  border-top: 6px solid #a8285a;
+  border-left: 6px solid transparent;
+}
+.cover .ribbon {
+  clip-path: none;
+}
+.ribbon.small {
+  top: 6px;
+  left: auto;
+  right: -6px;
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 4px 0 0 4px;
+  clip-path: none;
+}
+.ribbon.small::after {
+  left: auto;
+  right: 0;
+  border-left: 0;
+  border-right: 6px solid transparent;
+}
+.mcard {
+  position: relative;
+}
+.mcard.has-new .mt .r {
+  padding-right: 112px;
+}
+.mcard .mt .k {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+.art .fx {
+  animation: ar-fall 7s ease-in-out infinite alternate;
+  animation-play-state: paused;
+}
+@keyframes ar-fall {
+  from {
+    transform: translate(-4px, -8px);
+  }
+  to {
+    transform: translate(4px, 8px);
+  }
+}
+.in-view .art .fx,
+.dcover .art .fx,
+.thumb .art .fx {
+  animation-play-state: running;
+}
+.vbtn {
+  border: 0;
+  background: var(--primary-soft);
+  color: var(--primary-text);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 2px 10px;
+  cursor: pointer;
+}
+.vbtn:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* ----- 固定里程、筛选提示 ----- */
+.milesrow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  overflow-x: auto;
+  padding: 2px 0 10px;
+  scrollbar-width: none;
+}
+.milesrow .ml {
+  font-size: 12px;
+  color: var(--muted);
+  flex: none;
+}
+.mchip {
+  flex: none;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-2);
+  border-radius: 999px;
+  padding: 3px 11px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mchip .n {
+  font-weight: 400;
+  color: var(--muted);
+  margin-left: 4px;
+  font-size: 11px;
+}
+.mchip.on {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.mchip.on .n {
+  color: rgba(255, 255, 255, 0.85);
+}
+.empty.filtered b {
+  font-weight: 700;
+}
+
+/* ----- 国家对比卡 ----- */
+.compare {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.cmp {
+  background: var(--surface);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  outline: 2px solid transparent;
+  transition: outline-color 0.2s;
+}
+.cmp.on {
+  outline-color: var(--primary);
+}
+.cmp-head {
+  position: relative;
+  height: 124px;
+  overflow: hidden;
+}
+.cmp-art svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.cmp-head::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(20, 16, 40, 0.6), rgba(20, 16, 40, 0.05));
+}
+.cmp-head h3 {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 8px;
+  z-index: 1;
+  margin: 0;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+}
+.cmp-dirs {
+  display: flex;
+}
+.cmp-half {
+  flex: 1;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+.cmp-half + .cmp-half {
+  border-left: 1px dashed var(--line);
+}
+.cmp-half small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.cmp-days {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--ink);
+}
+.cmp-days.none {
+  font-size: 15px;
+  color: var(--muted);
+}
+.cmp-price {
+  font-weight: 700;
+  color: var(--primary-text);
+}
+.cmp-new {
+  align-self: flex-start;
+  margin-top: 3px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 800;
+  font-size: 11px;
+  border-radius: 4px;
+  padding: 0 6px;
+}
+.cmp-routes {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 0 14px 12px;
+}
+.rchip {
+  border: 0;
+  background: var(--wash);
+  color: var(--ink-2);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.rchip:hover {
+  background: var(--primary-soft);
+  color: var(--primary-text);
+}
+
+/* ----- 选国家、查询次数 ----- */
+.sug.country b {
+  color: var(--primary-text);
+}
+.pchip.country {
+  background: var(--primary);
+  color: #fff;
+}
+.pchip.country small,
+.pchip.country button {
+  color: rgba(255, 255, 255, 0.9);
+}
+.pchip.country i {
+  font-style: normal;
+  margin-right: 3px;
+}
+.estimate {
+  background: var(--wash);
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.estimate .est-main {
+  font-size: 14px;
+  color: var(--ink);
+}
+.estimate .est-main b {
+  font-size: 18px;
+  color: var(--primary-text);
+}
+.estimate .est-sub {
+  font-size: 12px;
+  color: var(--muted);
+}
+.estimate .est-tip {
+  font-size: 12.5px;
+  color: var(--warn);
+  font-weight: 600;
+}
+.estimate.many {
+  box-shadow: inset 0 0 0 1.5px var(--warn);
+}
+
+/* ----- 抽屉日历：新放出的日期 ----- */
+.day.has.new {
+  box-shadow:
+    inset 0 0 0 2px var(--primary),
+    inset 0 0 0 3.5px #fff;
+}
+.day.new::after {
+  width: 8px;
+  height: 8px;
+  right: -2px;
+  top: -2px;
+  box-shadow: 0 0 0 1.5px var(--surface);
+}
+.newlegend {
+  font-size: 12.5px;
+  color: var(--primary-text);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.newlegend i {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  box-shadow:
+    inset 0 0 0 2px var(--primary),
+    inset 0 0 0 3.5px #fff;
+  background: var(--d-lead);
+}
+
+/* ----- 面板打开时看板娘站在面板右下角，照常说话 ----- */
+.ar.panel-open .dock,
+.ar.panel-open .bubble {
+  z-index: 2147483004;
+}
+.ar.panel-open .full .main .view {
+  padding-right: calc(var(--dock-w, 220px) + 28px);
+}
+@media (max-width: 720px) {
+  .ar.panel-open .full .main .view {
+    padding-right: 0;
+    padding-bottom: calc(var(--dock-h, 200px) + 16px);
+  }
+  /* 手机上打开扫描设置时让开，别挡住「开始扫描」 */
+  .ar.panel-open.setup-open .dock,
+  .ar.panel-open.setup-open .bubble {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .compare {
+    grid-template-columns: 1fr;
+  }
+  .cover .cv-t .cv-k {
+    font-size: 14.5px;
+  }
+  .ribbon {
+    font-size: 11.5px;
+    top: 36px;
   }
 }
 
@@ -6445,6 +7986,70 @@ h3 .sub {
 @media (hover: none) {
   .in-view .art .pl {
     transform: translate(var(--dx), var(--dy));
+  }
+}
+
+/* ----- 舱位：小窗快捷开关、结果里的切换、卡片上的标签 ----- */
+.mini-cab,
+.cabrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+.cchip {
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-2);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cchip.on {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary-text);
+}
+.cab {
+  font-style: normal;
+  font-weight: 800;
+  font-size: 0.85em;
+  margin-right: 4px;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: var(--primary-soft);
+  color: var(--primary-text);
+}
+.cover .price .cab {
+  background: var(--primary);
+  color: #fff;
+}
+@media (pointer: coarse) {
+  .cchip,
+  .mchip,
+  .rchip,
+  .vbtn {
+    min-height: 44px;
+  }
+}
+
+/* 手机上滑动时看板娘缩到右边缘 */
+@media (max-width: 720px) {
+  .ar.panel-open .dock {
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+  .ar.panel-open.tucked .dock {
+    transform: translateX(86%);
+    pointer-events: none;
+  }
+  .ar.panel-open.tucked .bubble {
+    opacity: 0;
+    pointer-events: none;
   }
 }
 `;
