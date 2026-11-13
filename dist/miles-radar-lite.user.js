@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         里程票雷达 手机版
 // @namespace    https://github.com/liangju1/miles-radar
-// @version      1.0.1
+// @version      1.0.2
 // @description  在 aa.com 上批量查 AAdvantage 里程票空位，按“里程+税费”分档，小红书式卡片浏览，下单前一键核实。
 // @author       里程票雷达
 // @homepageURL  https://github.com/liangju1/miles-radar
@@ -16,7 +16,7 @@
 // ==/UserScript==
 
 /*
- * 里程票雷达 v1.0.1（手机版）
+ * 里程票雷达 v1.0.2（手机版）
  * 在 aa.com 上批量查 AAdvantage 里程票空位，按“里程+税费”分档，下单前一键核实。
  * 看板娘：Miku（初音未来，占位）
  * 占位形象：初音未来 © Crypton Future Media, INC. 2007 · Art by KEI · CC BY-NC 3.0
@@ -339,7 +339,7 @@ function judge(slices, o, d, cabin, pax) {
       const usable =
         wanted.has(price.productType) &&
         typeof price.perPassengerAwardPoints === 'number' &&
-        price.productAvailable !== false;
+        offerAvailable(price);
       if (usable) offers.push({ slice, price });
     }
   }
@@ -349,6 +349,80 @@ function judge(slices, o, d, cabin, pax) {
       : { status: 'none', note: '这一天实际已经没有该舱位' };
   }
   return describeOffer(bestOffer(offers, wanted, pax), wanted);
+}
+
+// 价格条目里任何「不可订」的标记都算没位：available/productAvailable/isAvailable/bookable 为 false，
+// soldOut/waitlist/disabled 为 true，状态字段写着售罄/候补/不可用，或者剩余座位是 0
+const UNAVAILABLE_TRUE = /^(is)?(sold_?out|wait_?list(ed)?|disabled|unavailable|closed)$/i;
+const AVAILABLE_FALSE = /^(is)?(available|product_?available|bookable|selectable|enabled|valid)$/i;
+const BAD_STATUS = /sold|wait|unavail|closed|disabled|not_?avail|inactive/i;
+
+function offerAvailable(price, depth = 0) {
+  if (!price || typeof price !== 'object' || depth > 3) return true;
+  for (const [key, value] of Object.entries(price)) {
+    if (typeof value === 'boolean') {
+      if (value === false && AVAILABLE_FALSE.test(key)) return false;
+      if (value === true && UNAVAILABLE_TRUE.test(key)) return false;
+    } else if (typeof value === 'string' && /status|availability/i.test(key)) {
+      if (BAD_STATUS.test(value)) return false;
+    } else if (key === 'seatsRemaining' && value === 0) {
+      return false;
+    } else if (value && typeof value === 'object' && !/segments|legs|slices/i.test(key)) {
+      if (!offerAvailable(value, depth + 1)) return false;
+    }
+  }
+  return true;
+}
+
+// 结果页上真正显示出来的里程数（85,000 / 85K / 85k），用来确认 JSON 里的价格页面上真的能选
+function pageMiles(text) {
+  const found = new Set();
+  const pattern = /(^|[^$\d.,])(\d{1,3}(?:,\d{3})+|\d{1,3}(?:\.\d)?\s?[Kk])(?![\d,])/g;
+  let match;
+  while ((match = pattern.exec(text || ''))) {
+    const raw = match[2].replace(/\s/g, '');
+    const miles = /k$/i.test(raw) ? Math.round(parseFloat(raw) * 1000) : +raw.replace(/,/g, '');
+    if (miles >= 5000 && miles <= 1000000) found.add(miles);
+  }
+  return Array.from(found).sort((a, b) => a - b);
+}
+
+// JSON 说有位还不够：页面上必须看得到同样的里程，否则「价格对不上」；读不到页面就「未能确认」
+function confirmOnPage(result, pageText) {
+  if (result.status !== 'ok') return result;
+  const shown = pageMiles(pageText);
+  if (!shown.length) {
+    return Object.assign({}, result, {
+      status: 'unsure',
+      note: '页面上没读到里程数，没法确认这个价格真的能选',
+      pageMiles: [],
+    });
+  }
+  if (shown.includes(result.miles)) return Object.assign({}, result, { pageMiles: shown });
+  const above = shown.filter(miles => miles > result.miles);
+  const nearest = above.length ? above[0] : shown[shown.length - 1];
+  return Object.assign({}, result, {
+    status: 'mismatch',
+    note: `页面显示 ${fmtInt(nearest)}，没有 ${fmtInt(result.miles)} 这个价`,
+    pageMiles: shown,
+  });
+}
+
+// 证据：判定用到的那一段 JSON、选中的价格条目、页面上读到的里程，存在核实记录里供排查
+function compactSlice(slice) {
+  const segments = slice.segments || [];
+  return {
+    from: airportCode(slice.origin) || airportCode(segments[0] && segments[0].origin),
+    flights: segments.map(s => (s.flight ? s.flight.carrierCode + s.flight.flightNumber : '?')),
+    pricing: (slice.pricingDetail || []).slice(0, 8).map(price => {
+      const brief = {};
+      for (const [key, value] of Object.entries(price)) {
+        if (value == null || typeof value !== 'object') brief[key] = value;
+        else if (key === 'perPassengerSaleTotal') brief[key] = value.amount;
+      }
+      return brief;
+    }),
+  };
 }
 
 // 优先：每段都是所选舱位 → 座位够 → 里程少 → 段数少
@@ -398,6 +472,7 @@ function describeOffer(offer, wanted) {
   const unique = list => Array.from(new Set(list.filter(Boolean)));
   return {
     status,
+    evidence: { slice: compactSlice(slice) },
     miles: Math.round(price.perPassengerAwardPoints),
     cash: Math.round(Number((price.perPassengerSaleTotal || {}).amount || 0) * 100) / 100,
     carriers: unique(segments.map(s => s.flight && s.flight.carrierCode)).join('/'),
@@ -431,6 +506,10 @@ function verdictLine(result, pax) {
       return '✕ 机场被换了，不是你要的那个';
     case 'none':
       return '✕ 这天其实已经没位了';
+    case 'mismatch':
+      return '✕ 价格对不上：' + (result.note || '页面上没有这个价');
+    case 'unsure':
+      return '? 未能确认：' + (result.note || '页面上没读到价格');
     default:
       return '没读到航班数据……';
   }
@@ -444,14 +523,31 @@ const RANK = {
   lead: 2,
   seats: 3,
   mixed: 4,
+  unsure: 2.5,
   gone: 5,
+  mismatch: 5.5,
   airport: 6,
   excluded: 7,
 };
+// 这些状态的日期不算「有位」：上卷到档位时要排除
+const FAILED_DATES = new Set(['gone', 'airport', 'mixed', 'seats', 'mismatch']);
 // 机场不符、混舱是整组航班的问题；没位、座位不够只是那一天的问题
 const ROUTING_PROBLEMS = new Set(['airport', 'mixed']);
 
 const tierId = row => `${row.miles}|${row.cash.toFixed(2)}`;
+
+// AA 自营航班是浮动定价：同一航线的里程五花八门，按「里程+税费」精确分档会分出几十档，
+// 「同档 = 同一组航班」也不成立。这种航线改按价位段分组，只认逐天核实。
+const DYNAMIC_MIN_LEVELS = 6;
+const BANDS = [
+  [60000, '6 万以内'],
+  [90000, '9 万以内'],
+  [120000, '12 万以内'],
+  [Infinity, '12 万以上'],
+];
+const isDynamicRoute = rows => new Set(rows.map(row => row.miles)).size >= DYNAMIC_MIN_LEVELS;
+const bandIndex = miles => BANDS.findIndex(([limit]) => miles <= limit);
+const bandId = row => 'band' + bandIndex(row.miles);
 
 // 核实结果只适用于当时同一里程同一税费的日历数据
 const sameTier = (check, row) =>
@@ -466,11 +562,21 @@ function analyze(pax, cabin) {
   const twins = findTwinRoutes(routes);
   const result = new Map();
   for (const [key, route] of routes) {
-    const checkOf = date => checks[`${route.o}|${route.d}|${cabin}|${pax}|${date}`];
-    const tiers = buildTiers(route.rows, checkOf);
-    const dates = route.rows.map(row => dateView(row, tiers.get(tierId(row)), checkOf(row.date)));
+    // 没有证据的旧核实（1.0.2 以前）不再采信，退回线索
+    const checkOf = date => {
+      const check = checks[`${route.o}|${route.d}|${cabin}|${pax}|${date}`];
+      return check && check.ev ? check : null;
+    };
+    const dynamic = isDynamicRoute(route.rows);
+    const keyOf = dynamic ? bandId : tierId;
+    const tiers = buildTiers(route.rows, checkOf, keyOf, dynamic);
+    const dates = route.rows.map(row => dateView(row, tiers.get(keyOf(row)), checkOf(row.date)));
     for (const tier of tiers.values()) {
       tier.verified = dates.filter(x => x.tier === tier.id && x.status === 'verified').length;
+      rollUpFailures(
+        tier,
+        dates.filter(x => x.tier === tier.id),
+      );
     }
     result.set(key, routeSummary(route, tiers, dates, twins[key] || null));
   }
@@ -530,11 +636,11 @@ function findTwinRoutes(routes) {
   return twins;
 }
 
-function buildTiers(rows, checkOf) {
+function buildTiers(rows, checkOf, keyOf = tierId, dynamic = false) {
   const soon = new Date(Date.now() + 2 * DAY_MS).toISOString().slice(0, 10);
   const groups = new Map();
   for (const row of rows) {
-    const id = tierId(row);
+    const id = keyOf(row);
     if (!groups.has(id)) groups.set(id, []);
     groups.get(id).push(row);
   }
@@ -546,7 +652,10 @@ function buildTiers(rows, checkOf) {
     const failed = checks.filter(c => ROUTING_PROBLEMS.has(c.status));
     let status = 'lead';
     let reference = null;
-    if (passed.length) {
+    // 浮动价航线不做同档推断：每天单独核实
+    if (dynamic) {
+      // 什么也不做
+    } else if (passed.length) {
       status = 'trusted';
       reference = newest(passed);
     } else if (failed.length) {
@@ -558,10 +667,14 @@ function buildTiers(rows, checkOf) {
     // 代表日：优先两天以后、还没核实过的日期
     const representative =
       dates.find(x => x >= soon && !tried.has(x)) || dates.find(x => !tried.has(x)) || null;
+    const cheapest = members.slice().sort((a, b) => a.miles - b.miles || a.cash - b.cash)[0];
     tiers.set(id, {
       id,
-      miles: members[0].miles,
-      cash: members[0].cash,
+      miles: cheapest.miles,
+      cash: cheapest.cash,
+      dynamic,
+      band: dynamic ? BANDS[bandIndex(cheapest.miles)][1] : '',
+      maxMiles: dynamic ? Math.max(...members.map(row => row.miles)) : cheapest.miles,
       days: members.length,
       first: dates[0],
       last: dates[dates.length - 1],
@@ -575,6 +688,32 @@ function buildTiers(rows, checkOf) {
     });
   }
   return tiers;
+}
+
+// 核实没通过的日期从档位里扣掉；全部没通过时，档位就取最近一次失败的状态和原因
+function rollUpFailures(tier, mine) {
+  const live = mine.filter(x => !FAILED_DATES.has(x.status));
+  tier.failed = mine.length - live.length;
+  if (!tier.failed) return;
+  if (!live.length) {
+    const latest = mine
+      .filter(x => x.check)
+      .sort((a, b) => b.check.checked_at.localeCompare(a.check.checked_at))[0];
+    if (latest) {
+      tier.status = latest.status;
+      tier.ref = latest.check;
+    }
+    return;
+  }
+  tier.days = live.length;
+  tier.first = live[0].date;
+  tier.last = live[live.length - 1].date;
+  tier.new = live.filter(x => x.new).length;
+  tier.peak = busiestMonth(live.map(x => x.date));
+  if (!tier.rep || !live.some(x => x.date === tier.rep)) {
+    const fresh = live.find(x => !x.check);
+    tier.rep = fresh ? fresh.date : null;
+  }
 }
 
 function busiestMonth(dates) {
@@ -593,7 +732,7 @@ function dateView(row, tier, ownCheck) {
       status = hours < 24 ? 'verified' : 'trusted';
     } else if (check.status === 'none') {
       status = 'gone';
-    } else if (['mixed', 'airport', 'seats'].includes(check.status)) {
+    } else if (['mixed', 'airport', 'seats', 'mismatch', 'unsure'].includes(check.status)) {
       status = check.status;
     }
   }
@@ -2307,6 +2446,8 @@ const STATUS = {
   mixed: { icon: '!', label: '混舱', tone: 'warn' },
   gone: { icon: '✕', label: '已失效', tone: 'bad' },
   airport: { icon: '✕', label: '机场不符', tone: 'bad' },
+  mismatch: { icon: '✕', label: '价格对不上', tone: 'bad' },
+  unsure: { icon: '?', label: '未能确认', tone: 'warn' },
   excluded: { icon: '✕', label: '已排除', tone: 'bad' },
 };
 const TIER_EXPLAIN = {
@@ -2314,6 +2455,21 @@ const TIER_EXPLAIN = {
     '这一档里已经有一天在 aa.com 搜索页核实过：机场对、舱位对、座位够。同档其他日期通常是同一组航班，但不保证。不过同一组航班可能某天全程商务、某天有一段只剩经济，下单前把要订的那天再核实一次最稳。',
   lead: '这一档还只有日历数据。日历是 aa.com 的每日最低价汇总，可能和实际搜索页对不上（比如没位、换了机场、混舱）。核实一天，就知道这一档靠不靠谱。',
   excluded: '这一档核实时发现机场不符或混舱，先排除。个别日期可以单独再核实。',
+};
+// 整档的日期都核实没通过时的说明
+const FAILED_EXPLAIN = {
+  gone: '这一档的日期核实时都已经没位了。',
+  airport: '这一档核实时页面只给了其他机场的航班。',
+  mixed: '这一档核实时最好的选项里有一段不是所选舱位（混舱）。',
+  seats: '这一档核实时座位不够你选的人数。',
+  mismatch: '这一档核实时，搜索页上显示的价格和日历不一样，日历上的价格订不到。',
+};
+const DYNAMIC_EXPLAIN =
+  '这条航线是浮动定价（常见于 AA 自营航班）：每天的里程都可能不一样，这里按价位段归在一起。同一价位段里不同日期不一定是同一组航班，想订哪天就核实哪天。';
+const SINGLE_EXPLAIN = {
+  trusted: '这一天已经在 aa.com 搜索页核实过：机场对、舱位对、座位够。',
+  lead: '这一天还只有日历数据。日历是 aa.com 的每日最低价汇总，可能和实际搜索页对不上，点「核实」确认一下。',
+  excluded: '这一天核实时发现机场不符或混舱。',
 };
 const DATE_EXPLAIN = {
   verified: '刚核实过这一天：机场一致、舱位一致、座位够。',
@@ -2323,6 +2479,8 @@ const DATE_EXPLAIN = {
   airport: '核实时只给出了其他机场的航班。',
   mixed: '核实时最好的选项里有一段不是所选舱位。',
   seats: '核实时座位不够你选的人数。',
+  mismatch: '核实时搜索页上没有日历显示的这个价格。',
+  unsure: '打开了搜索页，但没能在页面上读到价格来确认，以页面为准。',
   excluded: '同档另一天核实有问题，这天跟着排除，可以单独再核实。',
 };
 const KAOMOJI = ['(｡･ω･｡)', '(´･ω･`)', '(・∀・)', '(*´▽`*)'];
@@ -2381,9 +2539,18 @@ function initState() {
 }
 
 const savePrefs = () => Store.set('prefs', prefs);
-const combo = () => prefs.combo || { pax: prefs.sel.pax, cabin: prefs.sel.cabins[0] || 'J' };
-const cardId = card => `${card.o}-${card.d}-${card.id}`;
-const favoriteKey = card => `${combo().pax}|${combo().cabin}|${cardId(card)}`;
+// 结果按扫描设置里的人数显示，经济和商务头等放在同一个瀑布流里，每张卡自带舱位
+const viewPax = () => +prefs.sel.pax || 1;
+const combo = () => ({
+  pax: viewPax(),
+  cabin:
+    state.cabinFilter && state.cabinFilter !== 'all'
+      ? state.cabinFilter
+      : prefs.sel.cabins[0] || 'J',
+});
+const cardId = card => `${card.cabin}-${card.o}-${card.d}-${card.id}`;
+const favoriteKey = card => `${viewPax()}|${cardId(card)}`;
+const routeKey = (cabin, o, d) => `${cabin}|${o}|${d}`;
 const $ = (selector, scope) => (scope || state.root).querySelector(selector);
 const $$ = (selector, scope) => Array.from((scope || state.root).querySelectorAll(selector));
 const isPhone = () => window.innerWidth <= 720;
@@ -2565,11 +2732,10 @@ function showResults() {
   state.routeFilter = null;
   prefs.miles = null;
   prefs.view = 'feed';
-  if (last && last.params) prefs.combo = { pax: +last.params.pax, cabin: last.params.cabins[0] };
+  state.cabinFilter = 'all';
   savePrefs();
   refreshData();
   if (!state.fullOpen) return openFull(false);
-  renderCombos();
   updateTabs();
   renderFeed(true);
   renderStatus();
@@ -2596,7 +2762,7 @@ function mount() {
   if (document.getElementById('award-radar-host')) return;
   const host = document.createElement('div');
   host.id = 'award-radar-host';
-  (document.body || document.documentElement).appendChild(host);
+  document.documentElement.appendChild(host);
   state.root = host.attachShadow({ mode: 'open' });
   state.root.innerHTML = `<style>${STYLES}</style><div class="ar">
     <div class="dock" data-act="dock" title="${esc(persona().name)}"></div><div class="bubble" hidden></div>
@@ -2646,7 +2812,8 @@ function dockHeight() {
   let base = isPhone() ? 66 : 92;
   if (rendererKind() === 'live2d') base = isPhone() ? 200 : 300;
   else if (DATA.mascot.normal) base = isPhone() ? 150 : 220;
-  return Math.round(base * sizeFactor());
+  const room = window.innerHeight - (state && state.fullOpen ? 72 : 24);
+  return Math.max(90, Math.min(Math.round(base * sizeFactor()), room));
 }
 
 function dockWidth() {
@@ -2797,6 +2964,7 @@ function positionFloating() {
   const onRight = rect.x + rect.width / 2 > window.innerWidth / 2;
   const bubble = $('.bubble');
   if (!bubble.hidden) {
+    bubble.style.left = '0px'; // 先挪到左边量宽度，免得被右边缘挤窄
     const width = Math.min(240, bubble.offsetWidth || 220);
     const height = bubble.offsetHeight || 60;
     const left = onRight ? rect.x + rect.width - width + 10 : rect.x - 10;
@@ -3131,8 +3299,12 @@ function heartBurst(button) {
 // ----- 数据刷新与扫描事件 -----
 
 function refreshData() {
-  const current = combo();
-  state.routes = analyze(current.pax, current.cabin);
+  state.routes = new Map();
+  for (const cabin of ['Y', 'J']) {
+    for (const route of analyze(viewPax(), cabin).values()) {
+      state.routes.set(routeKey(cabin, route.o, route.d), Object.assign(route, { cabin }));
+    }
+  }
   state.cards = [];
   for (const route of state.routes.values()) {
     const byTier = new Map();
@@ -3146,6 +3318,7 @@ function refreshData() {
         Object.assign({}, tier, {
           o: route.o,
           d: route.d,
+          cabin: route.cabin,
           twin: route.twin,
           scanned: route.scanned,
           dates: days.map(day => day.date),
@@ -3279,7 +3452,7 @@ function miniCardHtml(card) {
   return `<button class="mcard${card.new ? ' has-new' : ''}" data-card="${esc(cardId(card))}">${ribbon}
     <div class="thumb">${cardCoverArt(card)}</div>
     <div class="mt"><span class="r">${esc(cityName(card.o))} → ${esc(cityName(card.d))}</span>
-      <span class="p"><i class="cab">${CABINS[combo().cabin].short}</i><b>${fmtInt(card.miles)}</b> 里程 + ${money(card.cash)}</span>
+      <span class="p"><i class="cab">${CABINS[card.cabin].short}</i><b>${fmtInt(card.miles)}</b> 里程 + ${money(card.cash)}</span>
       ${facts ? `<span class="k">${esc(keyFact(card))} · 最近 ${facts.nearest.slice(5)}</span>` : ''}
       <span>${badge(card.status)} <span class="small muted">${card.days} 天有位</span></span></div></button>`;
 }
@@ -3291,7 +3464,7 @@ function renderMini() {
     ? '<button class="btn" data-act="stop">停止扫描</button>'
     : `<button class="btn primary" data-act="quickScan">开始扫描 · 约 ${fmtInt(requests)} 次</button>`;
   $('.mini').innerHTML = `<div class="mini-h">${mascotHead(30, '')}<b>${esc(persona().name)}</b>
-      <span class="small muted">${combo().pax}人 ${CABINS[combo().cabin].label}</span>
+      <span class="small muted">${viewPax()}人 · ${prefs.sel.cabins.map(cabin => CABINS[cabin].label).join(' + ')}</span>
       <button class="x" data-act="closeMini" aria-label="关闭">×</button></div>
     <div class="mini-b">
       ${statusHtml('mini')}
@@ -3327,7 +3500,6 @@ function fullHeaderHtml() {
     <nav class="tabs"><button data-view="feed">发现</button><button data-view="fav">收藏<span class="n fav-n"></span></button><button data-view="matrix">总览</button></nav>
     <span class="spacer"></span>
     <button class="btn small mobile-only" data-act="toggleSetup">扫描设置</button>
-    <select class="combo" aria-label="显示哪种结果"></select>
     <button class="x" data-act="closeFull" aria-label="关闭">×</button></header>`;
 }
 
@@ -3396,7 +3568,6 @@ function openFull(withSetup) {
   buildPicker('A');
   buildPicker('B');
   renderOptions();
-  renderCombos();
   renderJob();
   updateTabs();
   if (prefs.view === 'matrix') renderMatrix();
@@ -3446,21 +3617,6 @@ function updateTabs() {
   const count = state.cards.filter(card => state.favorites.has(favoriteKey(card))).length;
   const counter = $('.fav-n');
   if (counter) counter.textContent = count || '';
-}
-
-function renderCombos() {
-  const select = $('.combo');
-  if (!select) return;
-  const current = combo();
-  const combos = DB.combos();
-  if (!combos.some(x => x.pax === current.pax && x.cabin === current.cabin))
-    combos.unshift(current);
-  select.innerHTML = combos
-    .map(x => {
-      const selected = x.pax === current.pax && x.cabin === current.cabin ? 'selected' : '';
-      return `<option value="${x.pax}|${x.cabin}" ${selected}>${x.pax} 人 · ${CABINS[x.cabin].label}</option>`;
-    })
-    .join('');
 }
 
 function renderJob() {
@@ -3655,10 +3811,8 @@ function renderEstimate() {
 function startScan(params) {
   closeScanDialog();
   state.resultCard = false;
-  prefs.combo = { pax: +params.pax, cabin: params.cabins[0] };
   savePrefs();
   refreshData();
-  renderCombos();
   toast('出发啦！扫描时这个标签页别关哦', 3500);
   Scan.start(params).catch(error => toast(error.message, 3500, 'worry'));
 }
@@ -3698,11 +3852,19 @@ function sideGroups(tokens) {
   const groups = tokens.filter(isCountry).map(token => ({
     key: token,
     label: placeName(token),
-    codes: new Set(expandCodes([token])),
+    first: gatewaysOf(token.slice(1))[0],
+    has: code => countryOf(code) === token.slice(1),
   }));
   const plain = tokens.filter(token => !isCountry(token));
-  if (plain.length)
-    groups.push({ key: 'airports', label: placesText(plain), codes: new Set(plain) });
+  if (plain.length) {
+    const set = new Set(plain);
+    groups.push({
+      key: 'airports',
+      label: placesText(plain),
+      first: plain[0],
+      has: code => set.has(code),
+    });
+  }
   return groups;
 }
 
@@ -3715,11 +3877,10 @@ function comparePairs() {
 }
 
 const inPair = (card, pair) =>
-  (pair.a.codes.has(card.o) && pair.b.codes.has(card.d)) ||
-  (pair.b.codes.has(card.o) && pair.a.codes.has(card.d));
+  (pair.a.has(card.o) && pair.b.has(card.d)) || (pair.b.has(card.o) && pair.a.has(card.d));
 
 function directionStats(cards) {
-  const usable = cards.filter(card => card.status !== 'excluded');
+  const usable = cards.filter(card => card.status !== 'excluded' && !FAILED_DATES.has(card.status));
   const dates = new Set();
   usable.forEach(card => card.dates.forEach(date => dates.add(date)));
   return {
@@ -3734,14 +3895,17 @@ function compareHalfHtml(label, stats) {
   if (!stats.days)
     return `<div class="cmp-half"><small>${label}</small><b class="cmp-days none">还没有位</b><span>扫一下看看</span></div>`;
   return `<div class="cmp-half"><small>${label}</small><b class="cmp-days">${fmtInt(stats.days)} 天</b>
-    <span class="cmp-price">最低 ${shortMiles(stats.cheapest.miles)} + ${money(stats.cheapest.cash)}</span>
+    <span class="cmp-price">最低 ${CABINS[stats.cheapest.cabin].short} ${shortMiles(stats.cheapest.miles)} + ${money(stats.cheapest.cash)}</span>
     <span>最近 ${stats.nearest.slice(5)} 出发</span>${stats.fresh ? `<span class="cmp-new">NEW ${fmtInt(stats.fresh)} 天</span>` : ''}</div>`;
 }
 
 function compareCardHtml(pair, index) {
-  const cards = state.cards.filter(card => inPair(card, pair));
-  const out = directionStats(cards.filter(card => pair.a.codes.has(card.o)));
-  const back = directionStats(cards.filter(card => pair.b.codes.has(card.o)));
+  const cabin = state.cabinFilter || 'all';
+  const cards = state.cards.filter(
+    card => inPair(card, pair) && (cabin === 'all' || card.cabin === cabin),
+  );
+  const out = directionStats(cards.filter(card => pair.a.has(card.o)));
+  const back = directionStats(cards.filter(card => pair.b.has(card.o)));
   const byRoute = new Map();
   for (const card of cards) {
     if (card.status === 'excluded') continue;
@@ -3758,7 +3922,7 @@ function compareCardHtml(pair, index) {
         `<button class="rchip" data-route="${route.o}|${route.d}">${esc(cityName(route.o))}→${esc(cityName(route.d))} · ${route.days} 天</button>`,
     )
     .join('');
-  const code = Array.from(pair.b.codes)[0];
+  const code = pair.b.first;
   const total = out.days + back.days;
   const art = coverArt(code, airport(code).r || 'NA', hashStr(pair.a.key + pair.b.key), {
     planes: total > 60 ? 3 : total > 10 ? 2 : 1,
@@ -3782,19 +3946,22 @@ function filterCards() {
     state.pair = Math.min(state.pair || 0, pairs.length - 1);
     cards = cards.filter(card => inPair(card, pairs[state.pair]));
   }
+  if (state.cabinFilter && state.cabinFilter !== 'all')
+    cards = cards.filter(card => card.cabin === state.cabinFilter);
   if (state.routeFilter) {
     cards = cards.filter(card => card.o === state.routeFilter.o && card.d === state.routeFilter.d);
   }
   const base = cards;
+  // 核实没通过的整档（已失效、价格对不上……）和已排除的一样，默认不显示
   if (!state.showExcluded && prefs.view !== 'fav')
-    cards = cards.filter(card => card.status !== 'excluded');
+    cards = cards.filter(card => card.status !== 'excluded' && !FAILED_DATES.has(card.status));
   if (state.channel === 'good')
     cards = cards.filter(card => card.status === 'trusted' || card.verified);
   else if (state.channel === 'new') cards = cards.filter(card => card.new);
   else if (state.channel !== 'all')
     cards = cards.filter(card => regionOf(card.o, card.d).key === state.channel);
   const beforeMiles = cards;
-  if (prefs.miles) cards = cards.filter(card => card.miles === prefs.miles);
+  if (prefs.miles) cards = cards.filter(card => milesMatch(card, prefs.miles));
   cards.sort(SORTS[prefs.sort] || recommendedOrder);
   return { cards, base, beforeMiles, pairs };
 }
@@ -3802,8 +3969,14 @@ function filterCards() {
 function postTitle(card) {
   const from = cityName(card.o);
   const to = cityName(card.d);
-  const cabin = CABINS[combo().cabin].word;
+  const cabin = CABINS[card.cabin].word;
   const price = `${Math.round(card.miles / 1000)}k+$${Math.round(card.cash)}`;
+  if (card.dynamic) {
+    return `${from}→${to}${cabin} ${card.band}，最低 ${price}｜${card.days} 天，价格浮动，想订哪天核实哪天`;
+  }
+  if (card.status !== 'excluded' && FAILED_DATES.has(card.status)) {
+    return `${from}→${to} ${STATUS[card.status].label}：${(card.ref && card.ref.note) || '核实没通过'}，这一档先别冲 ${KAOMOJI[1]}`;
+  }
   if (card.status === 'excluded') {
     return `${from}→${to} 这一档核实没通过（${(card.ref && card.ref.note) || '机场或舱位不对'}），先别冲 ${KAOMOJI[1]}`;
   }
@@ -3842,6 +4015,8 @@ function cardCoverArt(card) {
 // 封面上的一句大字：从数据里挑最有用的一条
 function keyFact(card) {
   const facts = card.facts;
+  if (FAILED_DATES.has(card.status)) return STATUS[card.status].label;
+  if (card.dynamic) return `最低 ${shortMiles(card.miles)} · ${card.days}天`;
   if (card.days <= 3) return `只有 ${card.days} 天有位`;
   if (facts.months === 1) return `${facts.peakMonth}月 · ${facts.peakCount}天有位`;
   return `${facts.peakMonth}月最多 · ${facts.peakCount}天`;
@@ -3867,11 +4042,12 @@ function tierFacts(days) {
 function coverHtml(card, ratio, large) {
   const facts = card.facts;
   const lines = facts
-    ? `<span class="cv-k">${esc(keyFact(card))}</span><span class="cv-s">最近 ${facts.nearest.slice(5)} 出发</span>`
+    ? `<span class="cv-k">${esc(keyFact(card))}</span><span class="cv-s">${card.dynamic ? esc(card.band) + ' · ' : ''}最近 ${facts.nearest.slice(5)} 出发</span>`
     : '';
   return `<div class="${large ? 'cover dcover' : 'cover'}" ${ratio ? `style="aspect-ratio:${ratio}"` : ''}>${cardCoverArt(card)}
     <div class="scrim"></div>
-    <div class="cv-top">${badge(card.status)}<span class="price"><i class="cab">${CABINS[combo().cabin].short}</i>${Math.round(card.miles / 1000)}k + ${money(card.cash)}</span></div>
+    <div class="cv-top">${badge(card.status)}<span class="price"><i class="cab">${CABINS[card.cabin].short}</i>${Math.round(card.miles / 1000)}k${card.dynamic ? ' 起' : ''} + ${money(card.cash)}</span></div>
+    ${card.dynamic ? '<span class="dyn">价格浮动</span>' : ''}
     ${card.new ? `<div class="ribbon">NEW · 新放出 ${card.new} 天</div>` : ''}
     <div class="cv-t"><small>从 ${esc(cityName(card.o))} 出发</small><b>${esc(cityName(card.d))}</b>${lines}</div></div>`;
 }
@@ -3937,11 +4113,15 @@ function feedBarHtml(channels) {
         `<button data-ch="${key}" class="${state.channel === key ? 'on' : ''}">${esc(label)}<span class="n">${count}</span></button>`,
     )
     .join('');
-  const current = combo();
-  const cabinTabs = ['Y', 'J']
+  const shownCabin = state.cabinFilter || 'all';
+  const cabinTabs = [
+    ['all', '全部舱位'],
+    ['Y', '经济'],
+    ['J', '商务·头等'],
+  ]
     .map(
-      cabin =>
-        `<button class="cchip${current.cabin === cabin ? ' on' : ''}" data-show-cab="${cabin}">${CABINS[cabin].label}</button>`,
+      ([cabin, label]) =>
+        `<button class="cchip${shownCabin === cabin ? ' on' : ''}" data-show-cab="${cabin}">${label}<span class="n">${cabin === 'all' ? state.cards.length : state.cards.filter(card => card.cabin === cabin).length}</span></button>`,
     )
     .join('');
   return `<div class="cabrow"><span>舱位</span>${cabinTabs}</div><div class="feedbar"><div class="channels">${tabs}</div>
@@ -3950,16 +4130,40 @@ function feedBarHtml(channels) {
 }
 
 // 固定里程：只看某一个里程档，和频道、国家对一起生效，会记住
-function milesChipsHtml(cards) {
+// 里程值是数字时精确匹配；"b0".."b3" 表示价位段
+function milesMatch(card, value) {
+  return typeof value === 'string' ? 'b' + bandIndex(card.miles) === value : card.miles === value;
+}
+
+function milesChoices(cards) {
   const counts = new Map();
   for (const card of cards) counts.set(card.miles, (counts.get(card.miles) || 0) + 1);
-  if (prefs.miles && !counts.has(prefs.miles)) counts.set(prefs.miles, 0);
-  if (counts.size < 2 && !prefs.miles) return '';
-  const chips = Array.from(counts)
-    .sort((a, b) => a[0] - b[0])
+  // 值不多：每个里程一个；太多（浮动定价）：常见的两三个精确值 + 价位段，最多 6 个
+  if (counts.size <= 5) return Array.from(counts).sort((a, b) => a[0] - b[0]);
+  const common = Array.from(counts)
+    .filter(([, count]) => count >= 3)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .sort((a, b) => a[0] - b[0]);
+  const bands = BANDS.map((band, index) => [
+    'b' + index,
+    cards.filter(card => bandIndex(card.miles) === index).length,
+  ]).filter(([, count]) => count);
+  return common.concat(bands).slice(0, 6);
+}
+
+const milesLabel = value =>
+  typeof value === 'string' ? BANDS[+value.slice(1)][1] : shortMiles(value);
+
+function milesChipsHtml(cards) {
+  const choices = milesChoices(cards);
+  if (prefs.miles && !choices.some(([value]) => value === prefs.miles))
+    choices.push([prefs.miles, 0]);
+  if (choices.length < 2 && !prefs.miles) return '';
+  const chips = choices
     .map(
-      ([miles, count]) =>
-        `<button class="mchip${prefs.miles === miles ? ' on' : ''}" data-miles="${miles}">${shortMiles(miles)}<span class="n">${count}</span></button>`,
+      ([value, count]) =>
+        `<button class="mchip${prefs.miles === value ? ' on' : ''}" data-miles="${value}">${milesLabel(value)}<span class="n">${count}</span></button>`,
     )
     .join('');
   return `<div class="milesrow"><span class="ml">里程</span><button class="mchip${prefs.miles ? '' : ' on'}" data-miles="0">全部<span class="n">${cards.length}</span></button>${chips}</div>`;
@@ -3981,8 +4185,7 @@ function emptyFeedHtml() {
     last &&
     last.params &&
     scanKind(last) !== 'found' &&
-    +last.params.pax === combo().pax &&
-    last.params.cabins.includes(combo().cabin)
+    +last.params.pax === viewPax()
   ) {
     return `<div class="empty-result">${resultCardHtml(last, 'feed')}</div>`;
   }
@@ -4146,12 +4349,25 @@ function toggleFavorite(id, button) {
 
 function exportCsv() {
   const rows = [
-    ['状态', '出发', '到达', '日期', '里程', '税费USD', '航班', '经停', '核实时间', '日历查询时间'],
+    [
+      '舱位',
+      '状态',
+      '出发',
+      '到达',
+      '日期',
+      '里程',
+      '税费USD',
+      '航班',
+      '经停',
+      '核实时间',
+      '日历查询时间',
+    ],
   ];
   for (const route of state.routes.values()) {
     for (const day of route.dates) {
       const check = day.check || {};
       rows.push([
+        CABINS[route.cabin].label,
         STATUS[day.status].label,
         route.o,
         route.d,
@@ -4171,7 +4387,7 @@ function exportCsv() {
   const csv = '﻿' + rows.map(row => row.map(quote).join(',')).join('\n');
   const link = document.createElement('a');
   link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-  link.download = `里程票-${combo().pax}人-${CABINS[combo().cabin].label.replace('/', '')}.csv`;
+  link.download = `里程票-${viewPax()}人.csv`;
   document.body.appendChild(link);
   link.click();
   setTimeout(() => {
@@ -4204,8 +4420,9 @@ function renderMatrix() {
   const origins = expandCodes(prefs.sel.A);
   const destinations = expandCodes(prefs.sel.B);
   const directions = prefs.sel.dir === 'both' ? ['out', 'back'] : [prefs.sel.dir];
+  const cabin = combo().cabin;
   const routeOf = (a, b, direction) =>
-    state.routes.get(direction === 'out' ? a + '|' + b : b + '|' + a);
+    state.routes.get(direction === 'out' ? routeKey(cabin, a, b) : routeKey(cabin, b, a));
   const shown = [];
   for (const a of origins)
     for (const b of destinations)
@@ -4257,7 +4474,7 @@ function renderMatrix() {
 function openCardDrawer(id, source) {
   const card = state.cards.find(x => cardId(x) === id);
   if (!card) return;
-  state.card = { o: card.o, d: card.d, id: card.id };
+  state.card = { o: card.o, d: card.d, id: card.id, cabin: card.cabin };
   state.day = null;
   const cover = source && source.querySelector ? source.querySelector('.cover, .thumb') : null;
   state.drawerSource = cover;
@@ -4356,10 +4573,11 @@ function otherTiersHtml(tiers) {
   const rows = tiers
     .map(
       t =>
-        `<button class="tierrow" data-tier="${esc(t.id)}">${badge(t.status)}<b>${fmtInt(t.miles)} + ${money(t.cash)}</b><span class="sub">${t.days} 天 · ${t.first.slice(5)} ~ ${t.last.slice(5)}</span></button>`,
+        `<button class="tierrow" data-tier="${esc(t.id)}">${badge(t.status)}<b>${t.dynamic ? esc(t.band) + ' · ' + fmtInt(t.miles) + ' 起' : fmtInt(t.miles) + ' + ' + money(t.cash)}</b><span class="sub">${t.days} 天 · ${t.first.slice(5)} ~ ${t.last.slice(5)}</span></button>`,
     )
     .join('');
-  return `<h3>同航线其他档位 <span class="sub">${tiers.length} 档</span></h3>${rows}`;
+  const unit = tiers[0].dynamic ? '个价位段' : '档';
+  return `<h3>同航线其他${tiers[0].dynamic ? '价位段' : '档位'} <span class="sub">${tiers.length} ${unit}</span></h3>${rows}`;
 }
 
 function drawerBodyHtml(route, tier, card) {
@@ -4367,13 +4585,13 @@ function drawerBodyHtml(route, tier, card) {
     ? `<button class="btn primary" data-verify="${tier.rep}">${tier.status === 'lead' ? '核实这一档' : '再核实一天'}（${tier.rep.slice(5)}）</button>`
     : '';
   const newDays = route.dates.filter(day => day.tier === tier.id && day.new).length;
-  const meta = `${route.o} → ${route.d} · ${combo().pax} 人 · ${CABINS[combo().cabin].label} · 这一档 ${tier.days} 天（${tier.first.slice(5)} ~ ${tier.last.slice(5)}）· 日历${ago(route.scanned)}查询`;
+  const meta = `${route.o} → ${route.d} · ${viewPax()} 人 · ${CABINS[route.cabin].label} · ${tier.dynamic ? '这一价位段' : '这一档'} ${tier.days} 天（${tier.first.slice(5)} ~ ${tier.last.slice(5)}）· 日历${ago(route.scanned)}查询`;
   return `<div class="dbody">
-    <div class="dprice"><b>${fmtInt(tier.miles)}</b><span class="muted">里程/人</span><span style="color:var(--ink-2)">+ ${money(tier.cash)}</span></div>
+    <div class="dprice"><b>${fmtInt(tier.miles)}${tier.dynamic ? ' 起' : ''}</b><span class="muted">里程/人${tier.dynamic ? ` · ${tier.band}，最高 ${fmtInt(tier.maxMiles)}` : ''}</span><span style="color:var(--ink-2)">+ ${money(tier.cash)}</span></div>
     <div class="dmeta">${meta}</div>
-    <p>${TIER_EXPLAIN[tier.status]}</p>
+    <p>${FAILED_EXPLAIN[tier.status] ? FAILED_EXPLAIN[tier.status] + esc(tier.ref && tier.ref.note ? '（' + tier.ref.note + '）' : '') : tier.dynamic ? DYNAMIC_EXPLAIN : tier.days === 1 ? SINGLE_EXPLAIN[tier.status] || TIER_EXPLAIN[tier.status] : TIER_EXPLAIN[tier.status]}</p>
     ${route.twin ? `<p class="note">⚠ 这条航线的日历和 ${esc(cityName(route.twin))} ${route.twin} 每天都一样，实际机场以核实为准。</p>` : ''}
-    ${tierFactsHtml(tier.ref)}
+    ${tier.days === 1 || tier.dynamic ? '' : tierFactsHtml(tier.ref)}
     <div class="actions">${verifyButton}${favoriteButton(cardId(card), state.favorites.has(favoriteKey(card)), true)}</div>
     <h3>这一档的日期 <span class="sub">点日期看详情</span></h3>
     ${newDays ? `<p class="newlegend"><i></i>粉色框 = 新放出（上次扫描以后才出现），这一档有 ${newDays} 天</p>` : ''}
@@ -4386,7 +4604,7 @@ function drawerBodyHtml(route, tier, card) {
 
 function renderDrawer(fromCard) {
   const selected = state.card;
-  const route = selected && state.routes.get(selected.o + '|' + selected.d);
+  const route = selected && state.routes.get(routeKey(selected.cabin, selected.o, selected.d));
   const tier = route && route.tiers.find(t => t.id === selected.id);
   const drawer = $('.drawer');
   if (!tier) {
@@ -4396,13 +4614,16 @@ function renderDrawer(fromCard) {
     return;
   }
   const card =
-    state.cards.find(x => x.o === route.o && x.d === route.d && x.id === tier.id) ||
-    Object.assign({}, tier, { o: route.o, d: route.d });
+    state.cards.find(
+      x => x.cabin === route.cabin && x.o === route.o && x.d === route.d && x.id === tier.id,
+    ) || Object.assign({}, tier, { o: route.o, d: route.d, cabin: route.cabin });
   cancelAnimations(drawer, true);
   drawer.innerHTML = `<button class="x" data-act="closeDrawer">×</button>${coverHtml(card, null, true)}${drawerBodyHtml(route, tier, card)}`;
   drawer.classList.toggle('flip', !!fromCard);
   drawer.hidden = false;
   $('.scrim-all').hidden = false;
+  // 只有一天时直接展开那一天，航班信息只在这里出现一次
+  if (!state.day && tier.days === 1) state.day = tier.first;
   if (state.day) showDay(state.day);
 }
 
@@ -4456,7 +4677,7 @@ function monthsHtml(dates, tierKey) {
 }
 
 function showDay(date) {
-  const route = state.routes.get(state.card.o + '|' + state.card.d);
+  const route = state.routes.get(routeKey(state.card.cabin, state.card.o, state.card.d));
   const day = route && route.dates.find(x => x.date === date);
   if (!day) return;
   state.day = date;
@@ -4484,12 +4705,11 @@ let openExternal = url => window.open(url, '_blank');
 
 // 一次点击只打开一个搜索页；人机验证由用户自己完成
 let verify = (date, route = state.card) => {
-  const current = combo();
   const item = {
     o: route.o,
     d: route.d,
-    cabin: current.cabin,
-    pax: current.pax,
+    cabin: route.cabin || 'J',
+    pax: viewPax(),
     date,
     atMs: Date.now(),
   };
@@ -4676,15 +4896,11 @@ function onRootClick(event) {
     return;
   }
   if (data.showCab) {
-    prefs.combo = { pax: combo().pax, cabin: data.showCab };
-    savePrefs();
-    closeDrawer();
-    refreshData();
-    renderCombos();
-    return;
+    state.cabinFilter = data.showCab;
+    return renderFeed(true);
   }
   if (data.miles != null) {
-    prefs.miles = +data.miles || null;
+    prefs.miles = /^b\d$/.test(data.miles) ? data.miles : +data.miles || null;
     savePrefs();
     return renderFeed(true);
   }
@@ -4730,9 +4946,8 @@ function onRootClick(event) {
   if (data.day) return showDay(data.day);
   if (data.verify) return verify(data.verify);
   if (data.open) {
-    const current = combo();
     return openExternal(
-      bookingUrl(state.card.o, state.card.d, data.open, current.cabin, current.pax),
+      bookingUrl(state.card.o, state.card.d, data.open, state.card.cabin, viewPax()),
     );
   }
   if (ACTIONS[data.act]) ACTIONS[data.act](el);
@@ -4740,13 +4955,7 @@ function onRootClick(event) {
 
 function onRootChange(event) {
   const el = event.target;
-  if (el.classList.contains('combo')) {
-    const [pax, cabin] = el.value.split('|');
-    prefs.combo = { pax: +pax, cabin };
-    savePrefs();
-    closeDrawer();
-    refreshData();
-  } else if (el.classList.contains('sort')) {
+  if (el.classList.contains('sort')) {
     prefs.sort = el.value;
     savePrefs();
     renderFeed(true);
@@ -4928,7 +5137,28 @@ const Diagnostics = {
       `看板娘：${renderer}`,
       `页面：${location.pathname}`,
       this.notes.length ? '最近的问题：\n' + this.notes.join('\n') : '最近的问题：无',
+      this.evidence(),
     ].join('\n');
+  },
+
+  // 最近三次核实的证据（JSON 片段、选中的价格、页面上读到的里程），可以整段复制发给作者
+  evidence() {
+    const checks = Object.entries(DB.checks())
+      .filter(([, check]) => check.ev)
+      .sort((a, b) => b[1].checked_at.localeCompare(a[1].checked_at))
+      .slice(0, 3);
+    if (!checks.length) return '核实证据：还没有';
+    const lines = checks.map(([key, check]) =>
+      JSON.stringify({
+        key,
+        status: check.status,
+        miles: check.miles,
+        cal: [check.cal_miles, check.cal_cash],
+        note: check.note,
+        ev: check.ev,
+      }),
+    );
+    return ['核实证据（最近 3 次）：'].concat(lines).join(String.fromCharCode(10));
   },
 };
 
@@ -5000,13 +5230,43 @@ const Capture = {
       return;
     }
     const slices = findSlices(data);
-    if (slices)
-      this.finish(judge(slices, this.item.o, this.item.d, this.item.cabin, this.item.pax));
+    if (!slices) return;
+    const result = judge(slices, this.item.o, this.item.d, this.item.cabin, this.item.pax);
+    if (result.status === 'ok') this.confirm(result);
+    else this.finish(result);
   },
 
-  finish(result, extra) {
+  // JSON 判定有位：等页面把价格画出来，页面上看得到同样的里程才算数
+  confirm(result) {
+    if (this.confirming) return;
+    this.confirming = true;
+    const startedAt = Date.now();
+    const look = () => {
+      if (this.done) return;
+      const text = (document.body && document.body.innerText) || '';
+      const shown = pageMiles(text);
+      if (shown.includes(result.miles) || (shown.length && Date.now() - startedAt > 12000)) {
+        return this.finish(confirmOnPage(result, text), null, text);
+      }
+      if (Date.now() - startedAt > 30000)
+        return this.finish(confirmOnPage(result, text), null, text);
+      setTimeout(look, 1000);
+    };
+    setTimeout(look, 800);
+  },
+
+  finish(result, extra, pageText) {
     if (this.done) return;
     this.done = true;
+    // 证据：JSON 片段、选中的价格、页面上读到的里程和一小段页面文字
+    result.ev = Object.assign({}, result.evidence || {}, {
+      v: 2,
+      pageMiles: result.pageMiles || pageMiles(pageText || ''),
+      pageSample: (pageText || '').replace(/\s+/g, ' ').slice(0, 240),
+      url: location.pathname,
+    });
+    delete result.evidence;
+    delete result.pageMiles;
     DB.saveCheck(this.item, result);
     Store.remove('pending');
     whenBodyReady(() =>
@@ -5186,7 +5446,7 @@ async function start() {
 
 const DATA = {
   // 构建信息
-  build: {"version":"1.0.1","target":"lite","label":"手机版"},
+  build: {"version":"1.0.2","target":"lite","label":"手机版"},
   // 人设
   persona: {"key":"miku","name":"Miku","about":"看板娘：Miku（初音未来，占位）"},
   // 机场字典：三字码 → [显示名, 城市, 中文机场名, 英文城市, 国家, 地区, 同城键, 大机场]
@@ -8051,6 +8311,47 @@ h3 .sub {
     opacity: 0;
     pointer-events: none;
   }
+}
+
+/* 浮动定价的卡片 */
+.cover .dyn {
+  position: absolute;
+  top: 34px;
+  right: 8px;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--warn);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+/* 频道单独一行横向滚动，排序和筛选在下一行靠右，互不遮挡 */
+.feedbar {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.feedbar .channels {
+  flex: none;
+  width: 100%;
+}
+.feedbar .tools {
+  justify-content: flex-end;
+}
+.cchip .n {
+  font-weight: 400;
+  font-size: 11px;
+  margin-left: 4px;
+  color: var(--muted);
+}
+
+/* 气泡按内容定宽，贴着屏幕右边时也不会被挤成一列 */
+.bubble {
+  width: max-content;
+  max-width: min(240px, calc(100vw - 12px));
 }
 `;
 
