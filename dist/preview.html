@@ -2770,6 +2770,8 @@ async function cacheTextures(pixi, settings, files) {
 function live2dRenderer(fallback) {
   return {
     kind: 'live2d',
+    figureTop: 0,
+    figureHeight: 1,
     app: null,
     model: null,
     destroyed: false,
@@ -2824,6 +2826,8 @@ function live2dRenderer(fallback) {
       model.scale.set(scale);
       model.x = (width - model.internalModel.width * scale) / 2;
       model.y = height - model.internalModel.height * scale;
+      this.figureTop = model.y / height;
+      this.figureHeight = (model.internalModel.height * scale) / height;
       app.stage.addChild(model);
       app.view.className = 'fig l2d';
       app.view.style.width = width + 'px';
@@ -3341,11 +3345,8 @@ function placeDock() {
   }
   if (state.story) {
 
-    x = Math.round((window.innerWidth - width) / 2 + (isPhone() ? 0 : window.innerWidth * 0.05));
-    x = Math.max(-width * 0.12, Math.min(window.innerWidth - width * 0.88, x));
-    const box = $('.st-box');
-    const boxTop = box ? box.getBoundingClientRect().top : window.innerHeight * 0.82;
-    y = Math.max(4, Math.round(boxTop - height * 0.8));
+    x = Math.round((window.innerWidth - width) / 2);
+    y = Math.max(4, Math.round((window.innerHeight - height) / 2));
   }
   dock.style.left = x + 'px';
   dock.style.top = y + 'px';
@@ -3444,12 +3445,9 @@ function renderDock() {
   const index = todayStory();
   const unread = index >= 0 && !storyRead(index);
   story.hidden = index < 0 || busy || (!!text && unread && false);
-
-  const bubbleShown = !$('.bubble').hidden;
-  if (bubbleShown) story.hidden = true;
   story.className = 'badge-s ' + (unread ? 'unread' : 'read');
   story.innerHTML = unread ? MARK_EXCLAIM : MARK_DOTS;
-  story.title = unread ? '今天有一篇小故事' : '再看一次小故事';
+  story.title = unread ? '今天有一篇小剧场' : '再看一次小剧场';
   story.dataset.act = 'openStory';
 }
 
@@ -3482,7 +3480,9 @@ function positionFloating() {
     const width = Math.min(240, bubble.offsetWidth || 220);
     const height = bubble.offsetHeight || 60;
     const left = onRight ? rect.x + rect.width - width + 10 : rect.x - 10;
-    let top = rect.y - height - 10;
+    const badge = $('.badge-s');
+    const badgeRoom = badge && !badge.hidden ? badge.offsetHeight + 8 : 0;
+    let top = rect.y - height - 10 - badgeRoom;
     if (top < 6) top = rect.y + rect.height + 10;
     bubble.style.left = Math.max(6, Math.min(window.innerWidth - width - 6, left)) + 'px';
     bubble.style.top = top + 'px';
@@ -3696,7 +3696,27 @@ function greetingGroup() {
   return 'greet_night';
 }
 
+const VERSION_NOTES = {
+  '1.0.5': '新增小剧场，可以点击感叹号试试看哦～',
+};
+
+function versionNote() {
+  if (IS_RESULTS_PAGE) return;
+  const version = DATA.build.version;
+  if (Store.get('noticedVersion', '') === version) return;
+  Store.set('noticedVersion', version);
+  const text = VERSION_NOTES[version];
+  if (!text) return;
+  const show = () => {
+    if (Scan.running()) return setTimeout(show, 20000);
+    if (isMuted()) toast(text, 6000, 'happy');
+    else say(esc(text), { sticky: true, mood: 'happy' });
+  };
+  setTimeout(show, 3200);
+}
+
 function initTalk() {
+  versionNote();
   if (!IS_RESULTS_PAGE && !sessionStorage.getItem('ar-greeted')) {
     sessionStorage.setItem('ar-greeted', '1');
     const group = greetingGroup();
@@ -3983,7 +4003,6 @@ function renderMini() {
       <button class="x" data-act="closeMini" aria-label="关闭">×</button></div>
     <div class="mini-b">
       ${statusHtml('mini')}
-      ${storyList().length ? `<button class="st-entry${todayStory() >= 0 && !storyRead(todayStory()) ? ' unread' : ''}" data-act="openStory">${mascotHead(22, 'happy')}<span>小故事</span>${todayStory() >= 0 && !storyRead(todayStory()) ? '<i>！</i>' : `<em>${storyState().n} 篇</em>`}</button>` : ''}
       <div class="mini-route"><span class="mr-a">${esc(placesText(prefs.sel.A))}</span><button class="swapbtn" data-act="swapSides" title="交换出发地和目的地">⇄</button><span class="mr-b">${esc(placesText(prefs.sel.B))}</span></div>
       <div class="mini-cab"><span>扫哪种舱位</span>${['Y', 'J']
         .map(
@@ -3994,6 +4013,7 @@ function renderMini() {
       <div class="say">${mascotHead(26, cards.length ? 'happy' : '')}<div class="txt">${miniGreeting(cards)}</div></div>
       ${cards.map(miniCardHtml).join('')}
     </div>
+    ${storyList().length ? `<div class="mini-story"><button class="st-entry${todayStory() >= 0 && !storyRead(todayStory()) ? ' unread' : ''}" data-act="openStory">${mascotHead(22, 'happy')}<span>小剧场</span>${todayStory() >= 0 && !storyRead(todayStory()) ? '<i>！</i>' : `<em>${storyState().n} 篇</em>`}</button></div>` : ''}
     <div class="mini-f">${scanButton}
       <button class="btn" data-act="openSetup">设置</button>
       <button class="btn" data-act="openFull">展开完整面板</button></div>`;
@@ -4011,7 +4031,7 @@ function progressHtml() {
 function fullHeaderHtml() {
   return `<header class="top">
     <div class="brand">${mascotHead(34, 'happy')}<div><b>里程票雷达</b><span class="small">AAdvantage 兑换空位</span></div></div>
-    <nav class="tabs"><button data-view="feed">发现</button><button data-view="fav">收藏<span class="n fav-n"></span></button><button data-view="matrix">总览</button></nav>
+    <nav class="tabs"><button data-view="feed">发现</button><button data-view="fav">收藏<span class="n fav-n"></span></button><button data-view="matrix">总览</button><button data-view="story" class="tab-story">小剧场<span class="n story-n"></span></button></nav>
     <span class="spacer"></span>
     <button class="btn small mobile-only" data-act="toggleSetup">扫描设置</button>
     <button class="x" data-act="closeFull" aria-label="关闭">×</button></header>`;
@@ -4052,7 +4072,6 @@ function optionsHtml() {
       .join(
         '',
       )}</select><span class="hint">今天已查 ${fmtInt(requestsToday())} 次，超过只提醒、不拦</span></div>
-    ${storyList().length ? '<div class="opt"><span class="opt-l">小故事</span><button class="btn small" data-act="openStory">打开</button><span class="hint">每天解锁一篇</span></div>' : ''}
     <p class="tradeoff">查得越多，aa.com 之后越可能要求人机验证，包括你真正订票的时候。不登录 aa.com 账号扫描，这些查询不会挂在你的账户上。</p>
     <div class="opt"><span class="opt-l">看板娘</span>${segHtml('mascotSize', [
       ['s', '小'],
@@ -4097,8 +4116,7 @@ function openFull(withSetup) {
   renderOptions();
   renderJob();
   updateTabs();
-  if (prefs.view === 'matrix') renderMatrix();
-  else renderFeed(true);
+  renderView(true);
   renderEstimate();
   $('.view').addEventListener('scroll', onFeedScroll);
   $('.debug').addEventListener('toggle', event => {
@@ -4143,6 +4161,12 @@ function updateTabs() {
   const count = state.cards.filter(card => state.favorites.has(favoriteKey(card))).length;
   const counter = $('.fav-n');
   if (counter) counter.textContent = count || '';
+  const story = $('.story-n');
+  if (story) {
+    const index = todayStory();
+    story.textContent = index >= 0 && !storyRead(index) ? '！' : '';
+    story.className = 'n story-n' + (story.textContent ? ' unread' : '');
+  }
 }
 
 function renderJob() {
@@ -4937,6 +4961,28 @@ function matrixCellHtml(route, o, d, maxDays) {
   return `<td class="cell q${level}" data-o="${o}" data-d="${d}" title="${esc(cityName(o))}→${esc(cityName(d))} ${route.days} 天"><b>${route.days}</b><span>${cash}</span>${usable}${twin}</td>`;
 }
 
+function renderStoryView() {
+  if (!state.fullOpen) return;
+  const unlocked = storyState().n;
+  const items = storyList()
+    .slice(0, unlocked)
+    .map(
+      (story, i) =>
+        `<button class="st-item${storyRead(i) ? '' : ' unread'}" data-story="${i}"><b>${cnNumber(i + 1)}</b>${esc(story.title.replace(/^\d+\s*·\s*/, ''))}${storyRead(i) ? '' : '<i>！</i>'}</button>`,
+    )
+    .join('');
+  const left = storyList().length - unlocked;
+  $('.view').innerHTML = `<div class="st-page"><div class="st-head">${mascotHead(34, 'happy')}
+      <div><b>小剧场</b><span>每天解锁一篇，点哪篇都能重看${left ? `．还有 ${left} 篇没解锁` : ''}</span></div></div>
+    ${items || '<div class="empty">还没有解锁的小剧场</div>'}</div>`;
+}
+
+function renderView(reset) {
+  if (prefs.view === 'story') return renderStoryView();
+  if (prefs.view === 'matrix') return renderMatrix();
+  return renderFeed(reset);
+}
+
 function renderMatrix() {
   if (!state.fullOpen) return;
   const view = $('.view');
@@ -5296,29 +5342,17 @@ function openStory(index) {
   renderStoryLine();
 }
 
-function storyArchiveHtml() {
-  const unlocked = storyState().n;
-  const items = storyList()
-    .slice(0, unlocked)
-    .map(
-      (story, i) =>
-        `<button class="st-item${storyRead(i) ? '' : ' unread'}" data-story="${i}"><b>${cnNumber(i + 1)}</b>${esc(story.title.replace(/^\d+\s*·\s*/, ''))}${storyRead(i) ? '' : '<i>！</i>'}</button>`,
-    )
-    .join('');
-  return `<div class="st-list"><h3>小故事</h3>${items}</div>`;
-}
-
 function openStoryEntry() {
-  if (storyState().n > 1) {
-    showDialog(
-      `<div class="dlg-face">${mascotHead(64, 'happy')}</div><h2 id="ar-dlg-h">小故事</h2>
-      <p id="ar-dlg-d" class="dlg-sum">每天解锁一篇，点哪篇都能重看</p>
-      ${storyArchiveHtml()}<div class="dlg-btns"><button class="btn" data-act="dialogDismiss">关闭</button></div>`,
-      'stories',
-    );
-    return;
+  const today = todayStory();
+  if (today >= 0 && !storyRead(today)) return openStory(today);
+  if (state.fullOpen || storyState().n > 1) {
+    prefs.view = 'story';
+    savePrefs();
+    if (!state.fullOpen) return openFull(false);
+    updateTabs();
+    return renderView(true);
   }
-  openStory(todayStory());
+  openStory(todayStory() >= 0 ? todayStory() : 0);
 }
 
 function renderStoryLine() {
@@ -5335,12 +5369,29 @@ function renderStoryLine() {
   if (atEnd) {
     saveStoryPos(current.index, current.line, true);
     placeDock();
+    placeStoryBox();
     renderDock();
     return;
   }
   saveStoryPos(current.index, current.line, false);
   placeDock();
+  placeStoryBox();
   typeStoryLine(story.lines[current.line]);
+}
+
+function placeStoryBox() {
+  const box = $('.st-box');
+  const text = $('.st-text');
+  if (!box || !text || !state.dockRect) return;
+  const renderer = state.renderer || {};
+  const rect = state.dockRect;
+  const figureTop = rect.y + rect.height * (renderer.figureTop || 0);
+  const figureHeight = rect.height * (renderer.figureHeight || 1);
+  const thigh = figureTop + figureHeight * 0.62;
+  box.style.top = '0px';
+  const offset = text.getBoundingClientRect().top + text.getBoundingClientRect().height / 2;
+  const top = Math.round(thigh - offset);
+  box.style.top = Math.max(6, Math.min(window.innerHeight - box.offsetHeight - 6, top)) + 'px';
 }
 
 function typeStoryLine(text) {
@@ -5733,7 +5784,7 @@ function onRootClick(event) {
     prefs.view = data.view;
     savePrefs();
     updateTabs();
-    return prefs.view === 'matrix' ? renderMatrix() : renderFeed(true);
+    return renderView(true);
   }
   if (data.ch) {
     state.channel = data.ch;
@@ -6444,7 +6495,7 @@ function simulatedVerify(date, route = state.card) {
 
 const DATA = {
 
-  build: {"version":"1.0.4","target":"preview","label":"预览"},
+  build: {"version":"1.0.5","target":"preview","label":"预览"},
 
   persona: {"key":"miku","name":"Miku","about":"看板娘：Miku（初音未来，占位）"},
 
@@ -9511,7 +9562,7 @@ h3 .sub {
   position: fixed;
   z-index: 1;
   left: 50%;
-  bottom: 0;
+  top: 0;
   transform: translateX(-50%);
   width: 88vw;
   max-width: 1280px;
@@ -9523,10 +9574,9 @@ h3 .sub {
   backdrop-filter: blur(10px) saturate(0.7);
   -webkit-backdrop-filter: blur(10px) saturate(0.7);
   border: 1px solid rgba(255, 255, 255, 0.22);
-  border-bottom: 0;
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.45);
-  padding: 44px 40px calc(24px + env(safe-area-inset-bottom, 0px));
+  border-radius: 20px;
+  box-shadow: 0 10px 44px rgba(0, 0, 0, 0.45);
+  padding: 44px 40px 24px;
   color: #f4f2f8;
 }
 .st-title {
@@ -9658,11 +9708,9 @@ h3 .sub {
 }
 @media (max-width: 720px) {
   .st-box {
-    width: 100vw;
+    width: 94vw;
     max-width: none;
-    border-left: 0;
-    border-right: 0;
-    padding: 36px 18px calc(22px + env(safe-area-inset-bottom, 0px));
+    padding: 34px 16px 20px;
   }
   .st-title {
     font-size: 11px;
@@ -9696,6 +9744,38 @@ h3 .sub {
 .st-box .btn:not(.primary):hover {
   background: rgba(255, 255, 255, 0.28);
   color: #fff;
+}
+
+.tabs .story-n.unread {
+  color: #f0a23b;
+  font-weight: 800;
+}
+.st-page {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 6px 0 20px;
+}
+.st-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.st-head b {
+  display: block;
+  font-size: 17px;
+}
+.st-head span {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.mini-story {
+  margin: 10px 0 2px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+}
+.mini-story .st-entry {
+  margin-bottom: 0;
 }
 `;
 
