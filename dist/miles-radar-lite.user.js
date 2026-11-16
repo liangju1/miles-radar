@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         里程票雷达 手机版
 // @namespace    https://github.com/liangju1/miles-radar
-// @version      1.0.8
+// @version      1.0.9
 // @description  在 aa.com 上批量查 AAdvantage 里程票空位，按“里程+税费”分档，小红书式卡片浏览，下单前一键核实。
 // @author       里程票雷达
 // @homepageURL  https://github.com/liangju1/miles-radar
@@ -2530,6 +2530,18 @@ function mascotHead(size, mood = '') {
 }
 
 const EXPRESSIONS = {
+
+  normal: {
+    head: {},
+    face: {
+      PARAM_EYE_L_SMILE: null, PARAM_EYE_R_SMILE: null,
+      PARAM_BROW_L_ANGLE: null, PARAM_BROW_R_ANGLE: null,
+      PARAM_BROW_L_FORM: null, PARAM_BROW_R_FORM: null,
+      PARAM_BROW_L_Y: null, PARAM_BROW_R_Y: null,
+      PARAM_MOUTH_FORM: null, PARAM_MOUTH_OPEN_Y: null,
+      PARAM_CHEEK: null,
+    },
+  },
   happy: {
     head: { PARAM_ANGLE_Z: 7, PARAM_ANGLE_Y: 3, PARAM_BODY_ANGLE_Z: 3 },
     face: {
@@ -2600,6 +2612,7 @@ const EXPRESSIONS = {
     head: { PARAM_ANGLE_Y: -4, PARAM_ANGLE_Z: 3 },
     face: {
       PARAM_EYE_L_OPEN: 0.72, PARAM_EYE_R_OPEN: 0.72,
+      PARAM_EYE_L_SMILE: 0, PARAM_EYE_R_SMILE: 0,
       PARAM_BROW_L_ANGLE: -0.7, PARAM_BROW_R_ANGLE: -0.7,
       PARAM_BROW_L_FORM: -0.5, PARAM_BROW_R_FORM: -0.5,
       PARAM_MOUTH_FORM: -0.5, PARAM_MOUTH_OPEN_Y: 0.1,
@@ -2642,6 +2655,7 @@ function stillRenderer() {
       this.draw();
     },
     tap() {},
+    stopMotion() {},
     destroy() {
       if (this.el) this.el.innerHTML = '';
     },
@@ -2900,6 +2914,18 @@ function live2dRenderer(fallback) {
       this.weightFrom = 0;
       this.weightTo = 0;
       this.blendAt = 0;
+      const write = groups => {
+        const w = this.weight;
+        for (const group of groups) {
+          const pose = this.pose[group];
+          for (const id in pose) {
+            const base = defaultOf(id);
+
+            const target = pose[id] == null ? base : pose[id];
+            core.setParameterValueById(id, base + (target - base) * w);
+          }
+        }
+      };
       this.onExpression = () => {
         if (!this.pose) return;
         const span = this.snap
@@ -2912,15 +2938,14 @@ function live2dRenderer(fallback) {
           this.pose = null;
           return;
         }
-        for (const group of ['head', 'face']) {
-          const pose = this.pose[group];
-          for (const id in pose) {
-            const base = defaultOf(id);
-            core.setParameterValueById(id, base + (pose[id] - base) * w);
-          }
-        }
+        write(['head', 'face']);
+      };
+
+      this.onExpressionLate = () => {
+        if (this.pose && this.weight > 0.002) write(['face']);
       };
       internal.on('afterMotionUpdate', this.onExpression);
+      internal.on('beforeModelUpdate', this.onExpressionLate);
 
       if (this.pendingMood) {
         const mood = this.pendingMood;
@@ -2930,7 +2955,14 @@ function live2dRenderer(fallback) {
     },
 
     resize(width, height) {
-      if (!this.app || !this.model || !this.layout) return false;
+      if (!this.app || !this.model || !this.layout) {
+
+        if (this.el && fallback.draw) {
+          fallback.draw();
+          return true;
+        }
+        return false;
+      }
       this.app.renderer.resize(width, height);
       this.app.view.style.width = width + 'px';
       this.app.view.style.height = height + 'px';
@@ -2962,10 +2994,16 @@ function live2dRenderer(fallback) {
     tap() {
       if (this.model) this.model.motion('Tap');
     },
+
+    stopMotion() {
+      const manager = this.model && this.model.internalModel && this.model.internalModel.motionManager;
+      if (manager && manager.stopAllMotions) manager.stopAllMotions();
+    },
     destroy() {
       this.destroyed = true;
       if (this.model && this.onExpression) {
         this.model.internalModel.off('afterMotionUpdate', this.onExpression);
+        this.model.internalModel.off('beforeModelUpdate', this.onExpressionLate);
       }
       if (this.followPointer) window.removeEventListener('pointermove', this.followPointer);
       if (this.pauseWhenHidden)
@@ -3378,6 +3416,7 @@ function mount() {
   placeDock();
   window.addEventListener('resize', () => {
     placeDock();
+    if (state.story) placeStoryBox();
     if (state.fullOpen) renderFeed(false);
   });
   Scan.listeners.add(onScan);
@@ -3687,7 +3726,8 @@ function bindDock() {
       return;
     }
     wake();
-    if (state.renderer) state.renderer.tap();
+
+    if (state.renderer && !state.story) state.renderer.tap();
     onDockClick();
   });
   dock.addEventListener('pointerenter', wake);
@@ -5596,6 +5636,7 @@ function openStory(index) {
     window.addEventListener('keydown', state.storyKeys, true);
   }
   placeDock();
+  if (state.renderer && state.renderer.stopMotion) state.renderer.stopMotion();
   renderStoryLine();
 }
 
@@ -5641,7 +5682,13 @@ function renderStoryLine() {
   }
   placeDock();
   placeStoryBox();
+
+  requestAnimationFrame(() => {
+    if (state.story) placeStoryBox();
+  });
   const line = story.lines[current.line];
+
+  if (state.renderer && state.renderer.stopMotion) state.renderer.stopMotion();
   setExpression(lineExpression(line));
   typeStoryLine(line);
 }
@@ -5662,22 +5709,46 @@ function lineExpression(line) {
   if (/呃\.\.\.|不好意思|害羞/.test(text)) return 'shy';
   if (/好过分|可恶|凭什么|什么东西啊/.test(text)) return 'angry';
   if (/！！|欸\.\.\.！/.test(text)) return 'surprised';
-  return '';
+  return 'normal';
 }
 
 function placeStoryBox() {
   const box = $('.st-box');
   const text = $('.st-text');
-  if (!box || !text || !state.dockRect) return;
+  if (!box || !text) return;
   const renderer = state.renderer || {};
-  const rect = state.dockRect;
-  const figureTop = rect.y + rect.height * (renderer.figureTop || 0);
-  const figureHeight = rect.height * (renderer.figureHeight || 1);
-  const thigh = figureTop + figureHeight * 0.62;
+
+  const figure = $('.dock canvas.l2d') || $('.dock img') || $('.dock');
+  const live = figure ? figure.getBoundingClientRect() : null;
+
+  const gliding = $('.dock').classList.contains('glide');
+  const rect = !gliding && live && live.height > 40 ? live : state.dockRect || live;
+  if (!rect) return;
+  if (gliding) {
+    clearTimeout(state.storyBoxTimer);
+    state.storyBoxTimer = setTimeout(() => {
+      if (state.story) placeStoryBox();
+    }, 620);
+  }
+  const rectTop = rect.y == null ? rect.top : rect.y;
+  let topFrac = renderer.figureTop || 0;
+  let heightFrac = renderer.figureHeight || 1;
+
+  if (!(heightFrac > 0.25) || topFrac + heightFrac > 1.05) {
+    topFrac = 0;
+    heightFrac = 1;
+  }
+  const figureTop = rectTop + rect.height * topFrac;
+  const figureHeight = rect.height * heightFrac;
   box.style.top = '0px';
-  const offset = text.getBoundingClientRect().top + text.getBoundingClientRect().height / 2;
-  const top = Math.round(thigh - offset);
-  box.style.top = Math.max(6, Math.min(window.innerHeight - box.offsetHeight - 6, top)) + 'px';
+  const textRect = text.getBoundingClientRect();
+  const offset = textRect.top + textRect.height / 2;
+
+  const waist = figureTop + figureHeight * 0.5;
+  const feet = figureTop + figureHeight * 0.8;
+  const centre = Math.max(waist, Math.min(feet, figureTop + figureHeight * 0.62));
+  const room = Math.max(6, window.innerHeight - box.offsetHeight - 6);
+  box.style.top = Math.max(6, Math.min(room, Math.round(centre - offset))) + 'px';
 }
 
 function typeStoryLine(text) {
@@ -6694,7 +6765,7 @@ async function start() {
 
 const DATA = {
 
-  build: {"version":"1.0.8","target":"lite","label":"手机版"},
+  build: {"version":"1.0.9","target":"lite","label":"手机版"},
 
   persona: {"key":"miku","name":"Miku","about":"看板娘：Miku（初音未来，占位）"},
 
