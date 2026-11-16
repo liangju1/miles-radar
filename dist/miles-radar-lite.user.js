@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         里程票雷达 手机版
 // @namespace    https://github.com/liangju1/miles-radar
-// @version      1.0.6
+// @version      1.0.7
 // @description  在 aa.com 上批量查 AAdvantage 里程票空位，按“里程+税费”分档，小红书式卡片浏览，下单前一键核实。
 // @author       里程票雷达
 // @homepageURL  https://github.com/liangju1/miles-radar
@@ -2552,17 +2552,24 @@ const EXPRESSIONS = {
     },
   },
 
-  cry: {
-    head: { PARAM_ANGLE_Y: -9, PARAM_ANGLE_Z: 5, PARAM_BODY_ANGLE_Y: -4 },
+  down: {
+
+    head: {
+      PARAM_ANGLE_X: -7,
+      PARAM_ANGLE_Y: -26,
+      PARAM_ANGLE_Z: -9,
+      PARAM_BODY_ANGLE_X: -6,
+      PARAM_BODY_ANGLE_Y: -9,
+      PARAM_BODY_ANGLE_Z: -5,
+    },
     face: {
-      PARAM_EYE_L_OPEN: 0.3, PARAM_EYE_R_OPEN: 0.3,
+      PARAM_EYE_L_OPEN: 0.6, PARAM_EYE_R_OPEN: 0.6,
       PARAM_EYE_L_SMILE: 0, PARAM_EYE_R_SMILE: 0,
-      PARAM_EYE_BALL_Y: -0.4,
+      PARAM_EYE_BALL_Y: -1, PARAM_EYE_BALL_X: -0.3,
       PARAM_BROW_L_ANGLE: -1, PARAM_BROW_R_ANGLE: -1,
-      PARAM_BROW_L_FORM: -0.8, PARAM_BROW_R_FORM: -0.8,
-      PARAM_BROW_L_Y: -0.3, PARAM_BROW_R_Y: -0.3,
-      PARAM_MOUTH_FORM: -1, PARAM_MOUTH_OPEN_Y: 0.3,
-      PARAM_CHEEK: 0.8,
+      PARAM_BROW_L_FORM: -0.9, PARAM_BROW_R_FORM: -0.9,
+      PARAM_BROW_L_Y: -0.5, PARAM_BROW_R_Y: -0.5,
+      PARAM_MOUTH_FORM: -1, PARAM_MOUTH_OPEN_Y: 0.15,
     },
   },
   shy: {
@@ -2627,7 +2634,7 @@ function stillRenderer() {
 
     setMood(mood) {
 
-      const face = { cry: 'worry', shy: 'happy', angry: 'worry' }[mood] || mood;
+      const face = { down: 'worry', shy: 'happy', angry: 'worry' }[mood] || mood;
       if (!useSvg || face === this.mood) return;
       this.mood = face;
       this.draw();
@@ -3030,8 +3037,8 @@ const MOOD_DECOS = {
   happy: '<i class="deco spark">✦</i><i class="deco spark s2">✦</i>',
   surprised: '<i class="deco bang">!</i><i class="deco spark">✦</i>',
   worry: '<i class="deco drop"></i>',
-  cry: '<i class="deco tear l"></i><i class="deco tear r"></i>',
-  shy: '<i class="deco steam">～</i><i class="deco steam s2">～</i>',
+
+  shy: '',
   angry: '<i class="deco anger"><b></b><b></b></i>',
   sleep: '<i class="deco zz">z<small>z</small></i>',
 };
@@ -3503,6 +3510,7 @@ function renderDock() {
   const renderer = state.renderer || {};
   const faceY = (renderer.figureTop || 0) + (renderer.figureHeight || 1) * 0.115;
   decos.style.setProperty('--face-y', (faceY * 100).toFixed(1) + '%');
+  decos.style.setProperty('--deco-s', Math.round(dockWidth() * 0.055) + 'px');
 
   const ring = $('.ring', dock);
   ring.hidden = !busy;
@@ -3720,14 +3728,14 @@ const LINE_MOODS = {
   scan_half: 'happy',
   scan_done_found: 'happy',
   scan_done_new: 'surprised',
-  scan_done_none: 'cry',
+  scan_done_none: 'down',
   blocked: 'worry',
   human_check: 'worry',
   fav: 'happy',
   unfav: 'worry',
   verify_ok: 'happy',
   verify_mixed: 'angry',
-  verify_gone: 'cry',
+  verify_gone: 'down',
   verify_airport: 'angry',
   verify_seats: 'worry',
   verify_failed: 'worry',
@@ -5607,7 +5615,7 @@ function renderStoryLine() {
 }
 
 const CUE_EXPRESSIONS = [
-  [/[（(](哭|泪|呜)/, 'cry'],
+  [/[（(](哭|泪|呜|沮丧)/, 'down'],
   [/[（(](笑|開心|开心|星星眼)/, 'happy'],
   [/[（(](叹气|嘆氣|心虚|汗)/, 'worry'],
   [/[（(](害羞|脸红|臉紅)/, 'shy'],
@@ -6647,7 +6655,7 @@ async function start() {
 
 const DATA = {
 
-  build: {"version":"1.0.6","target":"lite","label":"手机版"},
+  build: {"version":"1.0.7","target":"lite","label":"手机版"},
 
   persona: {"key":"miku","name":"Miku","about":"看板娘：Miku（初音未来，占位）"},
 
@@ -6975,76 +6983,27 @@ img.fig {
   background: #128a5b;
   color: #fff;
 }
-.dock .tear {
-  top: var(--face-y, 12%);
-  width: 7px;
-  height: 10px;
-  background: linear-gradient(180deg, #cfeaff, #7cc2f5);
-  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
-  box-shadow: 0 0 3px rgba(124, 194, 245, 0.8);
-  animation: ar-tear 1.4s ease-in infinite;
-}
-.dock .tear.l {
-  left: 41.5%;
-}
-.dock .tear.r {
-  left: 55.5%;
-  animation-delay: 0.5s;
-}
-@keyframes ar-tear {
-  0% {
-    opacity: 0;
-    transform: translateY(0) scale(0.6);
-  }
-  25% {
-    opacity: 1;
-    transform: translateY(2px) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(22px) scale(0.85);
-  }
-}
-.dock .steam {
-  top: calc(var(--face-y, 12%) - 6px);
-  left: 30%;
-  color: #ffb3cf;
-  font-size: 13px;
-  font-weight: 700;
-  animation: ar-steam 1.6s ease-out infinite;
-}
-.dock .steam.s2 {
-  left: 64%;
-  animation-delay: 0.6s;
-}
-@keyframes ar-steam {
-  0% {
-    opacity: 0;
-    transform: translateY(4px) scale(0.7);
-  }
-  40% {
-    opacity: 0.9;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-12px) scale(1.1);
-  }
+.dock.m-down .fig {
+  transform: translateY(7px) rotate(-1.6deg);
+  transform-origin: 50% 85%;
+  transition: transform 0.35s ease-out;
 }
 .dock .anger {
-  top: calc(var(--face-y, 12%) - 10px);
-  left: 64%;
-  width: 16px;
-  height: 16px;
+  top: calc(var(--face-y, 12%) - var(--deco-s, 16px) * 0.9);
+  left: 58%;
+  width: calc(var(--deco-s, 16px) * 1.1);
+  height: calc(var(--deco-s, 16px) * 1.1);
+  filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 2px #fff);
   animation: ar-anger 1.1s ease-in-out infinite;
 }
 .dock .anger b {
   position: absolute;
   inset: 0;
   margin: auto;
-  width: 14px;
-  height: 3.5px;
+  width: 100%;
+  height: calc(var(--deco-s, 16px) * 0.26);
   border-radius: 2px;
-  background: #e8456b;
+  background: var(--primary);
 }
 .dock .anger b:first-child {
   transform: rotate(45deg);
