@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         里程票雷达 手机版
 // @namespace    https://github.com/liangju1/miles-radar
-// @version      1.0.7
+// @version      1.0.8
 // @description  在 aa.com 上批量查 AAdvantage 里程票空位，按“里程+税费”分档，小红书式卡片浏览，下单前一键核实。
 // @author       里程票雷达
 // @homepageURL  https://github.com/liangju1/miles-radar
@@ -2615,7 +2615,9 @@ const EXPRESSIONS = {
     },
   },
 };
-const EXPRESSION_BLEND = 250;
+
+const EXPRESSION_BLEND = 120;
+const EXPRESSION_SNAP = 400;
 
 function stillRenderer() {
   const useSvg = !DATA.mascot.normal;
@@ -2853,16 +2855,6 @@ function live2dRenderer(fallback) {
         app.destroy(true);
         return;
       }
-
-      const scale = Math.min(
-        width / model.internalModel.width,
-        height / model.internalModel.height,
-      );
-      model.scale.set(scale);
-      model.x = (width - model.internalModel.width * scale) / 2;
-      model.y = height - model.internalModel.height * scale;
-      this.figureTop = model.y / height;
-      this.figureHeight = (model.internalModel.height * scale) / height;
       app.stage.addChild(model);
       app.view.className = 'fig l2d';
       app.view.style.width = width + 'px';
@@ -2873,11 +2865,20 @@ function live2dRenderer(fallback) {
       this.model = model;
 
       this.bindExpression(model);
+      this.layout = (w, h) => {
+        const fit = Math.min(w / model.internalModel.width, h / model.internalModel.height);
+        model.scale.set(fit);
+        model.x = (w - model.internalModel.width * fit) / 2;
+        model.y = h - model.internalModel.height * fit;
+        this.figureTop = model.y / h;
+        this.figureHeight = (model.internalModel.height * fit) / h;
+      };
 
       this.followPointer = event => {
         const rect = app.view.getBoundingClientRect();
         model.focus(event.clientX - rect.left, event.clientY - rect.top);
       };
+      this.layout(width, height);
       this.pauseWhenHidden = () => (document.hidden ? app.ticker.stop() : app.ticker.start());
       window.addEventListener('pointermove', this.followPointer, { passive: true });
       document.addEventListener('visibilitychange', this.pauseWhenHidden);
@@ -2901,7 +2902,9 @@ function live2dRenderer(fallback) {
       this.blendAt = 0;
       this.onExpression = () => {
         if (!this.pose) return;
-        const span = Math.min(1, (performance.now() - this.blendAt) / EXPRESSION_BLEND);
+        const span = this.snap
+          ? 1
+          : Math.min(1, (performance.now() - this.blendAt) / EXPRESSION_BLEND);
         const eased = span * span * (3 - 2 * span);
         const w = this.weightFrom + (this.weightTo - this.weightFrom) * eased;
         this.weight = w;
@@ -2926,17 +2929,35 @@ function live2dRenderer(fallback) {
       }
     },
 
+    resize(width, height) {
+      if (!this.app || !this.model || !this.layout) return false;
+      this.app.renderer.resize(width, height);
+      this.app.view.style.width = width + 'px';
+      this.app.view.style.height = height + 'px';
+      this.layout(width, height);
+      return true;
+    },
+
     setMood(mood) {
       if (!this.model) {
         this.pendingMood = mood;
         return;
       }
       const next = EXPRESSIONS[mood];
+      const now = performance.now();
+
+      this.snap = this.changedAt != null && now - this.changedAt < EXPRESSION_SNAP;
+      this.changedAt = now;
 
       if (next) this.pose = next;
-      this.weightFrom = this.weight;
+      this.weightFrom = this.snap ? (next ? 1 : 0) : this.weight;
       this.weightTo = next ? 1 : 0;
-      this.blendAt = performance.now();
+      this.blendAt = now;
+      if (this.snap && !next) {
+
+        this.weight = 0;
+        this.pose = null;
+      }
     },
     tap() {
       if (this.model) this.model.motion('Tap');
@@ -3456,14 +3477,14 @@ function placeDock() {
   dock.classList.toggle('side-l', x + width / 2 < window.innerWidth / 2);
 
   const size = width + 'x' + height;
-  if (
-    state.renderer &&
-    state.rendererSize &&
-    state.rendererSize !== size &&
-    state.renderer.kind === 'live2d'
-  ) {
-    state.renderer.destroy();
-    mountRenderer();
+  if (state.renderer && state.rendererSize && state.rendererSize !== size) {
+    const resized = state.renderer.resize && state.renderer.resize(width, height);
+    if (!resized && state.renderer.kind === 'live2d') {
+      state.renderer.destroy();
+      mountRenderer();
+    } else if (!resized && state.renderer.draw) {
+      state.renderer.draw();
+    }
   }
   state.rendererSize = size;
   positionFloating();
@@ -3472,6 +3493,9 @@ function placeDock() {
 function mountRenderer() {
   state.renderer = makeRenderer();
   state.rendererKind = state.renderer.kind;
+
+  state.lastMood = null;
+  if (state.mood) state.renderer.setMood(currentMood());
   Promise.resolve(state.renderer.mount($('.dock .holder'))).then(() => {
     if (state.renderer.kind !== 'live2d-failed') return;
     state.rendererKind = DATA.mascot.normal ? 'image' : 'svg';
@@ -5592,21 +5616,29 @@ function renderStoryLine() {
   const current = state.story;
   if (!current) return;
   const story = storyList()[current.index];
-  const box = $('.story');
   const atEnd = current.line >= story.lines.length;
-  box.innerHTML = `<div class="st-scrim"></div>
-    <div class="st-box"><span class="st-title">${esc(story.title)}</span>
+
+  if (!$('.st-box')) {
+    $('.story').innerHTML = `<div class="st-scrim"></div>
+    <div class="st-box"><span class="st-title"></span>
       <button class="x st-close" data-act="closeStory" aria-label="关闭">×</button>
       <p class="st-text"></p>
-      ${atEnd ? '<div class="st-end"><b>看完了</b><button class="btn primary" data-act="replayStory">再看一次</button><button class="btn" data-act="closeStory">关闭</button></div>' : '<i class="st-next" hidden>▼</i>'}</div>`;
+      <i class="st-next" hidden>▼</i>
+      <div class="st-end" hidden><b>看完了</b><button class="btn primary" data-act="replayStory">再看一次</button><button class="btn" data-act="closeStory">关闭</button></div></div>`;
+  }
+  if ($('.st-title').textContent !== story.title) $('.st-title').textContent = story.title;
+  $('.st-end').hidden = !atEnd;
+  $('.st-next').hidden = true;
+
+  $('.st-next').style.display = atEnd ? 'none' : '';
+  saveStoryPos(current.index, current.line, atEnd);
   if (atEnd) {
-    saveStoryPos(current.index, current.line, true);
+    $('.st-text').textContent = '';
     placeDock();
     placeStoryBox();
     renderDock();
     return;
   }
-  saveStoryPos(current.index, current.line, false);
   placeDock();
   placeStoryBox();
   const line = story.lines[current.line];
@@ -5651,23 +5683,29 @@ function placeStoryBox() {
 function typeStoryLine(text) {
   const el = $('.st-text');
   const current = state.story;
-  clearInterval(current.typing);
+  clearTimeout(current.typing);
+  el.textContent = '';
   if (reducedMotion()) {
     el.textContent = text;
     current.typing = null;
     $('.st-next').hidden = false;
     return;
   }
-  let shown = 0;
-  current.typing = setInterval(() => {
-    el.textContent = text.slice(0, ++shown);
-    if (shown >= text.length) {
-      clearInterval(current.typing);
-      current.typing = null;
-      const arrow = $('.st-next');
-      if (arrow) arrow.hidden = false;
-    }
-  }, TYPE_MS);
+
+  const chars = Array.from(text);
+  const frag = document.createDocumentFragment();
+  chars.forEach((ch, index) => {
+    const span = document.createElement('span');
+    span.textContent = ch;
+    span.style.animationDelay = index * TYPE_MS + 'ms';
+    frag.appendChild(span);
+  });
+  el.appendChild(frag);
+  current.typing = setTimeout(() => {
+    current.typing = null;
+    const arrow = $('.st-next');
+    if (arrow) arrow.hidden = false;
+  }, chars.length * TYPE_MS + 60);
 }
 
 function advanceStory() {
@@ -5675,8 +5713,9 @@ function advanceStory() {
   if (!current) return;
   const story = storyList()[current.index];
   if (current.typing) {
-    clearInterval(current.typing);
+    clearTimeout(current.typing);
     current.typing = null;
+
     $('.st-text').textContent = story.lines[current.line];
     const arrow = $('.st-next');
     if (arrow) arrow.hidden = false;
@@ -5689,7 +5728,7 @@ function advanceStory() {
 
 function closeStory() {
   if (!state.story) return;
-  clearInterval(state.story.typing);
+  clearTimeout(state.story.typing);
   state.story = null;
   setExpression('');
   if (state.storyKeys) {
@@ -6655,7 +6694,7 @@ async function start() {
 
 const DATA = {
 
-  build: {"version":"1.0.7","target":"lite","label":"手机版"},
+  build: {"version":"1.0.8","target":"lite","label":"手机版"},
 
   persona: {"key":"miku","name":"Miku","about":"看板娘：Miku（初音未来，占位）"},
 
@@ -9799,8 +9838,19 @@ h3 .sub {
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 20px;
   box-shadow: 0 10px 44px rgba(0, 0, 0, 0.45);
-  padding: 44px 40px 24px;
+  padding: 50px 40px 30px;
   color: #f4f2f8;
+    min-height: 9.6em;
+  justify-content: flex-start;
+  transition:
+    height 0.22s ease-out,
+    min-height 0.22s ease-out,
+    top 0.22s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .st-box {
+    transition: none;
+  }
 }
 .st-title {
   position: absolute;
@@ -9829,6 +9879,24 @@ h3 .sub {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
   min-height: 0;
   white-space: pre-wrap;
+}
+.st-text span {
+  animation: ar-type 0.12s ease-out backwards;
+}
+@keyframes ar-type {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .st-text span {
+    animation: none;
+  }
+}
+.st-next[hidden] {
+  display: block;
+  visibility: hidden;
+  animation: none;
 }
 .st-next {
   align-self: flex-end;
@@ -9933,7 +10001,8 @@ h3 .sub {
   .st-box {
     width: 94vw;
     max-width: none;
-    padding: 34px 16px 20px;
+    padding: 39px 16px 25px;
+    min-height: 9.2em;
   }
   .st-title {
     font-size: 11px;
