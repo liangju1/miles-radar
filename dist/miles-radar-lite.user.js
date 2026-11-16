@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         里程票雷达 手机版
 // @namespace    https://github.com/liangju1/miles-radar
-// @version      1.0.9
+// @version      1.0.10
 // @description  在 aa.com 上批量查 AAdvantage 里程票空位，按“里程+税费”分档，小红书式卡片浏览，下单前一键核实。
 // @author       里程票雷达
 // @homepageURL  https://github.com/liangju1/miles-radar
@@ -5740,15 +5740,38 @@ function placeStoryBox() {
   }
   const figureTop = rectTop + rect.height * topFrac;
   const figureHeight = rect.height * heightFrac;
-  box.style.top = '0px';
-  const textRect = text.getBoundingClientRect();
-  const offset = textRect.top + textRect.height / 2;
+
+  const offset = text.offsetTop + text.offsetHeight / 2;
 
   const waist = figureTop + figureHeight * 0.5;
   const feet = figureTop + figureHeight * 0.8;
-  const centre = Math.max(waist, Math.min(feet, figureTop + figureHeight * 0.62));
+  let centre = Math.max(waist, Math.min(feet, figureTop + figureHeight * 0.62));
+
+  const tall = figureHeight > window.innerHeight * 0.3;
+  if (!tall || centre < figureTop) centre = window.innerHeight * 0.62;
   const room = Math.max(6, window.innerHeight - box.offsetHeight - 6);
-  box.style.top = Math.max(6, Math.min(room, Math.round(centre - offset))) + 'px';
+  const put = value => (box.style.top = Math.max(6, Math.min(room, Math.round(value - offset))) + 'px');
+
+  const first = !box.dataset.placed;
+  if (first) box.style.transition = 'none';
+  put(centre);
+
+  const placed = box.getBoundingClientRect();
+  if (placed.bottom < figureTop + figureHeight * 0.35) {
+    Diagnostics.note(
+      `对话框锚点不对，已兜底：人形 ${Math.round(figureTop)}+${Math.round(figureHeight)}，` +
+        `框 ${Math.round(placed.top)}-${Math.round(placed.bottom)}，画面高 ${window.innerHeight}`,
+    );
+
+    const thigh = figureTop + figureHeight * 0.62;
+    box.style.top =
+      Math.max(6, Math.min(room, Math.round(thigh - box.offsetHeight / 2))) + 'px';
+  }
+  if (first) {
+    void box.offsetHeight;
+    box.style.transition = '';
+    box.dataset.placed = '1';
+  }
 }
 
 function typeStoryLine(text) {
@@ -6765,7 +6788,7 @@ async function start() {
 
 const DATA = {
 
-  build: {"version":"1.0.9","target":"lite","label":"手机版"},
+  build: {"version":"1.0.10","target":"lite","label":"手机版"},
 
   persona: {"key":"miku","name":"Miku","about":"看板娘：Miku（初音未来，占位）"},
 
