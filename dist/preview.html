@@ -780,14 +780,14 @@ const bandIndex = miles => BANDS.findIndex(([limit]) => miles <= limit);
 const bandId = row => 'band' + bandIndex(row.miles);
 
 const sameTier = (check, row) => {
-  const miles = row.calMiles != null ? row.calMiles : row.miles;
-  const cash = row.calCash != null ? row.calCash : row.cash;
-  return (
-    !!check &&
-    check.cal_miles === miles &&
-    check.cal_cash != null &&
-    Math.abs(check.cal_cash - cash) < 0.005
-  );
+
+  const repriced = row.calMiles != null;
+  const miles = repriced ? row.calMiles : row.miles;
+  const cash = repriced ? row.calCash : row.cash;
+  if (!check || check.cal_miles !== miles) return false;
+
+  if (check.cal_cash == null || cash == null) return check.cal_cash == null && cash == null;
+  return Math.abs(check.cal_cash - cash) < 0.005;
 };
 
 function analyze(pax, cabin) {
@@ -798,7 +798,10 @@ function analyze(pax, cabin) {
   for (const [key, route] of routes) {
 
     const checkOf = date => {
-      const check = checks[`${route.o}|${route.d}|${cabin}|${pax}|${date}`];
+      const check =
+        checks[
+          checkKey({ o: route.o, d: route.d, cabin, pax, date, program: route.program })
+        ];
       return check && check.ev ? check : null;
     };
 
@@ -833,6 +836,8 @@ function loadRoutes(pax, cabin) {
     const [routePax, routeCabin, o, d, keyProgram] = key.split('|');
     if (+routePax !== pax || routeCabin !== cabin) continue;
     const program = keyProgram || 'AA';
+
+    if (program !== 'AA' && typeof fetchAlaskaMonth !== 'function') continue;
     const record = DB.route(key);
     const rows = Object.entries(record.dates)
       .map(([date, v]) => ({
@@ -842,6 +847,7 @@ function loadRoutes(pax, cabin) {
         first: v[2],
         scanned: v[3],
         new: v[4],
+        anyCabin: !!v[5],
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
     const lastScan = Object.values(record.months).sort().pop() || '';
@@ -911,7 +917,11 @@ function buildTiers(rows, checkOf, keyOf = tierId, dynamic = false) {
     if (dynamic) {
 
     } else if (passed.length) {
-      status = 'trusted';
+
+      const flagged = members.filter(row => row.anyCabin).length;
+      if (passed.length >= members.length) status = 'verified';
+      else if (!flagged) status = 'trusted';
+      else status = 'lead';
       reference = newest(passed);
     } else if (failed.length) {
       status = 'excluded';
@@ -925,6 +935,8 @@ function buildTiers(rows, checkOf, keyOf = tierId, dynamic = false) {
     const cheapest = members.slice().sort((a, b) => a.miles - b.miles || a.cash - b.cash)[0];
     tiers.set(id, {
       id,
+
+      anyCabin: members.some(row => row.anyCabin),
       miles: cheapest.miles,
       cash: cheapest.cash,
       dynamic,
@@ -979,7 +991,8 @@ function busiestMonth(dates) {
 
 function dateView(row, tier, ownCheck) {
   const check = ownCheck && sameTier(ownCheck, row) ? ownCheck : null;
-  let status = tier.status;
+
+  let status = row.anyCabin && !check ? 'lead' : tier.status;
   if (check) {
     if (check.status === 'diff') {
       status = 'repriced';
@@ -1000,6 +1013,7 @@ function dateView(row, tier, ownCheck) {
     tier: tier.id,
     new: !!row.new,
     scanned: row.scanned,
+    anyCabin: !!row.anyCabin,
     check,
   };
 }
@@ -1010,6 +1024,8 @@ function routeSummary(route, tiers, dates, twin) {
   return {
     o: route.o,
     d: route.d,
+
+    program: route.program || 'AA',
     days: route.rows.length,
     usable: countOf(x => x.status === 'verified' || x.status === 'trusted'),
     leads: countOf(x => x.status === 'lead'),
@@ -1025,6 +1041,14 @@ function routeSummary(route, tiers, dates, twin) {
   };
 }
 
+const LOCK_TTL = 25000;
+
+const LOCK_SKEW = 5000;
+const lockUsable = lock => {
+  if (!lock) return false;
+  const age = Date.now() - (lock.at || 0);
+  return age >= -LOCK_SKEW && age < LOCK_TTL;
+};
 const AS_MAX_MONTHS = 3;
 const AS_PAGE_BYTES = 3.1 * 1024 * 1024;
 function scanPrograms(params) {
@@ -1041,6 +1065,9 @@ function openBackgroundTab(url) {
     GM.openInTab(url, { active: false });
   else window.open(url, '_blank');
 }
+
+const ON_AA_SITE = /(^|\.)aa\.com$/.test(location.hostname);
+const canRunJobsHere = jobs => ON_AA_SITE || !jobs.some(job => (job.program || 'AA') === 'AA');
 
 function planJobs(params) {
   const jobs = [];
@@ -1173,6 +1200,46 @@ const Scan = {
     return this.paused ? new Promise(resolve => this.waiters.push(resolve)) : Promise.resolve();
   },
 
+  tabId: Math.random().toString(36).slice(2),
+
+  probeLock() {
+    const lock = Store.get('scanLock', null);
+    if (!lock || lock.id === this.tabId) return;
+    if (!lockUsable(lock)) {
+
+      Store.remove('scanLock');
+      if (typeof renderStatus === 'function') renderStatus();
+    }
+  },
+
+  async claim() {
+    const token = Math.random().toString(36).slice(2, 10) + this.tabId;
+    const lock = Store.get('scanLock', null);
+    if (lock && lock.id !== this.tabId && lockUsable(lock)) return false;
+    Store.set('scanLock', { id: this.tabId, token, at: Date.now() });
+    await sleep(140 + Math.floor(Math.random() * 160));
+    const now = Store.get('scanLock', null);
+    return !!now && now.token === token;
+  },
+  hold() {
+    const lock = Store.get('scanLock', null);
+
+    Store.set('scanLock', {
+      id: this.tabId,
+      token: lock && lock.id === this.tabId ? lock.token : undefined,
+      at: Date.now(),
+    });
+  },
+  release() {
+    const lock = Store.get('scanLock', null);
+    if (!lock || lock.id === this.tabId) Store.remove('scanLock');
+  },
+
+  heldElsewhere() {
+    const lock = Store.get('scanLock', null);
+    return !!(lock && lock.id !== this.tabId && lockUsable(lock));
+  },
+
   saveRemaining(params, queue, autoResume) {
     Store.set('scanResume', {
       params,
@@ -1184,6 +1251,8 @@ const Scan = {
 
   async start(params, resumeJobs) {
     if (this.running()) throw new Error(`${persona().name}已经在扫描啦`);
+    if (this.heldElsewhere() || !(await this.claim()))
+      throw new Error('另一个标签页在扫描，等它扫完再来～');
     const jobs =
       resumeJobs && resumeJobs.length ? resumeJobs : shuffleWithinMonths(planJobs(params));
     if (!jobs.length) throw new Error('请至少选一个出发地和一个目的地');
@@ -1206,6 +1275,22 @@ const Scan = {
     const newTiers = new Set();
     const foundTiers = new Set();
     const queue = jobs.slice();
+
+    const saveOnLeave = () => {
+      if (queue.length) this.saveRemaining(params, queue, false);
+
+      Scan.release();
+    };
+    window.addEventListener('pagehide', saveOnLeave);
+    window.addEventListener('beforeunload', saveOnLeave);
+    const beat = setInterval(() => Scan.hold(), 4000);
+    Scan.hold();
+    const releaseHooks = () => {
+      window.removeEventListener('pagehide', saveOnLeave);
+      window.removeEventListener('beforeunload', saveOnLeave);
+      clearInterval(beat);
+      Scan.release();
+    };
     let gaveUp = false;
     let finished = false;
     let pausedAt = 0;
@@ -1331,6 +1416,7 @@ const Scan = {
     await watching;
 
     const stoppedForCheck = gaveUp && queue.length > 0;
+    releaseHooks();
     if (stoppedForCheck) this.saveRemaining(params, queue, false);
     else Store.remove('scanResume');
     const last = {
@@ -1435,13 +1521,19 @@ const Store = {
     this.listeners.set(key, callback);
     if (this.mode === 'gm' && typeof GM_addValueChangeListener === 'function') {
       GM_addValueChangeListener(key, (name, oldValue, newValue) => callback(newValue));
+    } else if (!this.storageHooked) {
+
+      this.storageHooked = true;
+      window.addEventListener('storage', event => this.onStorageEvent(event));
     }
   },
 
   onStorageEvent(event) {
-    if (!event.key || !event.key.startsWith('ar:')) return;
-    const callback = this.listeners.get(event.key.slice(3));
-    if (callback) callback(this.get(event.key.slice(3)));
+
+    const match = event.key && event.key.match(/^[a-z]{2,4}:(.+)$/);
+    if (!match) return;
+    const callback = this.listeners.get(match[1]);
+    if (callback) callback(this.get(match[1]));
   },
 
   async pollChanges() {
@@ -1454,6 +1546,10 @@ const Store = {
     }
   },
 };
+
+const checkKey = item =>
+  `${item.o}|${item.d}|${item.cabin}|${item.pax}|${item.date}` +
+  (item.program && item.program !== 'AA' ? '|' + item.program : '');
 
 function routeStoreKey(job) {
   const base = `${job.pax}|${job.cabin}|${job.o}|${job.d}`;
@@ -1515,7 +1611,7 @@ const DB = {
     let fresh = 0;
     let skipped = 0;
     const [floor, cap] = range || [null, null];
-    for (const [date, miles, cash] of days) {
+    for (const [date, miles, cash, anyCabin] of days) {
       if (date < job.date || date > lastDay || typeof miles !== 'number') continue;
       if ((cap != null && miles > cap) || (floor != null && miles < floor)) {
         skipped++;
@@ -1529,6 +1625,8 @@ const DB = {
         firstSeen,
         now,
         isNew ? 1 : 0,
+
+        anyCabin ? 1 : 0,
       ];
       kept++;
       if (isNew) fresh++;
@@ -1550,9 +1648,10 @@ const DB = {
   },
 
   saveCheck(item, result) {
+
     const calendar = this.route(routeStoreKey(item)).dates[item.date];
     const checks = this.checks();
-    checks[`${item.o}|${item.d}|${item.cabin}|${item.pax}|${item.date}`] = Object.assign(
+    checks[checkKey(item)] = Object.assign(
       {},
       result,
       {
@@ -3164,8 +3263,10 @@ const STATUS = {
   excluded: { icon: '✕', label: '已排除', tone: 'bad' },
 };
 const TIER_EXPLAIN = {
+  verified:
+    '这一档的每一天都在 aa.com 搜索页核实过：机场对、舱位对、座位够。下单前按日期再确认一次最稳。',
   trusted:
-    '这一档里已经有一天在 aa.com 搜索页核实过：机场对、舱位对、座位够。同档其他日期通常是同一组航班，但不保证。不过同一组航班可能某天全程商务、某天有一段只剩经济，下单前把要订的那天再核实一次最稳。',
+    '这一档里已经有{n}在 aa.com 搜索页核实过：机场对、舱位对、座位够。同档其他日期通常是同一组航班，但不保证。不过同一组航班可能某天全程商务、某天有一段只剩经济，下单前把要订的那天再核实一次最稳。',
   lead: '这一档还只有日历数据。日历是 aa.com 的每日最低价汇总，可能和实际搜索页对不上（比如没位、换了机场、混舱）。核实一天，就知道这一档靠不靠谱。',
   excluded: '这一档核实时发现机场不符或混舱，先排除。个别日期可以单独再核实。',
 };
@@ -3180,6 +3281,7 @@ const FAILED_EXPLAIN = {
 const DYNAMIC_EXPLAIN =
   '这条航线是浮动定价（常见于 AA 自营航班）：每天的里程都可能不一样，这里按价位段归在一起。同一价位段里不同日期不一定是同一组航班，想订哪天就核实哪天。';
 const SINGLE_EXPLAIN = {
+  verified: '这一天已经在 aa.com 搜索页核实过：机场对、舱位对、座位够。',
   trusted: '这一天已经在 aa.com 搜索页核实过：机场对、舱位对、座位够。',
   lead: '这一天还只有日历数据。日历是 aa.com 的每日最低价汇总，可能和实际搜索页对不上，点「核实」确认一下。',
   excluded: '这一天核实时发现机场不符或混舱。',
@@ -3289,7 +3391,9 @@ const combo = () => ({
       ? state.cabinFilter
       : prefs.sel.cabins[0] || 'J',
 });
-const cardId = card => `${card.cabin}-${card.o}-${card.d}-${card.id}`;
+const cardId = card =>
+  `${card.cabin}-${card.o}-${card.d}-${card.id}` +
+  (card.program && card.program !== 'AA' ? '-' + card.program : '');
 const favoriteKey = card => `${viewPax()}|${cardId(card)}`;
 const routeKey = (cabin, o, d, program) =>
   `${cabin}|${o}|${d}` + (program && program !== 'AA' ? '|' + program : '');
@@ -3407,27 +3511,42 @@ function resultCardHtml(last, place) {
     <div class="rc-acts">${resultButtons(last, place)}</div></div>`;
 }
 
+function scanStatusKind() {
+  const scan = Scan.state;
+  if (scan.job === 'scan') return scan.paused ? 'paused' : 'scanning';
+  if (Scan.heldElsewhere()) return 'locked';
+  const resume = Store.get('scanResume', null);
+  if (resume && resume.jobs && resume.jobs.length && !resume.autoResume) return 'resume';
+  return 'last';
+}
+
 function statusHtml(place) {
   const scan = Scan.state;
-  if (scan.job === 'scan' && scan.paused) {
+  const kind = scanStatusKind();
+
+  if (kind === 'locked') {
     return `<div class="scanstrip paused" role="status"><div class="ss-row"><i class="ss-dot"></i>
-      <b>已暂停，等你验证 · 还剩 <span class="num">${fmtInt(scan.remaining || 0)}</span> 次</b>
-      <button class="btn small primary" data-act="goCheck">去验证</button><button class="btn small" data-act="stop">停止</button></div>
-      <div class="ss-sub">已扫 ${fmtInt(scan.done)}/${fmtInt(scan.total)}，进度都在。完成验证后我会自动接着扫；15 分钟内没完成就先停下</div></div>`;
+      <b>另一个标签页在扫描</b></div>
+      <div class="ss-sub">那边扫完这里会自动更新。同一时间只扫一个，省得 aa.com 更容易要求人机验证</div></div>`;
   }
-  if (scan.job === 'scan') {
+  if (kind === 'paused') {
+    return `<div class="scanstrip paused" role="status"><div class="ss-row"><i class="ss-dot"></i>
+      <b>已暂停，等你验证 · 还剩 <span class="num ss-left">${fmtInt(scan.remaining || 0)}</span> 次</b>
+      <button class="btn small primary" data-act="goCheck">去验证</button><button class="btn small" data-act="stop">停止</button></div>
+      <div class="ss-sub">已扫 <span class="ss-done">${fmtInt(scan.done)}/${fmtInt(scan.total)}</span>，进度都在。完成验证后我会自动接着扫；15 分钟内没完成就先停下</div></div>`;
+  }
+  if (kind === 'scanning') {
     const percent = scan.total ? Math.round((scan.done / scan.total) * 100) : 0;
     const eta = scan.eta != null && scan.done ? ` · 还要约 ${duration(scan.eta)}` : '';
-    const fresh = scan.new ? `<em>新 ${fmtInt(scan.new)}</em>` : '';
     return `<div class="scanstrip" role="status"><div class="ss-row"><i class="ss-dot"></i>
-      <b>正在扫描 <span class="num">${fmtInt(scan.done)}/${fmtInt(scan.total)}</span></b>
-      <span class="ss-found">已找到 <b class="num">${fmtInt(scan.found)}</b> 天${fresh}</span>
+      <b>正在扫描 <span class="num ss-done">${fmtInt(scan.done)}/${fmtInt(scan.total)}</span></b>
+      <span class="ss-found">已找到 <b class="num ss-found-n">${fmtInt(scan.found)}</b> 天<em class="ss-new">${scan.new ? '新 ' + fmtInt(scan.new) : ''}</em></span>
       <button class="btn small" data-act="stop">${scan.msg ? '正在停止…' : '停止'}</button></div>
       <div class="ss-bar"><i style="width:${percent}%"></i></div>
       <div class="ss-sub">${percent}%${eta} · 扫描只在这个标签页开着时进行</div></div>`;
   }
   const resume = Store.get('scanResume', null);
-  if (resume && resume.jobs && resume.jobs.length && !resume.autoResume) {
+  if (kind === 'resume') {
     return `<div class="scanstrip paused"><div class="ss-row"><i class="ss-dot"></i><b>上次扫描停在半路 · 还剩 ${fmtInt(resume.jobs.length)} 次</b>
       <button class="btn small primary" data-act="resumeScan">继续</button><button class="btn small" data-act="dropResume">不扫了</button></div></div>`;
   }
@@ -3440,9 +3559,106 @@ function statusHtml(place) {
   return place === 'mini' ? progressHtml() : '';
 }
 
+let statusTimer = null;
+let statusPending = false;
+
+function statusSignature(kind) {
+  const scan = Scan.state;
+  if (kind === 'scanning')
+    return `scanning|${scan.done}|${scan.total}|${scan.found}|${scan.new}|${scan.eta}|${scan.msg}`;
+  if (kind === 'paused') return `paused|${scan.remaining}|${scan.done}|${scan.total}`;
+  if (kind === 'locked') return 'locked';
+  if (kind === 'resume') {
+    const resume = Store.get('scanResume', null);
+    return `resume|${((resume && resume.jobs) || []).length}`;
+  }
+  const last = lastScan();
+  return `last|${last ? last.at : ''}|${state.resultCard ? 1 : 0}|${Scan.running() ? 1 : 0}`;
+}
+
+function patchStatus(slot, kind) {
+  const scan = Scan.state;
+  const set = (selector, text) => {
+    const node = $(selector, slot);
+    if (node && node.textContent !== text) node.textContent = text;
+    return !!node;
+  };
+  if (kind === 'scanning') {
+    const percent = scan.total ? Math.round((scan.done / scan.total) * 100) : 0;
+    const eta = scan.eta != null && scan.done ? ` · 还要约 ${duration(scan.eta)}` : '';
+    const bar = $('.ss-bar i', slot);
+    if (bar) bar.style.width = percent + '%';
+    const stop = $('[data-act=stop]', slot);
+    if (stop) {
+      const label = scan.msg ? '正在停止…' : '停止';
+      if (stop.textContent !== label) stop.textContent = label;
+    }
+    return (
+      set('.ss-done', `${fmtInt(scan.done)}/${fmtInt(scan.total)}`) &&
+      set('.ss-found-n', fmtInt(scan.found)) &&
+      set('.ss-new', scan.new ? `新 ${fmtInt(scan.new)}` : '') &&
+      set('.ss-sub', `${percent}%${eta} · 扫描只在这个标签页开着时进行`) &&
+      !!bar
+    );
+  }
+  if (kind === 'paused') {
+    return (
+      set('.ss-left', fmtInt(scan.remaining || 0)) &&
+      set('.ss-done', `${fmtInt(scan.done)}/${fmtInt(scan.total)}`)
+    );
+  }
+  return false;
+}
+
 function renderStatus() {
-  const slot = state.fullOpen && $('.full .status-slot');
-  if (slot) slot.innerHTML = statusHtml('panel');
+
+  if (statusPending) return;
+  statusPending = true;
+  Promise.resolve().then(() => {
+    statusPending = false;
+    paintStatus();
+  });
+}
+
+function paintStatus() {
+  const kind = scanStatusKind();
+  const signature = statusSignature(kind);
+
+  for (const slot of $$('.status-slot')) {
+    const place = slot.closest('.mini') ? 'mini' : 'panel';
+    if (slot.dataset.sig === place + '|' + signature) continue;
+    if (slot.dataset.kind !== kind || !patchStatus(slot, kind)) {
+      slot.innerHTML = statusHtml(place);
+      slot.dataset.kind = kind;
+    }
+    slot.dataset.sig = place + '|' + signature;
+  }
+
+  const miniButton = state.miniOpen && $('.mini .mini-go');
+  if (miniButton) {
+    const html = miniScanButtonHtml();
+    if (miniButton.dataset.sig !== html) {
+      miniButton.innerHTML = html;
+      miniButton.dataset.sig = html;
+    }
+  }
+  clearTimeout(statusTimer);
+  if (kind === 'locked') {
+    const lock = Store.get('scanLock', null);
+    const left = lock ? LOCK_TTL - (Date.now() - (lock.at || 0)) : 0;
+    statusTimer = setTimeout(renderStatus, Math.max(500, Math.min(LOCK_TTL, left + 200)));
+  } else if (kind === 'scanning' || kind === 'paused') {
+    statusTimer = setTimeout(renderStatus, 1000);
+  }
+  return kind;
+}
+
+function miniScanButtonHtml() {
+  const requests = estimate(prefs.sel).requests;
+  if (Scan.running()) return '<button class="btn" data-act="stop">停止扫描</button>';
+  if (Scan.heldElsewhere())
+    return '<button class="btn" disabled title="另一个标签页在扫描">另一个标签页在扫描</button>';
+  return `<button class="btn primary" data-act="quickScan">开始扫描 · 约 ${fmtInt(requests)} 次</button>`;
 }
 
 function noteResultsOpened() {
@@ -3529,7 +3745,67 @@ function rescan(patch) {
   startScan(prefs.sel);
 }
 
+const INSTANCE_MARK = '__arInstance';
+
+const INSTANCE_TOKEN = Math.random().toString(36).slice(2);
+const instanceId = () =>
+  `${INSTANCE_TOKEN}|里程票雷达 v${DATA.build.version}${alaskaEnabled() ? '（AS 测试版）' : ''}`;
+
+function claimInstance() {
+  const page = PAGE || window;
+  let holder = null;
+  try {
+    holder = page[INSTANCE_MARK] || null;
+  } catch (error) {
+    return true;
+  }
+
+  const me = instanceId();
+  if (holder && holder !== me && document.getElementById('award-radar-host')) return false;
+  try {
+    page[INSTANCE_MARK] = me;
+  } catch (error) {
+
+  }
+  return true;
+}
+
+function noteOtherInstance() {
+  try {
+    if (sessionStorage.getItem('ar-dup-noticed')) return;
+    sessionStorage.setItem('ar-dup-noticed', '1');
+  } catch (error) {
+
+  }
+  const show = () => {
+    if (!document.body) return;
+    const box = document.createElement('div');
+    box.id = 'ar-dup-notice';
+    box.style.cssText =
+      'position:fixed;z-index:2147483646;left:50%;bottom:16px;transform:translateX(-50%);' +
+      'max-width:min(92vw,460px);background:#2b2c30;color:#f2f3f5;border-radius:12px;' +
+      'padding:9px 10px 9px 14px;font:600 13px/1.5 system-ui,-apple-system,"Microsoft YaHei",sans-serif;' +
+      'box-shadow:0 6px 24px rgba(0,0,0,.28);display:flex;gap:10px;align-items:center';
+    const text = document.createElement('span');
+    text.textContent = '检测到里程票雷达已经在这个页面上运行了，这一份先不显示';
+    const close = document.createElement('button');
+    close.textContent = '×';
+    close.setAttribute('aria-label', '关闭');
+    close.style.cssText =
+      'all:unset;cursor:pointer;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,.14)';
+    close.addEventListener('click', () => box.remove());
+    box.appendChild(text);
+    box.appendChild(close);
+    document.body.appendChild(box);
+    setTimeout(() => box.remove(), 15000);
+  };
+  if (document.body) show();
+  else document.addEventListener('DOMContentLoaded', show);
+}
+
 function mount() {
+
+  if (!claimInstance()) return noteOtherInstance();
   if (document.getElementById('award-radar-host')) return;
   const host = document.createElement('div');
   host.id = 'award-radar-host';
@@ -3551,14 +3827,37 @@ function mount() {
   });
   Scan.listeners.add(onScan);
   Store.listen('checks', refreshData);
+  Scan.probeLock();
+  Store.listen('scanLock', renderStatus);
   Store.listen('humanCheck', onRemoteCheck);
   document.addEventListener('visibilitychange', updateTabTitle);
   refreshData();
   renderDock();
   initTalk();
 
+  const leftover = Store.get('scanResume', null);
+  if (
+    leftover &&
+    !leftover.autoResume &&
+    leftover.jobs &&
+    leftover.jobs.length &&
+    !IS_RESULTS_PAGE
+  ) {
+
+    setTimeout(
+      () =>
+        say(
+          `上次扫描停在半路，还剩 ${fmtInt(leftover.jobs.length)} 次 ` +
+            '<button class="btn small primary" data-act="resumeScan">继续</button>',
+          { sticky: true, mood: 'worry' },
+        ),
+      2600,
+    );
+  }
   const resume = Store.get('scanResume', null);
-  if (resume && resume.autoResume && !IS_RESULTS_PAGE) {
+
+  const canHere = !alaskaEnabled() || canRunJobsHere(resume.jobs || []);
+  if (resume && resume.autoResume && !IS_RESULTS_PAGE && canHere) {
     Store.set('scanResume', Object.assign({}, resume, { autoResume: false }));
     const go = () => {
       if (humanCheckShown()) return setTimeout(go, 3000);
@@ -3818,6 +4117,11 @@ function bindDock() {
   let start = null;
   let moved = false;
   dock.addEventListener('pointerdown', event => {
+
+    if (event.target && event.target.closest && event.target.closest('button')) {
+      start = null;
+      return;
+    }
     start = { px: event.clientX, py: event.clientY, x: state.dockRect.x, y: state.dockRect.y };
     moved = false;
     try {
@@ -4029,12 +4333,30 @@ function versionNote() {
   setTimeout(show, 3200);
 }
 
+function siteRefusing() {
+  const title = document.title || '';
+  const text = ((document.body && document.body.innerText) || '').slice(0, 1200);
+  const denied = /access denied|请求被拒绝|forbidden/i.test(title + ' ' + text.slice(0, 300));
+  const akamai = /reference\s*#|akamai|error reference|don't have permission/i.test(text);
+  return denied && akamai;
+}
+
 function initTalk() {
   versionNote();
-  if (!IS_RESULTS_PAGE && !sessionStorage.getItem('ar-greeted')) {
-    sessionStorage.setItem('ar-greeted', '1');
-    const group = greetingGroup();
-    setTimeout(() => talk(group), 1400);
+  if (!IS_RESULTS_PAGE) {
+
+    const greeted = sessionStorage.getItem('ar-greeted');
+    const group = greeted ? null : greetingGroup();
+    if (!greeted) sessionStorage.setItem('ar-greeted', '1');
+    setTimeout(() => {
+
+      if (siteRefusing())
+        say('这个页面被站点拒绝了（Access Denied），上面什么都查不到。等一会儿再刷新试试，先别开扫描～', {
+          sticky: true,
+          mood: 'worry',
+        });
+      else if (group) talk(group);
+    }, 1400);
   }
   Store.set('lastVisit', Date.now());
   const scheduleIdle = () =>
@@ -4161,6 +4483,43 @@ function markCrossChecked() {
   }
 }
 
+function migrateFavorites() {
+
+  const favorites = Store.get('fav', []);
+  if (favorites.length && state.cards.length) {
+    const ids = new Set(state.cards.map(card => favoriteKey(card)));
+    const fixed = [];
+    for (const key of favorites) {
+      if (ids.has(key)) {
+        fixed.push(key);
+        continue;
+      }
+      const withSuffix = state.cards
+        .map(card => favoriteKey(card))
+        .find(id => id.indexOf(key) === 0 && id.length > key.length);
+
+      fixed.push(withSuffix || key);
+    }
+    if (fixed.some((key, i) => key !== favorites[i])) {
+      Store.set('fav', fixed);
+      state.favorites = new Set(fixed);
+
+      if (state.fullOpen && prefs.view === 'fav') renderFeed(true);
+    }
+  }
+}
+
+function refreshMiniCards() {
+  const box = state.miniOpen && $('.mini-cards');
+  if (!box) return false;
+  const cards = topCards(5);
+  box.innerHTML = cards.map(miniCardHtml).join('');
+  const say = $('.mini .say .txt');
+  if (say) say.innerHTML = miniGreeting(cards);
+  renderStatus();
+  return true;
+}
+
 function refreshData() {
   state.routes = new Map();
   for (const cabin of ['Y', 'J']) {
@@ -4190,13 +4549,16 @@ function refreshData() {
           twin: route.twin,
           scanned: route.scanned,
           dates: days.map(day => day.date),
+
+          dayMiles: days.map(day => [day.date, day.miles]),
           facts: tierFacts(days),
         }),
       );
     }
   }
   markCrossChecked();
-  if (state.miniOpen) renderMini();
+  migrateFavorites();
+  if (state.miniOpen && !refreshMiniCards()) renderMini();
   if (state.fullOpen) {
     if (prefs.view === 'matrix') renderMatrix();
     else renderFeed(true);
@@ -4207,6 +4569,7 @@ function refreshData() {
 }
 
 let lastScanRefresh = 0;
+
 function onScan(scan) {
   if (scan.job === 'scan' && scan.paused && !state.checkWhere) {
     onCheckAppeared('scan', `需要人机验证 · 已暂停，还剩 ${scan.remaining || 0} 次，进度都在`);
@@ -4222,10 +4585,12 @@ function onScan(scan) {
       refreshData();
     }
     renderJob();
+    renderStatus();
     talkScanProgress(scan);
   } else if (scan.last) {
     state.scanTalked = false;
     state.resultCard = true;
+    renderStatus();
 
     if (state.fullOpen || state.miniOpen) updateLastScan({ seen: true });
     refreshData();
@@ -4318,6 +4683,7 @@ const topCards = count =>
 
 function miniGreeting(cards) {
   if (Scan.running()) return '我在努力扫描中，这个标签页先别关哦～';
+  if (cards.some(card => card.status === 'verified')) return '有已核实的票！先看这几张～';
   if (cards.some(card => card.status === 'trusted')) return '有已核实的同款票！先看这几张～';
   if (cards.length) return '这几档最值得看，点「核实」确认一下哦～';
   return `还没有票的数据 ${KAOMOJI[0]} 点下面开始扫描吧！`;
@@ -4337,15 +4703,13 @@ function miniCardHtml(card) {
 function renderMini() {
   const cards = topCards(5);
   const requests = estimate(prefs.sel).requests;
-  const scanButton = Scan.running()
-    ? '<button class="btn" data-act="stop">停止扫描</button>'
-    : `<button class="btn primary" data-act="quickScan">开始扫描 · 约 ${fmtInt(requests)} 次</button>`;
+  const scanButton = `<div class="mini-go">${miniScanButtonHtml()}</div>`;
   $('.mini').innerHTML =
     `<div class="mini-main"><div class="mini-h">${mascotHead(30, '')}<b>${esc(persona().name)}</b>
       <span class="small muted">${viewPax()}人 · ${prefs.sel.cabins.map(cabin => CABINS[cabin].label).join(' + ')}</span>
       <button class="x" data-act="closeMini" aria-label="关闭">×</button></div>
     <div class="mini-b">
-      ${statusHtml('mini')}
+      <div class="status-slot">${statusHtml('mini')}</div>
       <div class="mini-route"><span class="mr-a">${esc(placesText(prefs.sel.A))}</span><button class="swapbtn" data-act="swapSides" title="交换出发地和目的地">⇄</button><span class="mr-b">${esc(placesText(prefs.sel.B))}</span></div>
       <div class="mini-cap"><span>里程上限</span>${capInputHtml('cap')}${[40, 60, 100]
         .map(
@@ -4360,11 +4724,13 @@ function renderMini() {
         )
         .join('')}</div>
       <div class="say">${mascotHead(26, cards.length ? 'happy' : '')}<div class="txt">${miniGreeting(cards)}</div></div>
-      ${cards.map(miniCardHtml).join('')}
+      <div class="mini-cards">${cards.map(miniCardHtml).join('')}</div>
     </div>
     <div class="mini-f">${scanButton}
       <button class="btn" data-act="openSetup">设置</button>
       <button class="btn" data-act="openFull">展开完整面板</button></div></div>${miniStoryPanelHtml()}`;
+
+  renderStatus();
 }
 
 function miniStoryPanelHtml() {
@@ -4553,14 +4919,25 @@ function updateTabs() {
 }
 
 function renderJob() {
-  if (state.miniOpen) renderMini();
+
+  renderStatus();
   renderDock();
   if (!state.fullOpen) return;
-  $('.jobbtn').innerHTML = Scan.running()
+  const jobButton = Scan.running()
     ? '<button class="btn" data-act="stop" style="width:100%;justify-content:center">停止扫描</button>'
     : '<button class="btn primary" data-act="scan" style="width:100%">开始扫描</button>';
-  $('.jobprog').innerHTML = progressHtml();
-  renderStatus();
+  const box = $('.jobbtn');
+
+  if (box.dataset.sig !== jobButton) {
+    box.innerHTML = jobButton;
+    box.dataset.sig = jobButton;
+  }
+  const prog = $('.jobprog');
+  const progress = progressHtml();
+  if (prog.dataset.sig !== progress) {
+    prog.innerHTML = progress;
+    prog.dataset.sig = progress;
+  }
 }
 
 const pickerOf = side => $(`.picker[data-side="${side}"]`);
@@ -4738,7 +5115,9 @@ function renderEstimate() {
     : '';
   const limit = rangeText() ? ` · ${rangeText()}` : '';
 
-  const traffic = megabytes ? ` · Alaska 约 ${megabytes} MB` : '';
+  const traffic = megabytes
+    ? ` · Alaska 约 ${megabytes} MB（每次查询＝1 天的真实舱位价 + 当月每天的最低价线索）`
+    : '';
   el.className = 'estimate' + (many ? ' many' : '');
   el.innerHTML = `<div class="est-main">约 <b class="num">${fmtInt(requests)}</b> 次查询 · 预计 ${duration(seconds)}${limit}${traffic}</div>${expanded}${advice}`;
 }
@@ -4750,12 +5129,27 @@ function afterLimitChange() {
     renderEstimate();
     renderView(true);
   }
+
+  if (state.card) renderDrawer();
   const text = rangeText();
   toast(text ? text.replace('只保留', '现在只看') : '里程不限了', 2400);
 }
 
 function startScan(params, options = {}) {
   closeScanDialog();
+  if (Scan.heldElsewhere()) {
+    renderStatus();
+    return toast('另一个标签页在扫描，等它扫完再来～', 3500, 'worry');
+  }
+  const jobs = options.jobs || planJobs(params);
+
+  if (alaskaEnabled() && !canRunJobsHere(jobs)) {
+    Scan.saveRemaining(params, jobs, true);
+    savePrefs();
+    toast('AA 的查询要在 aa.com 上跑，我开一个标签页接着扫～', 4000);
+    openExternal('https://www.aa.com/booking/find-flights');
+    return;
+  }
   const planned = options.jobs ? options.jobs.length : estimate(params).requests;
   const used = requestsToday();
   if (!options.force && dailyCap() > 0 && used + planned > dailyCap())
@@ -4764,7 +5158,14 @@ function startScan(params, options = {}) {
   savePrefs();
   refreshData();
   toast('出发啦！扫描时这个标签页别关哦', 3500);
-  Scan.start(params, options.jobs).catch(error => toast(error.message, 3500, 'worry'));
+
+  renderStatus();
+  Scan.start(params, options.jobs)
+    .then(renderStatus)
+    .catch(error => {
+      renderStatus();
+      toast(error.message, 3500, 'worry');
+    });
 }
 
 const dailyCap = () => (+prefs.dailyCap === -1 ? 0 : +prefs.dailyCap || DAILY_SOFT_CAP);
@@ -4898,6 +5299,35 @@ function compareHtml(pairs) {
   return `<div class="compare">${pairs.map(compareCardHtml).join('')}</div>`;
 }
 
+const rangeActive = () => {
+  const [floor, cap] = milesRange();
+  return floor != null || cap != null;
+};
+
+function limitCardToRange(card) {
+  if (!rangeActive()) return card;
+  if (!card.dynamic) return milesInRange(card.miles) ? card : null;
+  const all = card.dayMiles || [];
+  const keep = all.filter(entry => milesInRange(entry[1]));
+  if (!keep.length) return null;
+  if (keep.length === all.length) return card;
+  const list = keep.map(entry => entry[1]);
+  const dates = keep.map(entry => entry[0]);
+  const miles = Math.min.apply(null, list);
+  const maxMiles = Math.max.apply(null, list);
+  return Object.assign({}, card, {
+    dates,
+    dayMiles: keep,
+    days: dates.length,
+    miles,
+    maxMiles,
+    band: shortMiles(miles) + '–' + shortMiles(maxMiles),
+    first: dates[0],
+    last: dates[dates.length - 1],
+    facts: card.facts ? Object.assign({}, card.facts, { nearest: dates[0] }) : card.facts,
+  });
+}
+
 function filterCards() {
   let cards = state.cards.slice();
   if (prefs.view === 'fav') cards = cards.filter(card => state.favorites.has(favoriteKey(card)));
@@ -4913,16 +5343,23 @@ function filterCards() {
   if (state.routeFilter) {
     cards = cards.filter(card => card.o === state.routeFilter.o && card.d === state.routeFilter.d);
   }
-  const base = cards;
+
+  cards = cards.map(limitCardToRange).filter(Boolean);
 
   if (!state.showExcluded && prefs.view !== 'fav')
     cards = cards.filter(card => card.status !== 'excluded' && !FAILED_DATES.has(card.status));
+  const base = cards;
   if (state.channel === 'good')
-    cards = cards.filter(card => card.status === 'trusted' || card.verified);
+
+    cards = cards.filter(
+      card =>
+        card.status === 'verified' ||
+        card.status === 'trusted' ||
+        (card.verified && !card.anyCabin),
+    );
   else if (state.channel === 'new') cards = cards.filter(card => card.new);
   else if (state.channel !== 'all')
     cards = cards.filter(card => regionOf(card.o, card.d).key === state.channel);
-  cards = cards.filter(card => milesInRange(card.miles));
   const beforeMiles = cards;
   if (prefs.miles) cards = cards.filter(card => milesMatch(card, prefs.miles));
   cards.sort(SORTS[prefs.sort] || recommendedOrder);
@@ -4933,9 +5370,12 @@ function postTitle(card) {
   const from = cityName(card.o);
   const to = cityName(card.d);
   const cabin = CABINS[card.cabin].word;
-  const price = `${Math.round(card.miles / 1000)}k+$${Math.round(card.cash)}`;
+
+  if (card.anyCabin) {
+    return `${from}→${to} 这几天只知道当天最低价（舱位未知，不一定是${cabin}）｜${card.days} 天线索，想订哪天核实哪天`;
+  }
   if (card.dynamic) {
-    return `${from}→${to}${cabin} ${card.band}，最低 ${price}｜${card.days} 天，价格浮动，想订哪天核实哪天`;
+    return `${from}→${to}${cabin} ${card.band}｜${card.days} 天，价格浮动，想订哪天核实哪天`;
   }
   if (card.status !== 'excluded' && FAILED_DATES.has(card.status)) {
     return `${from}→${to} ${STATUS[card.status].label}：${(card.ref && card.ref.note) || '核实没通过'}，这一档先别冲 ${KAOMOJI[1]}`;
@@ -4943,17 +5383,29 @@ function postTitle(card) {
   if (card.status === 'excluded') {
     return `${from}→${to} 这一档核实没通过（${(card.ref && card.ref.note) || '机场或舱位不对'}），先别冲 ${KAOMOJI[1]}`;
   }
+  if (card.status === 'verified') {
+    const carriers =
+      card.ref && card.ref.carriers ? '，' + card.ref.carriers.split('/').join('+') : '';
+
+    return `已核实✓ ${from}飞${to}${cabin}，这一档 ${card.days} 天都核实过${carriers}`;
+  }
   if (card.status === 'trusted') {
     const carriers =
       card.ref && card.ref.carriers ? '，' + card.ref.carriers.split('/').join('+') : '';
-    return `已核实同款✓ ${from}飞${to}${cabin} ${price}，这一档有 ${card.days} 天${carriers}`;
+
+    const checked = card.verified ? `，其中 ${card.verified} 天已核实` : '';
+    return `已核实同款✓ ${from}飞${to}${cabin}，这一档有 ${card.days} 天${checked}${carriers}`;
+  }
+  if (card.status === 'repriced') {
+    const note = card.ref && card.ref.note ? `（${card.ref.note}）` : '';
+    return `${from}飞${to}${cabin}｜日历上的价格订不到，已按核实到的实际最低价归档${note}`;
   }
   if (card.new)
-    return `新放出！${from}→${to}${cabin} ${price}，多了 ${card.new} 天｜日历显示，待核实`;
+    return `新放出！${from}→${to}${cabin}，多了 ${card.new} 天｜日历显示，待核实`;
   if (card.days <= 3)
-    return `${from}→${to}${cabin} ${price}｜只有 ${card.days} 天，日历显示，待核实`;
+    return `${from}→${to}${cabin}｜只有 ${card.days} 天，日历显示，待核实`;
   const peak = card.peak ? `，${card.peak}月最多` : '';
-  return `${from}飞${to}${cabin} ${price}｜日历显示 ${card.days} 天有位${peak}，待核实`;
+  return `${from}飞${to}${cabin}｜日历显示 ${card.days} 天有位${peak}，待核实`;
 }
 
 const seasonOf = month =>
@@ -4974,9 +5426,19 @@ function cardCoverArt(card) {
   );
 }
 
+function priceLineHtml(card) {
+  const cabin = card.anyCabin ? '舱位未知' : CABINS[card.cabin].short;
+  const miles = `${fmtInt(card.miles)}${card.dynamic ? ' 起' : ''}`;
+  const float = card.dynamic ? '<span class="dyn">价格浮动</span>' : '';
+
+  return `<div class="cprice"><span class="tags"><i class="cab">${esc(cabin)}</i>${float}</span><span class="amt"><b>${miles}</b> 里程</span><span class="tax">+ ${money(card.cash)}</span></div>`;
+}
+
 function keyFact(card) {
   const facts = card.facts;
   if (FAILED_DATES.has(card.status)) return STATUS[card.status].label;
+
+  if (card.anyCabin) return `最低价 · 舱位未知 · ${card.days} 天`;
   if (card.dynamic) return `最低 ${shortMiles(card.miles)} · ${card.days}天`;
   if (card.days <= 3) return `只有 ${card.days} 天有位`;
   if (facts.months === 1) return `${facts.peakMonth}月 · ${facts.peakCount}天有位`;
@@ -5007,8 +5469,7 @@ function coverHtml(card, ratio, large) {
     : '';
   return `<div class="${large ? 'cover dcover' : 'cover'}" ${ratio ? `style="aspect-ratio:${ratio}"` : ''}>${cardCoverArt(card)}
     <div class="scrim"></div>
-    <div class="cv-top">${badge(card.status)}<span class="price"><i class="cab">${CABINS[card.cabin].short}</i>${Math.round(card.miles / 1000)}k${card.dynamic ? ' 起' : ''} + ${money(card.cash)}</span></div>
-    ${card.dynamic ? '<span class="dyn">价格浮动</span>' : ''}
+    <div class="cv-top">${badge(card.status)}</div>
     ${alaskaEnabled() ? `<span class="prog p-${card.program || 'AA'}">${PROGRAM_LABELS[card.program || 'AA']}</span>` : ''}
     ${card.crossChecked ? '<span class="xcheck" title="两个计划都查到同一班航班">双重确认</span>' : ''}
     ${card.new ? `<div class="ribbon">NEW · 新放出 ${card.new} 天</div>` : ''}
@@ -5024,6 +5485,7 @@ function cardHtml(card) {
   const id = cardId(card);
   return `<article class="card" data-card="${esc(id)}" tabindex="0">
     ${coverHtml(card, COVER_RATIOS[hashStr(id) % COVER_RATIOS.length])}
+    ${priceLineHtml(card)}
     <div class="ctitle">${esc(postTitle(card))}</div>
     <div class="cfoot">${mascotHead(18, '')}<span class="who">${esc(persona().name)} · ${ago(card.scanned)}</span><button class="vbtn" data-vcard="${esc(id)}">核实</button>${favoriteButton(id, state.favorites.has(favoriteKey(card)))}</div></article>`;
 }
@@ -5031,7 +5493,9 @@ function cardHtml(card) {
 function feedGreeting(cards) {
   if (Scan.running()) return '我在扫描中，新票会自己冒出来～';
   if (prefs.view === 'fav') return cards.length ? '你收藏的票都在这里～' : '';
-  const trusted = cards.filter(card => card.status === 'trusted').length;
+  const trusted = cards.filter(
+    card => card.status === 'trusted' || card.status === 'verified',
+  ).length;
   const fresh = cards.filter(card => card.new).length;
   if (trusted) return `有 ${trusted} 档已核实的同款票，先看它们！`;
   if (fresh) return `新放出 ${fresh} 档，手快有手慢无～`;
@@ -5049,7 +5513,16 @@ function channelList(base) {
   }
   return [
     ['all', prefs.view === 'fav' ? '全部收藏' : '推荐', base.length],
-    ['good', '可信', base.filter(card => card.status === 'trusted' || card.verified).length],
+    [
+      'good',
+      '可信',
+      base.filter(
+        card =>
+          card.status === 'verified' ||
+          card.status === 'trusted' ||
+          (card.verified && !card.anyCabin),
+      ).length,
+    ],
     ['new', '新出现', base.filter(card => card.new).length],
   ].concat(
     Array.from(regions)
@@ -5089,7 +5562,8 @@ function feedBarHtml(channels) {
     .join('');
   return `<div class="cabrow"><span>舱位</span>${cabinTabs}</div><div class="feedbar"><div class="channels">${tabs}</div>
     <div class="tools">${routeChip}<select class="sort">${sortOptions}</select>${excludedToggle}
-      <button class="btn small" data-act="csv">导出 CSV</button></div></div>`;
+      <button class="btn small" data-act="csv">导出 CSV（当前筛选）</button>
+      <button class="btn small" data-act="csvAll">导出全部</button></div></div>`;
 }
 
 function milesMatch(card, value) {
@@ -5324,7 +5798,16 @@ function toggleFavorite(id, button) {
   if (prefs.view === 'fav' && !on) renderFeed(true);
 }
 
-function exportCsv() {
+function exportCsv(all) {
+
+  const wanted = all ? null : new Set();
+  if (wanted) {
+    for (const card of state.filtered || []) {
+      const key = routeKey(card.cabin, card.o, card.d, card.program);
+      for (const date of card.dates || []) wanted.add(key + '|' + date);
+    }
+    if (!wanted.size) return toast('这个筛选下没有可导出的日期哦', 2600, 'worry');
+  }
   const rows = [
     [
       '舱位',
@@ -5340,8 +5823,9 @@ function exportCsv() {
       '日历查询时间',
     ],
   ];
-  for (const route of state.routes.values()) {
+  for (const [key, route] of state.routes) {
     for (const day of route.dates) {
+      if (wanted && !wanted.has(key + '|' + day.date)) continue;
       const check = day.check || {};
       rows.push([
         CABINS[route.cabin].label,
@@ -5364,7 +5848,7 @@ function exportCsv() {
   const csv = '﻿' + rows.map(row => row.map(quote).join(',')).join('\n');
   const link = document.createElement('a');
   link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-  link.download = `里程票-${viewPax()}人.csv`;
+  link.download = `里程票-${all ? '全部' : '当前筛选'}-${viewPax()}人.csv`;
   document.body.appendChild(link);
   link.click();
   setTimeout(() => {
@@ -5468,7 +5952,13 @@ function renderMatrix() {
 function openCardDrawer(id, source) {
   const card = state.cards.find(x => cardId(x) === id);
   if (!card) return;
-  state.card = { o: card.o, d: card.d, id: card.id, cabin: card.cabin };
+  state.card = {
+    o: card.o,
+    d: card.d,
+    id: card.id,
+    cabin: card.cabin,
+    program: card.program || 'AA',
+  };
   state.day = null;
   const cover = source && source.querySelector ? source.querySelector('.cover, .thumb') : null;
   state.drawerSource = cover;
@@ -5579,11 +6069,17 @@ function drawerBodyHtml(route, tier, card) {
     ? `<button class="btn primary" data-verify="${tier.rep}">${tier.status === 'lead' ? '核实这一档' : '再核实一天'}（${tier.rep.slice(5)}）</button>`
     : '';
   const newDays = route.dates.filter(day => day.tier === tier.id && day.new).length;
-  const meta = `${route.o} → ${route.d} · ${viewPax()} 人 · ${CABINS[route.cabin].label} · ${tier.dynamic ? '这一价位段' : '这一档'} ${tier.days} 天（${tier.first.slice(5)} ~ ${tier.last.slice(5)}）· 日历${ago(route.scanned)}查询`;
+  const cabinNote = tier.anyCabin
+    ? ' · <b class="unknowncab">舱位未知（只有当天最低价）</b>'
+    : '';
+  const verifiedDays = tier.verified
+    ? ` · <b class="okdays">✓ ${tier.verified} 天已核实</b>`
+    : '';
+  const meta = `${route.o} → ${route.d} · ${viewPax()} 人 · ${CABINS[route.cabin].label} · ${tier.dynamic ? '这一价位段' : '这一档'} ${tier.days} 天（${tier.first.slice(5)} ~ ${tier.last.slice(5)}）· 日历${ago(route.scanned)}查询${cabinNote}${verifiedDays}`;
   return `<div class="dbody">
     <div class="dprice"><b>${fmtInt(tier.miles)}${tier.dynamic ? ' 起' : ''}</b><span class="muted">里程/人${tier.dynamic ? ` · ${tier.band}，最高 ${fmtInt(tier.maxMiles)}` : ''}</span><span style="color:var(--ink-2)">+ ${money(tier.cash)}</span></div>
     <div class="dmeta">${meta}</div>
-    <p>${FAILED_EXPLAIN[tier.status] ? FAILED_EXPLAIN[tier.status] + esc(tier.ref && tier.ref.note ? '（' + tier.ref.note + '）' : '') : tier.dynamic ? DYNAMIC_EXPLAIN : tier.days === 1 ? SINGLE_EXPLAIN[tier.status] || TIER_EXPLAIN[tier.status] : TIER_EXPLAIN[tier.status]}</p>
+    <p>${explainFor(withCount(FAILED_EXPLAIN[tier.status] ? FAILED_EXPLAIN[tier.status] + esc(tier.ref && tier.ref.note ? '（' + tier.ref.note + '）' : '') : tier.dynamic ? DYNAMIC_EXPLAIN : tier.days === 1 ? SINGLE_EXPLAIN[tier.status] || TIER_EXPLAIN[tier.status] : TIER_EXPLAIN[tier.status], tier.verified || 1), route.program || 'AA')}</p>
     ${route.twin ? `<p class="note">⚠ 这条航线的日历和 ${esc(cityName(route.twin))} ${route.twin} 每天都一样，实际机场以核实为准。</p>` : ''}
     ${tier.days === 1 || tier.dynamic ? '' : tierFactsHtml(tier.ref)}
     <div class="actions">${verifyButton}${favoriteButton(cardId(card), state.favorites.has(favoriteKey(card)), true)}</div>
@@ -5608,17 +6104,43 @@ function renderDrawer(fromCard) {
     $('.scrim-all').hidden = true;
     return;
   }
-  const card =
+  const found =
     state.cards.find(
       x => x.cabin === route.cabin && x.o === route.o && x.d === route.d && x.id === tier.id,
     ) || Object.assign({}, tier, { o: route.o, d: route.d, cabin: route.cabin });
+  const trimmed = limitCardToRange(found);
+  if (!trimmed) {
+
+    state.card = null;
+    state.day = null;
+    drawer.hidden = true;
+    drawer.innerHTML = '';
+    $('.scrim-all').hidden = true;
+    return;
+  }
+  const card = trimmed;
+
+  const shownRoute = rangeActive()
+    ? Object.assign({}, route, { dates: route.dates.filter(day => milesInRange(day.miles)) })
+    : route;
+  const shownTier =
+    card !== found
+      ? Object.assign({}, tier, {
+          miles: card.miles,
+          maxMiles: card.maxMiles,
+          days: card.days,
+          band: card.band,
+          first: card.first,
+          last: card.last,
+        })
+      : tier;
   cancelAnimations(drawer, true);
-  drawer.innerHTML = `<button class="x" data-act="closeDrawer">×</button>${coverHtml(card, null, true)}${drawerBodyHtml(route, tier, card)}`;
+  drawer.innerHTML = `<button class="x" data-act="closeDrawer">×</button>${coverHtml(card, null, true)}${drawerBodyHtml(shownRoute, shownTier, card)}`;
   drawer.classList.toggle('flip', !!fromCard);
   drawer.hidden = false;
   $('.scrim-all').hidden = false;
 
-  if (!state.day && tier.days === 1) state.day = tier.first;
+  if (!state.day && shownTier.days === 1) state.day = shownTier.first;
   if (state.day) showDay(state.day);
 }
 
@@ -5671,6 +6193,12 @@ function monthsHtml(dates, tierKey) {
   return html;
 }
 
+const explainFor = (text, program) =>
+  program === 'AS' ? String(text || '').replace(/aa\.com/g, 'alaskaair.com') : text;
+
+const withCount = (text, days) =>
+  String(text || '').replace('{n}', days > 1 ? `${days} 天` : '一天');
+
 function showDay(date) {
   const route = state.routes.get(
     routeKey(state.card.cabin, state.card.o, state.card.d, state.card.program),
@@ -5699,11 +6227,13 @@ function showDay(date) {
           )
           .join('')}</div>`
       : '';
-  const verifyButton = `<button class="btn primary small" data-verify="${day.date}">核实这一天</button>`;
+  const program = (state.card && state.card.program) || 'AA';
+  const site = program === 'AS' ? 'Alaska' : 'aa.com';
+  const verifyButton = `<button class="btn primary small" data-verify="${day.date}">${program === 'AS' ? '核实这一天（去 Alaska）' : '核实这一天'}</button>`;
   const box = $('.daybox');
   box.innerHTML = `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${fmtDate(day.date)}</b>${badge(day.status)}</div>
-    <p>${DATE_EXPLAIN[day.status]}${note}</p><dl class="facts">${facts}</dl>${options}
-    <div class="actions">${verifyButton}<button class="btn small" data-open="${day.date}">在 aa.com 打开</button></div>`;
+    <p>${day.anyCabin ? '这一天只知道"当天最低价"，是哪个舱位不确定（Alaska 的日期带不分舱位）。点「核实」看这一天到底有没有这个舱位。' : explainFor(DATE_EXPLAIN[day.status], program)}${note}</p><dl class="facts">${facts}</dl>${options}
+    <div class="actions">${verifyButton}<button class="btn small" data-open="${day.date}">在 ${site} 打开</button></div>`;
   box.hidden = false;
 }
 
@@ -5718,9 +6248,11 @@ let verify = (date, route = state.card) => {
     cabin: route.cabin || 'J',
     pax: viewPax(),
     date,
+    program: route.program || 'AA',
     atMs: Date.now(),
   };
-  const key = x => `${x.o}|${x.d}|${x.cabin}|${x.pax}|${x.date}`;
+
+  const key = x => `${x.o}|${x.d}|${x.cabin}|${x.pax}|${x.date}|${x.program || 'AA'}`;
   const queue = Store.get('verifyQueue', []).filter(x => key(x) !== key(item));
   queue.push(item);
   Store.set('verifyQueue', queue);
@@ -5735,14 +6267,23 @@ let verify = (date, route = state.card) => {
     );
   }
   Store.set('pending', item);
-  const url = bookingUrl(item.o, item.d, date, item.cabin, item.pax);
+
+  const url =
+    item.program === 'AS' && typeof asSearchUrl === 'function'
+      ? asSearchUrl(item.o, item.d, date, item.pax)
+      : bookingUrl(item.o, item.d, date, item.cabin, item.pax);
   const opened = window.open(url, VERIFY_TAB);
   if (!opened) {
     if (typeof GM_openInTab === 'function') GM_openInTab(url, { active: true, insert: true });
     else if (typeof GM !== 'undefined' && GM && typeof GM.openInTab === 'function')
       GM.openInTab(url, false);
   }
-  toast('在核实标签页打开了搜索页，出现人机验证就勾一下，我会自己读结果～', 4500);
+  toast(
+    item.program === 'AS'
+      ? '在核实标签页打开了 Alaska 的搜索页，页面出来我就自己读，出现验证就勾一下～'
+      : '在核实标签页打开了搜索页，出现人机验证就勾一下，我会自己读结果～',
+    4500,
+  );
 };
 
 const TYPE_MS = 28;
@@ -5811,16 +6352,16 @@ function renderStoryLine() {
     return;
   }
   placeDock();
-  placeStoryBox();
-
-  requestAnimationFrame(() => {
-    if (state.story) placeStoryBox();
-  });
   const line = story.lines[current.line];
 
   if (state.renderer && state.renderer.stopMotion) state.renderer.stopMotion();
   setExpression(lineExpression(line));
+
   typeStoryLine(line);
+  placeStoryBox();
+  requestAnimationFrame(() => {
+    if (state.story) placeStoryBox();
+  });
 }
 
 const CUE_EXPRESSIONS = [
@@ -6038,7 +6579,17 @@ function goCheck() {
   }
   const box = findChallenge();
   if (box) {
-    box.scrollIntoView({ block: 'center', behavior: 'smooth' });
+
+    if (state.fullOpen) closeFull();
+    if (state.miniOpen) closeMini(true);
+
+    const bar = $('.checkbar');
+    if (bar && !bar.hidden) {
+      bar.classList.add('away');
+      clearTimeout(state.checkBarTimer);
+      state.checkBarTimer = setTimeout(() => bar.classList.remove('away'), 20000);
+    }
+    setTimeout(() => box.scrollIntoView({ block: 'center', behavior: 'smooth' }), 260);
     return;
   }
 
@@ -6225,7 +6776,8 @@ const ACTIONS = {
     renderOptions();
     renderEstimate();
   },
-  csv: () => exportCsv(),
+  csv: () => exportCsv(false),
+  csvAll: () => exportCsv(true),
 };
 
 function onRootClick(event) {
@@ -6342,6 +6894,15 @@ function onRootClick(event) {
   }
   if (data.day) return showDay(data.day);
   if (data.verify) return verify(data.verify);
+  if (
+    data.open &&
+    state.card &&
+    (state.card.program || 'AA') === 'AS' &&
+    typeof asSearchUrl === 'function'
+  ) {
+
+    return openExternal(asSearchUrl(state.card.o, state.card.d, data.open, viewPax()));
+  }
   if (data.open) {
     return openExternal(
       bookingUrl(state.card.o, state.card.d, data.open, state.card.cabin, viewPax()),
@@ -6899,12 +7460,16 @@ async function start() {
   try {
     await Store.init();
 
-    if (typeof runAlaskaWorker === 'function' && /(^|\.)alaskaair\.com$/.test(location.hostname)) {
+    const onAlaska =
+      typeof runAlaskaWorker === 'function' && /(^|\.)alaskaair\.com$/.test(location.hostname);
+    if (onAlaska && isAlaskaWorkerTab()) {
       runAlaskaWorker();
       return;
     }
     if (typeof installPreview === 'function') installPreview();
     boot();
+
+    if (onAlaska && typeof alaskaVerifyHere === 'function') alaskaVerifyHere();
   } catch (error) {
     showStartupFailure(error);
     return;
@@ -7044,7 +7609,7 @@ function simulatedVerify(date, route = state.card) {
 
 const DATA = {
 
-  build: {"version":"1.0.10","target":"preview","label":"预览"},
+  build: {"version":"1.0.17","target":"preview","label":"预览"},
 
   persona: {"key":"miku","name":"Miku","about":"看板娘：Miku（初音未来，占位）"},
 
@@ -8205,6 +8770,122 @@ select {
   height: 52%;
   background: linear-gradient(to top, rgba(20, 16, 40, 0.55), rgba(20, 16, 40, 0));
 }
+.cprice {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin: 8px 12px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.card {
+  container-type: inline-size;
+}
+@container (max-width: 250px) {
+  .cprice {
+    font-size: 11.5px;
+    margin: 7px 8px 0;
+    gap: 3px 4px;
+  }
+  .cprice b {
+    font-size: 15px;
+  }
+  .cprice .amt,
+  .cprice .tags {
+    gap: 4px;
+  }
+  .cprice .cab {
+    font-size: 10px;
+    padding: 0 4px;
+  }
+}
+@container (max-width: 200px) {
+  .cprice {
+    font-size: 10.5px;
+    margin: 6px 7px 0;
+    gap: 2px 3px;
+  }
+  .cprice b {
+    font-size: 13.5px;
+  }
+  .cprice .amt,
+  .cprice .tags {
+    gap: 3px;
+  }
+  .cprice .cab {
+    font-size: 9.5px;
+    padding: 0 4px;
+  }
+}
+.cprice .tags {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  white-space: nowrap;
+}
+.cprice .amt {
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.cprice .tax {
+  white-space: nowrap;
+}
+.cprice b {
+  font-size: 17px;
+  letter-spacing: -0.01em;
+}
+@media (max-width: 620px) {
+  .cprice {
+    font-size: 11.5px;
+    margin: 7px 8px 0;
+    gap: 3px 4px;
+  }
+  .cprice b {
+    font-size: 15px;
+  }
+  .cprice .amt {
+    gap: 4px;
+  }
+  .cprice .cab {
+    font-size: 10px;
+    padding: 0 4px;
+  }
+}
+@media (max-width: 480px) {
+    .cprice {
+    font-size: 10.5px;
+    margin: 6px 7px 0;
+    gap: 2px 3px;
+  }
+  .cprice b {
+    font-size: 13.5px;
+  }
+  .cprice .amt {
+    gap: 3px;
+  }
+  .cprice .cab {
+    font-size: 9.5px;
+    padding: 0 4px;
+  }
+}
+.cprice .cab {
+  font-style: normal;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--wash-2);
+  color: var(--ink-2);
+}
+.cprice .dyn {
+  position: static;
+  font-size: 11px;
+  padding: 1px 7px;
+}
 .cover .cv-top {
   position: absolute;
   top: 8px;
@@ -8214,8 +8895,35 @@ select {
   justify-content: space-between;
   align-items: flex-start;
   gap: 6px;
+    flex-wrap: nowrap;
+  z-index: 3;
+}
+.cover .cv-top .badge {
+    flex: 0 0 auto;
+  white-space: nowrap;
+}
+@media (max-width: 560px) {
+    .cover .cv-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .cover .price {
+    margin-left: 0;
+  }
+  .cover .ribbon {
+    top: 66px;
+  }
+}
+@media (max-width: 460px) {
+    .cover .price {
+    padding: 1px 7px;
+    font-size: 11.5px;
+  }
 }
 .cover .price {
+  flex: 0 0 auto;
+  margin-left: auto;
   background: rgba(255, 255, 255, 0.94);
   color: var(--primary-text);
   border-radius: 999px;
@@ -9493,6 +10201,14 @@ h3 .sub {
 .cover .ribbon {
   clip-path: none;
 }
+.cover {
+    min-height: 148px;
+}
+@media (max-width: 720px) {
+    .cover {
+    min-height: 186px;
+  }
+}
 .ribbon.small {
   top: 6px;
   left: auto;
@@ -9825,6 +10541,40 @@ h3 .sub {
 .full .top {
   padding-top: env(safe-area-inset-top, 0px);
 }
+@media (max-width: 1024px) {
+  .body {
+    grid-template-columns: 1fr;
+  }
+  .setup {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 82vh;
+    z-index: 6;
+    border-radius: 16px 16px 0 0;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(105%);
+    transition: transform 0.25s;
+  }
+  .setup.open {
+    transform: none;
+  }
+  .setup-h {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px 0;
+    font-weight: 600;
+  }
+  .mobile-only {
+    display: inline-flex !important;
+  }
+  .ar.panel-open .full .main .view {
+    padding-right: 0;
+    padding-bottom: calc(var(--dock-h, 200px) + 16px);
+  }
+}
 @media (max-width: 720px) {
   .mini,
   .setup {
@@ -10033,6 +10783,16 @@ h3 .sub {
   font-size: 14px;
   font-weight: 600;
   animation: ar-pop 0.25s ease-out;
+}
+.checkbar.away {
+  top: auto;
+  bottom: 10px;
+  font-size: 12.5px;
+  padding: 5px 8px 5px 10px;
+  opacity: 0.92;
+}
+.drawer .okdays {
+  color: var(--good, #1a9c6b);
 }
 .checkbar .btn {
   min-height: 36px;
